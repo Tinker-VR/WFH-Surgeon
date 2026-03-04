@@ -112,6 +112,8 @@ const DEBUG_FORCE_HAZARD = null;
 const DEBUG_STARTING_CASH = 0;
 // Set starting rank/level (0 = normal, max 14)
 const DEBUG_STARTING_RANK = 0;
+// Set to true to disable heart loss and game over (invincible mode)
+const DEBUG_GOD_MODE = false;
 // ===================== END TESTING VARIABLES =================
 
 const STARTING_CASH = DEBUG_STARTING_CASH;
@@ -311,7 +313,9 @@ const GAME = {
     lastMouseX: 0, lastMouseY: 0,
     helpPage: 0, helpPageCount: 4,
     notifications: [],
-    muteBtn: { x: CW - 50, y: 10, w: 36, h: 28 }
+    paused: false,
+    muteBtn: { x: CW - 50, y: 10, w: 36, h: 28 },
+    pauseBtn: { x: CW - 95, y: 10, w: 36, h: 28 }
 };
 
 function addNotification(text, icon = '', duration = 2000) {
@@ -327,15 +331,17 @@ function updateMousePos(e) {
 
 window.addEventListener('mousemove', (e) => {
     updateMousePos(e);
+    if (GAME.paused) return;
     if (GAME.hazard === 'battery' && GAME.batteryDrag) {
         GAME.plugPos.x = GAME.mouseX;
         GAME.plugPos.y = GAME.mouseY;
     }
     if (GAME.hazard === 'coffee') {
-        const splatX = CW/2, splatY = DESK_Y + 60;
-        if (Math.hypot(GAME.mouseX - splatX, GAME.mouseY - splatY) < 220) {
+        const M = MONITOR;
+        const splatX = M.sx + M.sw/2, splatY = M.sy + M.sh/2;
+        if (Math.hypot(GAME.mouseX - splatX, GAME.mouseY - splatY) < M.sw*0.4) {
             GAME.coffeeWipe += Math.hypot(GAME.mouseX - GAME.lastMouseX, GAME.mouseY - GAME.lastMouseY);
-            if (GAME.coffeeWipe > 2500) clearHazard();
+            if (GAME.coffeeWipe > 3000) clearHazard();
         }
     }
     GAME.lastMouseX = GAME.mouseX;
@@ -353,6 +359,16 @@ window.addEventListener('mouseup', (e) => {
 window.addEventListener('mousedown', (e) => {
     updateMousePos(e);
     if (!AudioEngine.ctx) AudioEngine.init();
+
+    // Pause button — only during PLAYING state
+    const pb = GAME.pauseBtn;
+    if (GAME.state === 'PLAYING' && isHover(pb.x, pb.y, pb.w, pb.h)) {
+        AudioEngine.playClick();
+        GAME.paused = !GAME.paused;
+        return;
+    }
+    // Block ALL other clicks while paused
+    if (GAME.paused) return;
 
     const mb = GAME.muteBtn;
     if (isHover(mb.x, mb.y, mb.w, mb.h)) {
@@ -476,8 +492,9 @@ window.addEventListener('mousedown', (e) => {
 
     if (GAME.state === 'PLAYING') {
         if (GAME.hazard === 'cat') {
-            const cx = CW/2, cy = DESK_Y + 50;
-            if (isHover(cx - 120, cy - 140, 240, 240)) { GAME.catClicks++; AudioEngine.playCatMeow(); if (GAME.catClicks >= 3) clearHazard(); }
+            const M = MONITOR;
+            const cx = M.sx + M.sw/2, cy = M.sy + M.sh/2;
+            if (isHover(cx - 200, cy - 200, 400, 400)) { GAME.catClicks++; AudioEngine.playCatMeow(); if (GAME.catClicks >= 3) clearHazard(); }
         }
         else if (GAME.hazard === 'ad') {
             if (isHover(GAME.adPos.x + GAME.adPos.w - 38, GAME.adPos.y + 6, 32, 32)) clearHazard();
@@ -495,6 +512,7 @@ window.addEventListener('mousedown', (e) => {
 });
 
 window.addEventListener('keydown', (e) => {
+    if (GAME.paused) return;
     if (GAME.state === 'PLAYING') {
         if (GAME.hazard === 'ad' && e.code === 'Escape') { clearHazard(); return; }
         if (ARROWS.includes(e.code)) {
@@ -514,10 +532,11 @@ function processArrow(code) {
         if (GAME.upgrades.keyboard) GAME.anesthesia = Math.min(GAME.anesthesiaMax, GAME.anesthesia + 200);
         if (GAME.currentIndex >= GAME.sequence.length) { GAME.armReach = 200; chunkComplete(); }
     } else {
-        GAME.hearts--; GAME.redFlashTimer = 150; GAME.shakeTimer = 300; GAME.perfectStreak = 0;
+        if (!DEBUG_GOD_MODE) GAME.hearts--;
+        GAME.redFlashTimer = 150; GAME.shakeTimer = 300; GAME.perfectStreak = 0;
         AudioEngine.playWrongKey(); GAME.armGlitchTimer = 800;
         for (let b = 0; b < 12; b++) GAME.bloodSpills.push({ x: (Math.random()*250)-125, y: (Math.random()*50)-25, r: Math.random()*15+6 });
-        if (GAME.hearts <= 0) triggerResolution('MALPRACTICE');
+        if (!DEBUG_GOD_MODE && GAME.hearts <= 0) triggerResolution('MALPRACTICE');
     }
 }
 
@@ -644,14 +663,15 @@ function spawnHazard() {
     if (GAME.hazard === 'cat') { GAME.catClicks = 0; AudioEngine.playCatMeow(); }
     if (GAME.hazard === 'ad') {
         const M = MONITOR;
-        GAME.adPos.w = 420; GAME.adPos.h = 220;
-        GAME.adPos.x = M.sx + 40 + Math.random()*(M.sw - 500);
-        GAME.adPos.y = M.sy + 40 + Math.random()*40;
+        GAME.adPos.w = M.sw - 80;
+        GAME.adPos.h = M.sh - 60;
+        GAME.adPos.x = M.sx + 40;
+        GAME.adPos.y = M.sy + 30;
     }
     if (GAME.hazard === 'battery') {
         GAME.dimLevel=0; GAME.batteryDrag=false;
-        GAME.plugPos = {x: CW/2, y: DESK_Y + 100};
-        GAME.socketPos = {x: CW - 100, y: DESK_Y + 100};
+        GAME.plugPos = {x: CW/2 - 100, y: DESK_Y + 90};
+        GAME.socketPos = {x: CW/2 + 200, y: DESK_Y + 90};
         AudioEngine.playBatteryWarning();
     }
     if (GAME.hazard === 'lag') AudioEngine.playWifiStatic();
@@ -666,7 +686,7 @@ function clearHazard() {
 
 function triggerResolution(result) {
     GAME.state = 'RESOLUTION'; GAME.lastResult = result;
-    GAME.hazard = null; GAME.dimLevel = 0; GAME.inputBuffer = [];
+    GAME.hazard = null; GAME.dimLevel = 0; GAME.inputBuffer = []; GAME.paused = false;
     AudioEngine.stopBGM();
     if (result === 'WIN') {
         if (GAME.rank < 14) GAME.rank++;
@@ -881,7 +901,7 @@ function drawDeskItems() {
 
     // === KEYBOARD (centered between left items and tablet) ===
     const kbW = 480, kbH = 120;
-    const deskMidZone = CW - 230; // tablet starts here
+    const deskMidZone = CW - 265; // tablet starts here
     const kbCenterX = (175 + deskMidZone) / 2; // center between router area and tablet
     const kx = kbCenterX - kbW/2, ky = dy + 38;
     // Keyboard body — dark like the rest of the desk tech
@@ -959,51 +979,91 @@ function drawDeskItems() {
     ctx.quadraticCurveTo(msx - 8, msy - 50, msx - 25, msy - 40);
     ctx.stroke();
 
-    // === TABLET / iPad (right side, full desk height) ===
-    const px = CW - 230, py = dy + 4;
-    const tw = 220, th = deskH - 12;
-    // iPad outer shell — rounded silver/space gray aluminum
+    // === TABLET / iPad (right side, full desk height, wider) ===
+    const px = CW - 265, py = dy + 2;
+    const tw = 258, th = deskH - 8;
+    // iPad outer shell — space gray aluminum
     ctx.save();
     ctx.shadowColor = 'rgba(0,0,0,0.5)'; ctx.shadowBlur = 15; ctx.shadowOffsetY = 6;
-    drawRoundRect(px, py, tw, th, 18, '#3A3A3C', null); // space gray body
+    drawRoundRect(px, py, tw, th, 18, '#3A3A3C', null);
     ctx.shadowColor = 'transparent'; ctx.shadowBlur = 0; ctx.shadowOffsetY = 0;
     ctx.restore();
     // Thin bezel
     drawRoundRect(px+2, py+2, tw-4, th-4, 16, '#2C2C2E', null);
     // Screen
-    drawRoundRect(px+8, py+12, tw-16, th-24, 8, '#0D1B2A', null);
-    // Front camera (top center, subtle)
+    drawRoundRect(px+7, py+10, tw-14, th-20, 8, '#0D1B2A', null);
+    // Front camera
     ctx.fillStyle = '#1C1C1E';
-    ctx.beginPath(); ctx.arc(px + tw/2, py + 7, 3, 0, Math.PI*2); ctx.fill();
+    ctx.beginPath(); ctx.arc(px + tw/2, py + 6, 3, 0, Math.PI*2); ctx.fill();
     ctx.fillStyle = '#0A0A0A';
-    ctx.beginPath(); ctx.arc(px + tw/2, py + 7, 1.5, 0, Math.PI*2); ctx.fill();
-    // Subtle Apple-like home indicator bar at bottom
-    drawRoundRect(px + tw/2 - 30, py + th - 9, 60, 4, 2, '#555', null);
+    ctx.beginPath(); ctx.arc(px + tw/2, py + 6, 1.5, 0, Math.PI*2); ctx.fill();
+    // Home indicator bar
+    drawRoundRect(px + tw/2 - 30, py + th - 8, 60, 3, 2, '#555', null);
 
-    // Bank app on iPad screen
-    const bankH = 55;
-    drawRoundRect(px + 16, py + 20, tw - 32, bankH, 10, '#1B5E20', '#2E7D32', 2);
-    drawText('💰 BANK', px + tw/2, py + 36, 17, '#C8E6C9', 'center');
-    drawText('$' + GAME.cash, px + tw/2, py + 58, 28, '#FFF', 'center');
+    // Bank app — compact
+    const bankH = 40;
+    drawRoundRect(px + 14, py + 18, tw - 28, bankH, 8, '#1B5E20', '#2E7D32', 2);
+    drawText('💰', px + 30, py + 38, 16, '#FFF', 'center');
+    drawText('$' + GAME.cash, px + tw/2 + 10, py + 38, 24, '#FFF', 'center');
 
-    // Installed plugins section
-    const plugY = py + 20 + bankH + 8;
-    const plugH = th - bankH - 48;
-    drawRoundRect(px + 16, plugY, tw - 32, plugH, 10, '#1A2332', '#2A3A4E', 2);
-    drawText('INSTALLED PLUGINS', px + tw/2, plugY + 18, 12, '#6B7A8E', 'center', null, 0, 'normal');
+    // Installed plugins section — much taller
+    const plugY = py + 18 + bankH + 6;
+    const plugH = th - bankH - 40;
+    drawRoundRect(px + 14, plugY, tw - 28, plugH, 8, '#1A2332', '#2A3A4E', 2);
+    drawText('PLUGINS', px + tw/2, plugY + 14, 11, '#6B7A8E', 'center', null, 0, 'normal');
     let apps = [];
-    Object.entries(GAME.upgrades).forEach(([k,v]) => { if(v) { const it = STORE_ITEMS.find(i=>i.id===k); if(it) apps.push(it.icon); }});
+    Object.entries(GAME.upgrades).forEach(([k,v]) => { if(v) { const it = STORE_ITEMS.find(i=>i.id===k); if(it) apps.push({icon: it.icon, name: it.title}); }});
     if (apps.length === 0) {
-        drawText('None', px + tw/2, plugY + plugH/2 + 8, 16, '#444', 'center', null, 0, 'normal');
+        drawText('None', px + tw/2, plugY + plugH/2, 14, '#444', 'center', null, 0, 'normal');
     } else {
-        const cols = Math.min(apps.length, 4);
-        const gridW = cols * 36;
-        const startX = px + tw/2 - gridW/2 + 10;
+        // Icon grid: 4 columns, fits up to 8 items with names
         for (let i = 0; i < apps.length && i < 8; i++) {
             const col = i % 4, row = Math.floor(i / 4);
-            drawText(apps[i], startX + col * 36, plugY + 38 + row * 28, 20, '#FFF', 'left');
+            const ix = px + 22 + col * 56;
+            const iy = plugY + 28 + row * 50;
+            drawRoundRect(ix, iy, 44, 40, 8, '#263248', '#3A4A5E', 1);
+            drawText(apps[i].icon, ix + 22, iy + 20, 20, '#FFF', 'center');
         }
     }
+
+    // === DESK DECOR (dead areas, purely visual) ===
+
+    // Sticky notes (left side, near mug)
+    ctx.save(); ctx.translate(120, dy + 105); ctx.rotate(0.12);
+    drawRoundRect(-22, -22, 44, 44, 3, '#FFF176', '#F9A825', 1);
+    ctx.strokeStyle = '#E0E0E0'; ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(-14, -8); ctx.lineTo(14, -8); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(-14, 0); ctx.lineTo(10, 0); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(-14, 8); ctx.lineTo(6, 8); ctx.stroke();
+    ctx.restore();
+
+    ctx.save(); ctx.translate(138, dy + 70); ctx.rotate(-0.08);
+    drawRoundRect(-20, -20, 40, 40, 3, '#80DEEA', '#00ACC1', 1);
+    ctx.strokeStyle = '#B2EBF2'; ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(-12, -6); ctx.lineTo(12, -6); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(-12, 2); ctx.lineTo(8, 2); ctx.stroke();
+    ctx.restore();
+
+    // Pen lying on desk (between mug and keyboard)
+    ctx.save(); ctx.translate(155, dy + 140); ctx.rotate(0.25);
+    ctx.strokeStyle = '#1565C0'; ctx.lineWidth = 5; ctx.lineCap = 'round';
+    ctx.beginPath(); ctx.moveTo(-30, 0); ctx.lineTo(30, 0); ctx.stroke();
+    ctx.strokeStyle = '#0D47A1'; ctx.lineWidth = 3;
+    ctx.beginPath(); ctx.moveTo(30, 0); ctx.lineTo(38, 0); ctx.stroke();
+    ctx.fillStyle = '#B0BEC5'; ctx.beginPath(); ctx.moveTo(38, -2); ctx.lineTo(44, 0); ctx.lineTo(38, 2); ctx.fill();
+    ctx.restore();
+
+    // Small papers/docs (below keyboard, slight angle)
+    ctx.save(); ctx.translate(kbCenterX - 60, dy + kbH + 55); ctx.rotate(-0.05);
+    drawRoundRect(-35, -25, 70, 50, 2, '#FFFDE7', '#E0E0E0', 1);
+    ctx.strokeStyle = '#BBDEFB'; ctx.lineWidth = 1;
+    for (let ln = 0; ln < 3; ln++) { ctx.beginPath(); ctx.moveTo(-25, -12+ln*12); ctx.lineTo(25, -12+ln*12); ctx.stroke(); }
+    ctx.fillStyle = '#E53935'; ctx.fillRect(-35, -25, 4, 50);
+    ctx.restore();
+
+    // Coaster under mug area (ring mark)
+    ctx.strokeStyle = 'rgba(0,0,0,0.08)'; ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.arc(65, dy + 115, 32, 0, Math.PI*2); ctx.stroke();
 }
 
 // ---- Screen content (inside monitor) ----
@@ -1033,16 +1093,21 @@ function drawScreenPlaying() {
     ctx.beginPath(); ctx.roundRectPolyfill(M.sx, M.uiY, M.sw, M.uiH, 4); ctx.clip();
     drawRect(M.sx, M.uiY, M.sw, M.uiH, 'rgba(8,18,35,0.95)');
 
-    drawText(GAME.flavorText, M.sx+M.sw/2, M.uiY+18, 20, '#7889A0', 'center', null, 0, 'normal');
-    drawText(`${getRankName(GAME.rank)}  ·  Phase ${GAME.phasesCompleted}/${GAME.phasesNeeded}`, M.sx+M.sw/2, M.uiY+44, 24, '#FFF', 'center');
+    // Info text
+    drawText(GAME.flavorText, M.sx+M.sw/2, M.uiY+16, 18, '#7889A0', 'center', null, 0, 'normal');
+    drawText(`${getRankName(GAME.rank)}  ·  Phase ${GAME.phasesCompleted}/${GAME.phasesNeeded}`, M.sx+M.sw/2, M.uiY+38, 22, '#FFF', 'center');
 
-    // Arrow keys
-    const sqW = 72, sqGap = 8;
+    // Arrow keys — sized to fill the panel nicely
+    const arrowY = M.uiY + 52;
+    const maxSqH = M.uiH - 52 - 38; // space minus header and timer bar
+    const sqW = Math.min(90, maxSqH); // square tiles, capped
+    const sqGap = 10;
     const availW = M.sw - 50;
     const neededW = GAME.sequence.length * (sqW + sqGap) - sqGap;
     const finalSqW = neededW > availW ? Math.floor((availW - (GAME.sequence.length-1)*sqGap) / GAME.sequence.length) : sqW;
     const totalW = GAME.sequence.length * finalSqW + (GAME.sequence.length-1)*sqGap;
     let kx = M.sx + (M.sw - totalW)/2;
+    const arrowCenterY = arrowY + (maxSqH - finalSqW)/2; // vertically center arrows
 
     for (let i = 0; i < GAME.sequence.length; i++) {
         let bg = '#2A3A4E', txt = '#AAA', sc = 1;
@@ -1050,44 +1115,17 @@ function drawScreenPlaying() {
         else if (i === GAME.currentIndex) { bg = COLORS.gold; txt = '#000'; sc = 1+Math.sin(performance.now()/100)*0.08; }
         if (i === GAME.currentIndex-1 && GAME.arrowPopTimer > 0) sc = 1+(GAME.arrowPopTimer/100)*0.2;
         if (GAME.hazard === 'lag') { bg = '#333'; txt = '#555'; }
-        let aw = finalSqW*sc, ax = kx+(finalSqW-aw)/2, ay = M.uiY+60+(finalSqW-aw)/2;
+        let aw = finalSqW*sc, ax = kx+(finalSqW-aw)/2, ay = arrowCenterY+(finalSqW-aw)/2;
         drawRoundRect(ax, ay, aw, aw, 14, bg, null);
-        drawText(ARROW_SYM[GAME.sequence[i]], kx+finalSqW/2, M.uiY+60+finalSqW/2, 38*sc, txt, 'center');
+        drawText(ARROW_SYM[GAME.sequence[i]], kx+finalSqW/2, arrowCenterY+finalSqW/2, 45*sc, txt, 'center');
         kx += finalSqW + sqGap;
     }
 
-    // Timer bar
-    const barY = M.uiY + 68 + finalSqW + 10;
+    // Timer bar — at bottom of UI panel
+    const barY = M.uiY + M.uiH - 28;
     const pPct = Math.max(0, GAME.phaseTimer/GAME.phaseTimerMax);
-    drawRoundRect(M.sx+40, barY, M.sw-80, 18, 9, '#1A1A1A', '#333', 2);
-    if ((M.sw-88)*pPct > 4) drawRoundRect(M.sx+44, barY+3, (M.sw-88)*pPct, 12, 6, COLORS.red, null);
-
-    // Hazard overlay — dims the ENTIRE monitor screen, not just UI panel
-    if (GAME.hazard) {
-        ctx.save();
-        ctx.beginPath(); ctx.roundRectPolyfill(M.sx, M.sy, M.sw, M.sh, 4); ctx.clip();
-        // Heavy dim over entire screen
-        ctx.fillStyle = 'rgba(0,0,0,0.75)';
-        ctx.fillRect(M.sx, M.sy, M.sw, M.sh);
-        // Pulsing vignette
-        let vigPulse = 0.15 + Math.sin(performance.now()/300)*0.08;
-        let vig = ctx.createRadialGradient(M.sx+M.sw/2, M.sy+M.sh/2, M.sw*0.2, M.sx+M.sw/2, M.sy+M.sh/2, M.sw*0.6);
-        vig.addColorStop(0, 'rgba(0,0,0,0)'); vig.addColorStop(1, `rgba(0,0,0,${vigPulse})`);
-        ctx.fillStyle = vig; ctx.fillRect(M.sx, M.sy, M.sw, M.sh);
-
-        let title='', sub='', col=COLORS.red;
-        if (GAME.hazard==='cat')     { title='🐱 SHOO THE CAT!'; sub=`Click ${3-GAME.catClicks} more times!`; col='#FFA000'; }
-        else if (GAME.hazard==='battery') { title='🔋 BATTERY LOW!'; sub='Drag charger to outlet!'; }
-        else if (GAME.hazard==='lag')     { title='📶 WI-FI DOWN!'; sub=`Click router ${3-GAME.routerClicks}x!`; }
-        else if (GAME.hazard==='coffee')  { title='☕ COFFEE SPILL!'; sub='Wipe it up! Drag mouse over it!'; col='#D7CCC8'; }
-        else if (GAME.hazard==='ad')      { title='💼 BOSS POPUP!'; sub='Click X or press ESC'; col='#1565C0'; }
-        let pulse = 1+Math.sin(performance.now()/150)*0.06;
-        ctx.save(); ctx.translate(M.sx+M.sw/2, M.sy+M.sh/2-20); ctx.scale(pulse, pulse);
-        drawText(title, 0, 0, 52, col, 'center', '#000', 6);
-        ctx.restore();
-        drawText(sub, M.sx+M.sw/2, M.sy+M.sh/2+35, 26, '#CCC', 'center', null, 0, 'normal');
-        ctx.restore();
-    }
+    drawRoundRect(M.sx+40, barY, M.sw-80, 20, 10, '#1A1A1A', '#333', 2);
+    if ((M.sw-88)*pPct > 4) drawRoundRect(M.sx+44, barY+3, (M.sw-88)*pPct, 14, 7, COLORS.red, null);
 
     if (GAME.greenFlashTimer > 0) {
         ctx.fillStyle = `rgba(0,230,118,${Math.min(0.35, GAME.greenFlashTimer/150)})`;
@@ -1250,70 +1288,132 @@ function drawHelpModal() {
 function drawHazards() {
     if (!GAME.hazard) return;
     const M = MONITOR;
+    const mcx = M.sx + M.sw/2, mcy = M.sy + M.sh/2;
+
+    // === DIM THE ENTIRE MONITOR SCREEN for all hazards ===
+    ctx.save();
+    ctx.beginPath(); ctx.roundRectPolyfill(M.sx, M.sy, M.sw, M.sh, 4); ctx.clip();
+    ctx.fillStyle = 'rgba(0,0,0,0.7)';
+    ctx.fillRect(M.sx, M.sy, M.sw, M.sh);
+
     if (GAME.hazard === 'ad') {
-        ctx.save();
-        ctx.beginPath(); ctx.roundRectPolyfill(M.sx, M.sy, M.sw, M.sh, 4); ctx.clip();
+        // Big popup filling most of the monitor
         const {x,y,w,h} = GAME.adPos;
-        drawShadowRoundRect(x, y, w, h, 12, '#F5F5F5', '#333', 3);
-        drawRoundRect(x, y, w, 40, 12, '#1565C0', null); drawRect(x, y+18, w, 22, '#1565C0');
-        drawText('URGENT MESSAGE FROM YOUR BOSS', x+15, y+20, 18, '#FFF', 'left');
-        drawRoundRect(x+w-38, y+6, 32, 32, 10, COLORS.red, null);
-        drawText('✕', x+w-22, y+22, 20, '#FFF', 'center');
-        drawText('TPS REPORTS ARE DUE.', x+w/2, y+82, 24, '#000', 'center');
-        drawText('IGNORE THE SURGERY.', x+w/2, y+114, 24, '#000', 'center');
-        drawText('Click X or press ESC to dismiss', x+w/2, y+158, 16, '#888', 'center', null, 0, 'normal');
-        ctx.restore();
+        drawShadowRoundRect(x, y, w, h, 14, '#F5F5F5', '#333', 3);
+        drawRoundRect(x, y, w, 50, 14, '#1565C0', null); drawRect(x, y+20, w, 30, '#1565C0');
+        drawText('URGENT MESSAGE FROM YOUR BOSS', x + w/2, y+25, 24, '#FFF', 'center');
+        drawRoundRect(x+w-48, y+8, 38, 38, 12, COLORS.red, null);
+        drawText('✕', x+w-29, y+27, 24, '#FFF', 'center');
+        drawText('TPS REPORTS ARE DUE.', x+w/2, y+h*0.35, 36, '#000', 'center');
+        drawText('IGNORE THE SURGERY.', x+w/2, y+h*0.5, 36, '#000', 'center');
+        drawText('REPLY TO THIS EMAIL IMMEDIATELY.', x+w/2, y+h*0.65, 24, '#555', 'center', null, 0, 'normal');
+        drawText('Click X or press ESC to dismiss', x+w/2, y+h-30, 18, '#888', 'center', null, 0, 'normal');
     }
     else if (GAME.hazard === 'cat') {
-        const cx = CW/2, cy = DESK_Y + 50;
+        // Giant cat head centered on monitor screen
+        const cx = mcx, cy = mcy + 10;
+        const s = 1.8; // scale factor to fill monitor
         // Cat body
-        drawShadowRoundRect(cx-85, cy-75, 170, 150, 75, '#FFA000', '#E65100', 4);
+        drawShadowRoundRect(cx-85*s, cy-65*s, 170*s, 140*s, 75*s, '#FFA000', '#E65100', 4);
         // Ears
-        ctx.fillStyle='#FFA000'; ctx.strokeStyle='#E65100'; ctx.lineWidth=3;
-        ctx.beginPath(); ctx.moveTo(cx-65,cy-50); ctx.lineTo(cx-90,cy-125); ctx.lineTo(cx-28,cy-60); ctx.fill(); ctx.stroke();
-        ctx.fillStyle='#FFCDD2'; ctx.beginPath(); ctx.moveTo(cx-60,cy-55); ctx.lineTo(cx-82,cy-110); ctx.lineTo(cx-35,cy-62); ctx.fill();
+        ctx.fillStyle='#FFA000'; ctx.strokeStyle='#E65100'; ctx.lineWidth=4;
+        ctx.beginPath(); ctx.moveTo(cx-65*s,cy-45*s); ctx.lineTo(cx-90*s,cy-120*s); ctx.lineTo(cx-28*s,cy-55*s); ctx.fill(); ctx.stroke();
+        ctx.fillStyle='#FFCDD2'; ctx.beginPath(); ctx.moveTo(cx-58*s,cy-50*s); ctx.lineTo(cx-80*s,cy-105*s); ctx.lineTo(cx-35*s,cy-56*s); ctx.fill();
         ctx.fillStyle='#FFA000'; ctx.strokeStyle='#E65100';
-        ctx.beginPath(); ctx.moveTo(cx+65,cy-50); ctx.lineTo(cx+90,cy-125); ctx.lineTo(cx+28,cy-60); ctx.fill(); ctx.stroke();
-        ctx.fillStyle='#FFCDD2'; ctx.beginPath(); ctx.moveTo(cx+60,cy-55); ctx.lineTo(cx+82,cy-110); ctx.lineTo(cx+35,cy-62); ctx.fill();
+        ctx.beginPath(); ctx.moveTo(cx+65*s,cy-45*s); ctx.lineTo(cx+90*s,cy-120*s); ctx.lineTo(cx+28*s,cy-55*s); ctx.fill(); ctx.stroke();
+        ctx.fillStyle='#FFCDD2'; ctx.beginPath(); ctx.moveTo(cx+58*s,cy-50*s); ctx.lineTo(cx+80*s,cy-105*s); ctx.lineTo(cx+35*s,cy-56*s); ctx.fill();
         // Eyes
-        ctx.fillStyle='#FFF'; ctx.strokeStyle='#000'; ctx.lineWidth=2;
-        ctx.beginPath(); ctx.ellipse(cx-30,cy-18,20,28,0,0,Math.PI*2); ctx.fill(); ctx.stroke();
-        ctx.beginPath(); ctx.ellipse(cx+30,cy-18,20,28,0,0,Math.PI*2); ctx.fill(); ctx.stroke();
+        ctx.fillStyle='#FFF'; ctx.strokeStyle='#000'; ctx.lineWidth=3;
+        ctx.beginPath(); ctx.ellipse(cx-30*s,cy-15*s,20*s,28*s,0,0,Math.PI*2); ctx.fill(); ctx.stroke();
+        ctx.beginPath(); ctx.ellipse(cx+30*s,cy-15*s,20*s,28*s,0,0,Math.PI*2); ctx.fill(); ctx.stroke();
         ctx.fillStyle='#000';
-        ctx.beginPath(); ctx.ellipse(cx-30,cy-18,8,20,0,0,Math.PI*2); ctx.fill();
-        ctx.beginPath(); ctx.ellipse(cx+30,cy-18,8,20,0,0,Math.PI*2); ctx.fill();
+        ctx.beginPath(); ctx.ellipse(cx-30*s,cy-15*s,8*s,20*s,0,0,Math.PI*2); ctx.fill();
+        ctx.beginPath(); ctx.ellipse(cx+30*s,cy-15*s,8*s,20*s,0,0,Math.PI*2); ctx.fill();
         // Nose & mouth
-        ctx.fillStyle='#F48FB1'; ctx.beginPath(); ctx.moveTo(cx-12,cy+16); ctx.lineTo(cx+12,cy+16); ctx.lineTo(cx,cy+30); ctx.fill();
-        ctx.strokeStyle='#000'; ctx.lineWidth=2;
-        ctx.beginPath(); ctx.arc(cx-14,cy+35,14,0,Math.PI); ctx.stroke();
-        ctx.beginPath(); ctx.arc(cx+14,cy+35,14,0,Math.PI); ctx.stroke();
+        ctx.fillStyle='#F48FB1'; ctx.beginPath(); ctx.moveTo(cx-12*s,cy+16*s); ctx.lineTo(cx+12*s,cy+16*s); ctx.lineTo(cx,cy+28*s); ctx.fill();
+        ctx.strokeStyle='#000'; ctx.lineWidth=3;
+        ctx.beginPath(); ctx.arc(cx-14*s,cy+32*s,14*s,0,Math.PI); ctx.stroke();
+        ctx.beginPath(); ctx.arc(cx+14*s,cy+32*s,14*s,0,Math.PI); ctx.stroke();
         // Whiskers
-        ctx.strokeStyle='#FFF'; ctx.lineWidth=2;
-        [-1,1].forEach(s => {
-            ctx.beginPath(); ctx.moveTo(cx+s*25,cy+20); ctx.lineTo(cx+s*80,cy+10); ctx.stroke();
-            ctx.beginPath(); ctx.moveTo(cx+s*25,cy+28); ctx.lineTo(cx+s*85,cy+28); ctx.stroke();
-            ctx.beginPath(); ctx.moveTo(cx+s*25,cy+36); ctx.lineTo(cx+s*80,cy+46); ctx.stroke();
+        ctx.strokeStyle='#FFF'; ctx.lineWidth=3;
+        [-1,1].forEach(dir => {
+            ctx.beginPath(); ctx.moveTo(cx+dir*25*s,cy+18*s); ctx.lineTo(cx+dir*85*s,cy+8*s); ctx.stroke();
+            ctx.beginPath(); ctx.moveTo(cx+dir*25*s,cy+26*s); ctx.lineTo(cx+dir*90*s,cy+26*s); ctx.stroke();
+            ctx.beginPath(); ctx.moveTo(cx+dir*25*s,cy+34*s); ctx.lineTo(cx+dir*85*s,cy+44*s); ctx.stroke();
         });
-        // Paws
-        drawShadowRoundRect(cx-65,cy+55,50,35,22,'#FFA000','#E65100',3);
-        drawShadowRoundRect(cx+15,cy+55,50,35,22,'#FFA000','#E65100',3);
+        // Paws on bottom
+        drawShadowRoundRect(cx-65*s,cy+50*s,50*s,30*s,22*s,'#FFA000','#E65100',3);
+        drawShadowRoundRect(cx+15*s,cy+50*s,50*s,30*s,22*s,'#FFA000','#E65100',3);
+        // Instruction text
+        let pulse = 1+Math.sin(performance.now()/150)*0.06;
+        ctx.save(); ctx.translate(cx, M.sy + 28); ctx.scale(pulse, pulse);
+        drawText(`SHOO THE CAT! Click ${3-GAME.catClicks} more!`, 0, 0, 32, '#FFA000', 'center', '#000', 4);
+        ctx.restore();
     }
     else if (GAME.hazard === 'coffee') {
-        const sy2 = DESK_Y + 60, s = Math.max(0, 220-(GAME.coffeeWipe/7));
+        // Coffee spill covers the monitor screen
+        const s = Math.max(0, 1-(GAME.coffeeWipe/3000));
+        const splashR = M.sw * 0.35 * s;
         ctx.fillStyle = '#4E342E';
-        ctx.beginPath(); ctx.arc(CW/2, sy2, s/2, 0, Math.PI*2); ctx.fill();
-        ctx.beginPath(); ctx.arc(CW/2-s*0.5, sy2+10, s*0.35, 0, Math.PI*2); ctx.fill();
-        ctx.beginPath(); ctx.arc(CW/2+s*0.4, sy2-5, s*0.38, 0, Math.PI*2); ctx.fill();
+        ctx.beginPath(); ctx.arc(mcx, mcy, splashR, 0, Math.PI*2); ctx.fill();
+        ctx.beginPath(); ctx.arc(mcx - splashR*0.6, mcy + splashR*0.3, splashR*0.45, 0, Math.PI*2); ctx.fill();
+        ctx.beginPath(); ctx.arc(mcx + splashR*0.5, mcy - splashR*0.2, splashR*0.5, 0, Math.PI*2); ctx.fill();
+        ctx.beginPath(); ctx.arc(mcx - splashR*0.2, mcy - splashR*0.5, splashR*0.35, 0, Math.PI*2); ctx.fill();
+        ctx.beginPath(); ctx.arc(mcx + splashR*0.3, mcy + splashR*0.45, splashR*0.4, 0, Math.PI*2); ctx.fill();
+        // Lighter coffee rings
+        ctx.strokeStyle = '#6D4C41'; ctx.lineWidth = 3;
+        ctx.beginPath(); ctx.arc(mcx, mcy, splashR*0.8, 0, Math.PI*2); ctx.stroke();
+        // Instruction
+        let pulse = 1+Math.sin(performance.now()/150)*0.06;
+        ctx.save(); ctx.translate(mcx, M.sy + 28); ctx.scale(pulse, pulse);
+        drawText('☕ COFFEE SPILL! Wipe it up!', 0, 0, 32, '#D7CCC8', 'center', '#000', 4);
+        ctx.restore();
     }
     else if (GAME.hazard === 'battery') {
-        drawShadowRoundRect(GAME.socketPos.x-35, GAME.socketPos.y-35, 70, 70, 10, '#FAFAFA', '#B0BEC5', 3);
-        drawRoundRect(GAME.socketPos.x-12, GAME.socketPos.y-8, 8, 16, 3, '#1A1A1A', null);
-        drawRoundRect(GAME.socketPos.x+4, GAME.socketPos.y-8, 8, 16, 3, '#1A1A1A', null);
+        // Battery warning icon on monitor
+        const bw = 120, bh = 60;
+        drawRoundRect(mcx-bw/2, mcy-bh/2-20, bw, bh, 12, '#333', '#FF4444', 3);
+        drawRect(mcx+bw/2, mcy-15-20, 10, 30, '#FF4444');
+        // Flashing low level
+        const flashPct = (Math.sin(performance.now()/200)+1)/2 * 0.3;
+        drawRoundRect(mcx-bw/2+6, mcy-bh/2+6-20, (bw-12)*flashPct, bh-12, 8, COLORS.red, null);
+        // Warning text
+        let pulse = 1+Math.sin(performance.now()/150)*0.06;
+        ctx.save(); ctx.translate(mcx, mcy+50); ctx.scale(pulse, pulse);
+        drawText('🔋 BATTERY LOW! Drag charger to outlet!', 0, 0, 28, COLORS.red, 'center', '#000', 4);
+        ctx.restore();
+    }
+    else if (GAME.hazard === 'lag') {
+        // Static noise effect on monitor
+        for (let i = 0; i < 80; i++) {
+            const sx2 = M.sx + Math.random()*M.sw;
+            const sy2 = M.sy + Math.random()*M.sh;
+            const sw2 = Math.random()*60+10;
+            ctx.fillStyle = `rgba(255,255,255,${Math.random()*0.15})`;
+            ctx.fillRect(sx2, sy2, sw2, 2);
+        }
+        // Warning text
+        let pulse = 1+Math.sin(performance.now()/150)*0.06;
+        ctx.save(); ctx.translate(mcx, mcy); ctx.scale(pulse, pulse);
+        drawText(`📶 WI-FI DOWN!`, 0, -20, 48, COLORS.red, 'center', '#000', 6);
+        drawText(`Click router ${3-GAME.routerClicks}x!`, 0, 30, 28, '#CCC', 'center', null, 0, 'normal');
+        ctx.restore();
+    }
+    ctx.restore();
+
+    // Battery plug/socket drawn ON the desk (not clipped to monitor)
+    if (GAME.hazard === 'battery') {
+        // Socket
+        drawShadowRoundRect(GAME.socketPos.x-40, GAME.socketPos.y-40, 80, 80, 12, '#FAFAFA', '#B0BEC5', 3);
+        drawRoundRect(GAME.socketPos.x-14, GAME.socketPos.y-10, 10, 20, 4, '#1A1A1A', null);
+        drawRoundRect(GAME.socketPos.x+4, GAME.socketPos.y-10, 10, 20, 4, '#1A1A1A', null);
+        // Cord
         ctx.lineWidth=14; ctx.strokeStyle='#1A1A1A';
         ctx.beginPath(); ctx.moveTo(CW/2, CH); ctx.quadraticCurveTo(CW/2, GAME.plugPos.y+50, GAME.plugPos.x, GAME.plugPos.y); ctx.stroke();
-        drawShadowRoundRect(GAME.plugPos.x-18, GAME.plugPos.y-28, 36, 56, 8, '#333', '#1A1A1A', 3);
-        drawRoundRect(GAME.plugPos.x-8, GAME.plugPos.y-45, 5, 20, 2, '#CCC', null);
-        drawRoundRect(GAME.plugPos.x+3, GAME.plugPos.y-45, 5, 20, 2, '#CCC', null);
+        // Plug
+        drawShadowRoundRect(GAME.plugPos.x-22, GAME.plugPos.y-32, 44, 64, 10, '#333', '#1A1A1A', 3);
+        drawRoundRect(GAME.plugPos.x-10, GAME.plugPos.y-50, 7, 22, 3, '#CCC', null);
+        drawRoundRect(GAME.plugPos.x+3, GAME.plugPos.y-50, 7, 22, 3, '#CCC', null);
     }
 }
 
@@ -1343,6 +1443,25 @@ function drawMuteButton() {
     drawText(AudioEngine.enabled ? '🔊' : '🔇', mb.x+mb.w/2, mb.y+mb.h/2, 18, AudioEngine.enabled ? '#FFF' : '#888', 'center');
 }
 
+function drawPauseButton() {
+    if (GAME.state !== 'PLAYING') return;
+    const pb = GAME.pauseBtn, hover = isHover(pb.x, pb.y, pb.w, pb.h);
+    drawRoundRect(pb.x, pb.y, pb.w, pb.h, 8, hover ? '#444' : 'rgba(0,0,0,0.4)', null);
+    drawText(GAME.paused ? '▶' : '⏸', pb.x+pb.w/2, pb.y+pb.h/2, 16, '#FFF', 'center');
+}
+
+function drawPauseOverlay() {
+    if (!GAME.paused) return;
+    ctx.fillStyle = 'rgba(0,0,0,0.7)';
+    ctx.fillRect(0, 0, CW, CH);
+    // Pause icon
+    const cx = CW/2, cy = CH/2;
+    drawRoundRect(cx-55, cy-65, 40, 100, 8, '#FFF', null);
+    drawRoundRect(cx+15, cy-65, 40, 100, 8, '#FFF', null);
+    drawText('PAUSED', cx, cy+80, 42, '#FFF', 'center', 'rgba(0,0,0,0.5)', 4);
+    drawText('Click ⏸ to resume', cx, cy+120, 20, '#AAA', 'center', null, 0, 'normal');
+}
+
 // ===================== MAIN LOOP =====================
 let lastTime = performance.now();
 
@@ -1350,19 +1469,20 @@ function loop(timestamp) {
     const dt = timestamp - lastTime; lastTime = timestamp;
     ctx.clearRect(0, 0, CW, CH);
 
-    if (GAME.state === 'PLAYING') {
+    if (GAME.state === 'PLAYING' && !GAME.paused) {
         GAME.anesthesia -= dt; GAME.phaseTimer -= dt; GAME.hazardTimer += dt;
         if (GAME.routerFlashTimer > 0) GAME.routerFlashTimer -= dt;
         if (GAME.armReach > 0) GAME.armReach = Math.max(0, GAME.armReach - dt*0.2);
         if (GAME.armGlitchTimer > 0) GAME.armGlitchTimer -= dt;
         if (GAME.inputBuffer.length > 0 && timestamp >= GAME.inputBuffer[0].time) processArrow(GAME.inputBuffer.shift().code);
         if (GAME.hazard === 'battery') GAME.dimLevel = Math.min(0.95, GAME.dimLevel + dt*0.0001);
-        if (GAME.anesthesia <= 0) triggerResolution('AWAKE');
+        if (!DEBUG_GOD_MODE && GAME.anesthesia <= 0) triggerResolution('AWAKE');
         if (GAME.phaseTimer <= 0) {
-            GAME.hearts--; GAME.redFlashTimer=150; GAME.shakeTimer=300; GAME.perfectStreak=0;
+            if (!DEBUG_GOD_MODE) GAME.hearts--;
+            GAME.redFlashTimer=150; GAME.shakeTimer=300; GAME.perfectStreak=0;
             GAME.phaseTimer=GAME.phaseTimerMax; GAME.armGlitchTimer=800;
             for (let b=0;b<12;b++) GAME.bloodSpills.push({x:(Math.random()*250)-125,y:(Math.random()*50)-25,r:Math.random()*15+6});
-            if (GAME.hearts<=0) triggerResolution('MALPRACTICE');
+            if (!DEBUG_GOD_MODE && GAME.hearts<=0) triggerResolution('MALPRACTICE');
         }
         if (GAME.state==='PLAYING' && !GAME.hazard && GAME.hazardTimer > GAME.hazardNextSpawn) { spawnHazard(); GAME.hazardTimer=0; }
         AudioEngine.updateEKG(timestamp, Math.max(0, GAME.anesthesia/GAME.anesthesiaMax));
@@ -1406,10 +1526,17 @@ function loop(timestamp) {
         ctx.fillStyle = `rgba(255,0,0,${Math.min(0.6, GAME.redFlashTimer/150)})`;
         ctx.fillRect(0, 0, CW, CH);
     }
-    if (GAME.dimLevel > 0) { ctx.fillStyle = `rgba(0,0,0,${GAME.dimLevel})`; ctx.fillRect(0, 0, CW, CH); }
+    if (GAME.dimLevel > 0) {
+        ctx.save();
+        ctx.beginPath(); ctx.roundRectPolyfill(MONITOR.sx, MONITOR.sy, MONITOR.sw, MONITOR.sh, 4); ctx.clip();
+        ctx.fillStyle = `rgba(0,0,0,${GAME.dimLevel})`; ctx.fillRect(MONITOR.sx, MONITOR.sy, MONITOR.sw, MONITOR.sh);
+        ctx.restore();
+    }
 
     ctx.restore();
     drawMuteButton();
+    drawPauseButton();
+    drawPauseOverlay();
 
     ctx.fillStyle='#FFF'; ctx.strokeStyle='#000'; ctx.lineWidth=2;
     ctx.beginPath(); ctx.moveTo(GAME.mouseX, GAME.mouseY);
