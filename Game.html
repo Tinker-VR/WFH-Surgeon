@@ -44,8 +44,8 @@
 
 <script>
 /**
- * WFH SURGEON — v3 Big Monitor
- * Massive 4:3 Monitor · Scamazon Store · Procedural Audio + BGM · Modern Aesthetic
+ * WFH SURGEON — v4 Desk Overhaul
+ * Tablet/iPad · Mouse Decor · Revised Desk Layout · Scamazon Store · Procedural Audio + BGM
  */
 
 const canvas = document.getElementById('gameCanvas');
@@ -477,7 +477,7 @@ window.addEventListener('mousedown', (e) => {
             if (Math.hypot(GAME.mouseX - GAME.plugPos.x, GAME.mouseY - GAME.plugPos.y) < 70) GAME.batteryDrag = true;
         }
         else if (GAME.hazard === 'lag') {
-            if (isHover(28, DESK_Y + 8, 100, 55)) {
+            if (isHover(15, DESK_Y + 8, 160, 55)) {
                 GAME.routerClicks++; GAME.routerFlashTimer = 150; AudioEngine.playWifiStatic();
                 if (GAME.routerClicks >= 3) clearHazard();
             }
@@ -824,123 +824,150 @@ function drawArm(sx2, sy2, tx, ty, erratic, flip) {
 }
 
 function drawDeskItems() {
-    const dy = DESK_Y + 12;
+    const dy = DESK_Y;
+    const deskH = CH - DESK_Y;
 
-    // === ROUTER (left side on desk) ===
-    const rx = 28, ry = dy + 8;
-    drawShadowRoundRect(rx, ry, 100, 40, 8, '#1A1A1A', '#111', 2);
-    // Antennas
-    drawRoundRect(rx+12, ry-38, 6, 42, 3, '#333', '#222', 1);
-    drawRoundRect(rx+82, ry-38, 6, 42, 3, '#333', '#222', 1);
+    // === ROUTER (top-left of desk, big) ===
+    const rx = 15, ry = dy + 8;
+    const rw = 160, rh = 55;
+    drawShadowRoundRect(rx, ry, rw, rh, 10, '#1A1A1A', '#111', 3);
+    drawRoundRect(rx+3, ry+3, rw-6, rh-6, 8, '#222', null);
+    // Antennas (taller)
+    drawRoundRect(rx+18, ry-52, 8, 58, 4, '#333', '#222', 2);
+    drawRoundRect(rx+rw-26, ry-52, 8, 58, 4, '#333', '#222', 2);
     // Antenna tips
-    ctx.fillStyle = '#555'; ctx.beginPath(); ctx.arc(rx+15, ry-40, 5, 0, Math.PI*2); ctx.fill();
-    ctx.beginPath(); ctx.arc(rx+85, ry-40, 5, 0, Math.PI*2); ctx.fill();
-    // Status LEDs
+    ctx.fillStyle = '#555'; ctx.beginPath(); ctx.arc(rx+22, ry-55, 7, 0, Math.PI*2); ctx.fill();
+    ctx.beginPath(); ctx.arc(rx+rw-22, ry-55, 7, 0, Math.PI*2); ctx.fill();
+    // Status LEDs (bigger)
     let lc = '#00E676';
     if (GAME.hazard === 'lag') lc = (Math.floor(performance.now()/200)%2===0) ? '#FF1744' : '#550000';
     ctx.fillStyle = lc;
-    ctx.beginPath(); ctx.arc(rx+30, ry+18, 5, 0, Math.PI*2); ctx.fill();
-    ctx.beginPath(); ctx.arc(rx+50, ry+18, 5, 0, Math.PI*2); ctx.fill();
-    ctx.beginPath(); ctx.arc(rx+70, ry+18, 5, 0, Math.PI*2); ctx.fill();
+    ctx.beginPath(); ctx.arc(rx+45, ry+28, 7, 0, Math.PI*2); ctx.fill();
+    ctx.beginPath(); ctx.arc(rx+75, ry+28, 7, 0, Math.PI*2); ctx.fill();
+    ctx.beginPath(); ctx.arc(rx+105, ry+28, 7, 0, Math.PI*2); ctx.fill();
     // Label
-    drawText('NET-O-MATIC', rx+50, ry+32, 8, '#444', 'center', null, 0, 'normal');
+    drawText('NET-O-MATIC', rx+rw/2, ry+46, 10, '#444', 'center', null, 0, 'normal');
     if (GAME.routerFlashTimer > 0) {
         ctx.fillStyle = `rgba(255,255,255,${GAME.routerFlashTimer/150})`;
-        ctx.roundRectPolyfill(rx, ry, 100, 40, 8); ctx.fill();
+        ctx.roundRectPolyfill(rx, ry, rw, rh, 10); ctx.fill();
     }
 
-    // === KEYBOARD (centered below monitor) ===
-    const kx = CW/2 - 150, ky = dy + 55;
+    // === MUG (left side, below router, big) ===
+    const mx2 = 30, my2 = dy + 78;
+    const mugW = 75, mugH = 90;
+    drawShadowRoundRect(mx2, my2, mugW, mugH, 14, '#FF8C00', '#E07000', 3);
+    // Handle
+    ctx.strokeStyle = '#FF8C00'; ctx.lineWidth = 8;
+    ctx.beginPath(); ctx.arc(mx2+mugW, my2+mugH*0.4, 20, -Math.PI*0.45, Math.PI*0.45); ctx.stroke();
+    // Coffee surface
+    ctx.fillStyle = '#3E2723';
+    ctx.beginPath(); ctx.ellipse(mx2+mugW/2, my2+10, mugW*0.38, 12, 0, 0, Math.PI*2); ctx.fill();
+    // Steam
+    ctx.strokeStyle = 'rgba(220,220,220,0.5)'; ctx.lineWidth = 3;
+    let so = Math.sin(performance.now()/500)*8;
+    ctx.beginPath(); ctx.moveTo(mx2+20, my2-6); ctx.quadraticCurveTo(mx2+26+so, my2-32, mx2+20, my2-55); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(mx2+50, my2-4); ctx.quadraticCurveTo(mx2+56-so, my2-30, mx2+50, my2-52); ctx.stroke();
+
+    // === KEYBOARD (big, centered on desk) ===
+    const kbW = 500, kbH = 130;
+    const kx = 220, ky = dy + 42;
     // Keyboard body
-    drawShadowRoundRect(kx, ky, 300, 95, 10, '#2A2A2A', '#1A1A1A', 2);
-    drawRoundRect(kx+2, ky+2, 296, 91, 8, '#333', null);
+    drawShadowRoundRect(kx, ky, kbW, kbH, 12, '#00ACC1', '#00838F', 3);
+    drawRoundRect(kx+4, ky+4, kbW-8, kbH-8, 10, '#00BCD4', null);
     // Key rows
-    const keyColors = ['#444', '#3A3A3A', '#404040', '#3A3A3A'];
-    const keysPerRow = [14, 13, 12, 10];
+    const keyColors = ['#0097A7', '#00838F', '#00ACC1', '#0097A7'];
+    const keysPerRow = [15, 14, 13, 11];
     for (let row = 0; row < 4; row++) {
-        const rowY = ky + 8 + row * 20;
-        const rowOffset = row * 4 + 6;
-        const keyW = (280 - rowOffset * 2) / keysPerRow[row] - 2;
+        const rowY = ky + 12 + row * 24;
+        const rowOffset = row * 6 + 10;
+        const keyW = (kbW - 20 - rowOffset * 2) / keysPerRow[row] - 3;
         for (let k = 0; k < keysPerRow[row]; k++) {
-            const keyX = kx + rowOffset + k * (keyW + 2);
-            drawRoundRect(keyX, rowY, keyW, 16, 3, keyColors[row], '#222', 1);
+            const keyX = kx + rowOffset + k * (keyW + 3);
+            drawRoundRect(keyX, rowY, keyW, 19, 4, keyColors[row], '#006064', 1);
         }
     }
     // Spacebar
-    drawRoundRect(kx + 80, ky + 88 - 6, 140, 14, 4, '#3A3A3A', '#222', 1);
-    // Arrow keys cluster (highlighted)
-    const akx = kx + 234, aky = ky + 55;
-    const akc = GAME.state === 'PLAYING' ? '#00E676' : '#555';
-    drawRoundRect(akx, aky-18, 16, 14, 3, akc, '#222', 1); // up
-    drawRoundRect(akx-19, aky, 16, 14, 3, akc, '#222', 1); // left
-    drawRoundRect(akx, aky, 16, 14, 3, akc, '#222', 1);     // down
-    drawRoundRect(akx+19, aky, 16, 14, 3, akc, '#222', 1);  // right
-    // Tiny arrow symbols
-    drawText('▲', akx+8, aky-11, 7, '#000', 'center');
-    drawText('◀', akx-11, aky+7, 7, '#000', 'center');
-    drawText('▼', akx+8, aky+7, 7, '#000', 'center');
-    drawText('▶', akx+27, aky+7, 7, '#000', 'center');
+    drawRoundRect(kx + 120, ky + kbH - 28, 260, 18, 6, '#0097A7', '#006064', 1);
+    // Arrow keys cluster (highlighted, bigger)
+    const akx = kx + kbW - 85, aky = ky + kbH - 55;
+    const akc = GAME.state === 'PLAYING' ? '#FFEB3B' : '#006064';
+    const akSz = 22;
+    drawRoundRect(akx, aky-akSz-2, akSz, akSz, 5, akc, '#004D40', 2); // up
+    drawRoundRect(akx-akSz-3, aky, akSz, akSz, 5, akc, '#004D40', 2); // left
+    drawRoundRect(akx, aky, akSz, akSz, 5, akc, '#004D40', 2);         // down
+    drawRoundRect(akx+akSz+3, aky, akSz, akSz, 5, akc, '#004D40', 2);  // right
+    // Arrow symbols
+    drawText('▲', akx+akSz/2, aky-akSz/2-2, 11, '#000', 'center');
+    drawText('◀', akx-akSz/2-3, aky+akSz/2, 11, '#000', 'center');
+    drawText('▼', akx+akSz/2, aky+akSz/2, 11, '#000', 'center');
+    drawText('▶', akx+akSz*1.5+3, aky+akSz/2, 11, '#000', 'center');
 
-    // === MUG (right of keyboard) ===
-    const mx2 = CW/2 + 190, my2 = dy + 25;
-    drawShadowRoundRect(mx2, my2, 48, 58, 10, '#FAFAFA', '#E0E0E0', 2);
-    // Handle
-    ctx.strokeStyle = '#FAFAFA'; ctx.lineWidth = 5;
-    ctx.beginPath(); ctx.arc(mx2+48, my2+25, 14, -Math.PI*0.4, Math.PI*0.4); ctx.stroke();
-    // Coffee surface
-    ctx.fillStyle = '#3E2723';
-    ctx.beginPath(); ctx.ellipse(mx2+24, my2+6, 18, 7, 0, 0, Math.PI*2); ctx.fill();
-    // Steam
-    ctx.strokeStyle = 'rgba(220,220,220,0.5)'; ctx.lineWidth = 2;
-    let so = Math.sin(performance.now()/500)*5;
-    ctx.beginPath(); ctx.moveTo(mx2+14, my2-4); ctx.quadraticCurveTo(mx2+18+so, my2-22, mx2+14, my2-38); ctx.stroke();
-    ctx.beginPath(); ctx.moveTo(mx2+34, my2-2); ctx.quadraticCurveTo(mx2+38-so, my2-20, mx2+34, my2-36); ctx.stroke();
+    // === MOUSE (right of keyboard, chunky) ===
+    const msx = kx + kbW + 25, msy = dy + 60;
+    const msW = 60, msH = 85;
+    // Mouse body
+    ctx.save();
+    ctx.beginPath();
+    ctx.ellipse(msx + msW/2, msy + msH/2, msW/2, msH/2, 0, 0, Math.PI * 2);
+    ctx.shadowColor = 'rgba(0,0,0,0.35)'; ctx.shadowBlur = 10; ctx.shadowOffsetY = 5;
+    ctx.fillStyle = '#2E7D32'; ctx.fill();
+    ctx.shadowColor = 'transparent'; ctx.shadowBlur = 0; ctx.shadowOffsetY = 0;
+    ctx.strokeStyle = '#FFD600'; ctx.lineWidth = 3; ctx.stroke();
+    ctx.restore();
+    // Mouse buttons divider
+    ctx.strokeStyle = '#1B5E20'; ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.moveTo(msx + msW/2, msy + 8); ctx.lineTo(msx + msW/2, msy + msH*0.45); ctx.stroke();
+    // Left/right button shading
+    drawRoundRect(msx + 8, msy + 8, msW/2 - 12, msH*0.35, 8, '#388E3C', null);
+    drawRoundRect(msx + msW/2 + 4, msy + 8, msW/2 - 12, msH*0.35, 8, '#357A38', null);
+    // Scroll wheel
+    drawRoundRect(msx + msW/2 - 6, msy + 12, 12, 18, 6, '#1B5E20', '#0D3B0D', 2);
+    // LED glow
+    ctx.fillStyle = GAME.state === 'PLAYING' ? 'rgba(0,230,118,0.7)' : 'rgba(100,100,100,0.4)';
+    ctx.beginPath(); ctx.arc(msx + msW/2, msy + msH - 14, 6, 0, Math.PI * 2); ctx.fill();
+    // Mouse cord
+    ctx.strokeStyle = '#1B5E20'; ctx.lineWidth = 4;
+    ctx.beginPath();
+    ctx.moveTo(msx + msW/2, msy);
+    ctx.quadraticCurveTo(msx + msW/2, msy - 25, msx + msW/2 - 20, msy - 40);
+    ctx.quadraticCurveTo(msx - 10, msy - 60, msx - 30, msy - 45);
+    ctx.stroke();
 
-    // === PHONE (right side, prominent) ===
-    const px = CW - 128, py = dy - 10;
-    // Phone body
-    drawShadowRoundRect(px, py, 90, 155, 14, '#263238', '#1A1A1A', 2);
-    // Screen
-    drawRoundRect(px+6, py+18, 78, 118, 6, '#0D1B2A', '#37474F', 1);
-    // Camera notch
-    ctx.fillStyle = '#111'; ctx.beginPath(); ctx.arc(px+45, py+10, 4, 0, Math.PI*2); ctx.fill();
-    // Home button
-    drawRoundRect(px+35, py+140, 20, 6, 3, '#37474F', null);
+    // === TABLET / iPad (right side, full desk height) ===
+    const px = CW - 230, py = dy + 4;
+    const tw = 220, th = deskH - 12;
+    // Tablet body
+    drawShadowRoundRect(px, py, tw, th, 16, '#263238', '#1A1A1A', 3);
+    // Screen bezel (teal border like sketch)
+    drawRoundRect(px + 5, py + 5, tw - 10, th - 10, 12, '#00897B', null);
+    drawRoundRect(px + 10, py + 10, tw - 20, th - 20, 10, '#0D1B2A', '#37474F', 1);
+    // Camera dot
+    ctx.fillStyle = '#111'; ctx.beginPath(); ctx.arc(px + tw/2, py + 7, 4, 0, Math.PI*2); ctx.fill();
 
     // Bank app
-    drawRoundRect(px+10, py+24, 70, 42, 6, '#1B5E20', '#2E7D32', 1);
-    drawText('💰 BANK', px+45, py+38, 13, '#C8E6C9', 'center');
-    drawText('$' + GAME.cash, px+45, py+56, 20, '#FFF', 'center');
+    const bankH = 60;
+    drawRoundRect(px + 18, py + 22, tw - 36, bankH, 10, '#1B5E20', '#2E7D32', 2);
+    drawText('💰 BANK', px + tw/2, py + 40, 18, '#C8E6C9', 'center');
+    drawText('$' + GAME.cash, px + tw/2, py + 64, 30, '#FFF', 'center');
 
-    // Upgrades section
-    drawRoundRect(px+10, py+72, 70, 58, 6, '#1A2332', '#2A3A4E', 1);
-    drawText('EQUIPPED', px+45, py+84, 9, '#6B7A8E', 'center', null, 0, 'normal');
+    // Installed plugins section
+    const plugY = py + 22 + bankH + 10;
+    const plugH = th - bankH - 50;
+    drawRoundRect(px + 18, plugY, tw - 36, plugH, 10, '#1A2332', '#2A3A4E', 2);
+    drawText('INSTALLED PLUGINS', px + tw/2, plugY + 18, 13, '#6B7A8E', 'center', null, 0, 'normal');
     let apps = [];
     Object.entries(GAME.upgrades).forEach(([k,v]) => { if(v) { const it = STORE_ITEMS.find(i=>i.id===k); if(it) apps.push(it.icon); }});
     if (apps.length === 0) {
-        drawText('None', px+45, py+104, 12, '#444', 'center', null, 0, 'normal');
+        drawText('None', px + tw/2, plugY + plugH/2 + 8, 16, '#444', 'center', null, 0, 'normal');
     } else {
-        for (let i = 0; i < apps.length && i < 6; i++) {
-            drawText(apps[i], px+16+(i%3)*22, py+100+Math.floor(i/3)*20, 14, '#FFF', 'left');
+        const cols = Math.min(apps.length, 4);
+        const gridW = cols * 36;
+        const startX = px + tw/2 - gridW/2 + 10;
+        for (let i = 0; i < apps.length && i < 8; i++) {
+            const col = i % 4, row = Math.floor(i / 4);
+            drawText(apps[i], startX + col * 36, plugY + 40 + row * 30, 22, '#FFF', 'left');
         }
     }
-
-    // === NOTEPAD / PAPERS (left of router) ===
-    const npx = 18, npy = dy + 70;
-    ctx.save(); ctx.translate(npx+30, npy+40); ctx.rotate(-0.08);
-    drawRoundRect(-30, -40, 60, 80, 3, '#FFFDE7', '#E0E0E0', 1);
-    ctx.strokeStyle = '#BBDEFB'; ctx.lineWidth = 1;
-    for (let ln = 0; ln < 5; ln++) { ctx.beginPath(); ctx.moveTo(-22, -24+ln*14); ctx.lineTo(22, -24+ln*14); ctx.stroke(); }
-    ctx.fillStyle = '#E53935'; ctx.fillRect(-30, -40, 6, 80);
-    ctx.restore();
-
-    // === PENCIL CUP (far left) ===
-    const pcx = 5, pcy = dy + 60;
-    drawShadowRoundRect(pcx, pcy, 30, 42, 6, '#795548', '#5D4037', 2);
-    ctx.strokeStyle = '#FFD54F'; ctx.lineWidth = 3;
-    ctx.beginPath(); ctx.moveTo(pcx+8, pcy-2); ctx.lineTo(pcx+4, pcy-28); ctx.stroke();
-    ctx.strokeStyle = '#2196F3'; ctx.beginPath(); ctx.moveTo(pcx+15, pcy-2); ctx.lineTo(pcx+18, pcy-24); ctx.stroke();
-    ctx.strokeStyle = '#F44336'; ctx.beginPath(); ctx.moveTo(pcx+22, pcy-2); ctx.lineTo(pcx+25, pcy-20); ctx.stroke();
 }
 
 // ---- Screen content (inside monitor) ----
