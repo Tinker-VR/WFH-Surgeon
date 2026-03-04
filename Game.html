@@ -88,7 +88,7 @@ const COLORS = {
 };
 
 const ARROWS = ['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'];
-const ARROW_SYM = { ArrowUp: '▲', ArrowDown: '▼', ArrowLeft: '◀', ArrowRight: '▶' };
+const ARROW_SYM = { ArrowUp: '⇧', ArrowDown: '⇩', ArrowLeft: '⇦', ArrowRight: '⇨' };
 
 const PROCEDURES = ["Left Knee Replacement", "Cranial Decompression", "Triple Bypass", "Emergency Appendectomy", "Kidney Transplant", "Robot-Assisted Tonsillectomy", "Spinal Fusion", "Cybernetic Eye Implant", "Spleen Defrag", "Heart Reboot", "Brain Dusting", "Ghost Removal (Surgical)"];
 const PATIENTS = ["John Doe", "Jane Smith", "Patient 8472", "The CEO", "Unknown Drifter", "Your Landlord", "A Literal Dog", "V.I.P. Client", "Three Kids in a Trenchcoat", "Florida Man", "Karen from Accounting", "Your Ex"];
@@ -105,8 +105,17 @@ const STORE_ITEMS = [
     {id: 'powerBank', icon: '⚡', title: 'Power Bank', desc: 'Blocks Low Battery.', price: 850, stars: 4}
 ];
 
-const STARTING_CASH = 0;
-const STARTING_RANK = 0;
+// ===================== TESTING VARIABLES =====================
+// Set to null for normal gameplay, or a string like 'cat', 'coffee', 'lag', 'battery', 'ad' to force that hazard
+const DEBUG_FORCE_HAZARD = null;
+// Set starting cash (0 = normal)
+const DEBUG_STARTING_CASH = 0;
+// Set starting rank/level (0 = normal, max 14)
+const DEBUG_STARTING_RANK = 0;
+// ===================== END TESTING VARIABLES =================
+
+const STARTING_CASH = DEBUG_STARTING_CASH;
+const STARTING_RANK = DEBUG_STARTING_RANK;
 
 // ===================== AUDIO ENGINE =====================
 const AudioEngine = {
@@ -619,14 +628,18 @@ function chunkComplete() {
 }
 
 function spawnHazard() {
-    let pool = [];
-    if (!GAME.upgrades.adBlock) pool.push('ad');
-    if (!GAME.upgrades.powerBank) pool.push('battery');
-    if (!GAME.upgrades.ethernet) pool.push('lag');
-    if (!GAME.upgrades.mugLid) pool.push('coffee');
-    if (!GAME.upgrades.treats) pool.push('cat');
-    if (!pool.length) return;
-    GAME.hazard = pool[Math.floor(Math.random()*pool.length)];
+    if (DEBUG_FORCE_HAZARD) {
+        GAME.hazard = DEBUG_FORCE_HAZARD;
+    } else {
+        let pool = [];
+        if (!GAME.upgrades.adBlock) pool.push('ad');
+        if (!GAME.upgrades.powerBank) pool.push('battery');
+        if (!GAME.upgrades.ethernet) pool.push('lag');
+        if (!GAME.upgrades.mugLid) pool.push('coffee');
+        if (!GAME.upgrades.treats) pool.push('cat');
+        if (!pool.length) return;
+        GAME.hazard = pool[Math.floor(Math.random()*pool.length)];
+    }
     GAME.coffeeWipe = 0; GAME.routerClicks = 0;
     if (GAME.hazard === 'cat') { GAME.catClicks = 0; AudioEngine.playCatMeow(); }
     if (GAME.hazard === 'ad') {
@@ -832,32 +845,30 @@ function drawDeskItems() {
     const rw = 160, rh = 55;
     drawShadowRoundRect(rx, ry, rw, rh, 10, '#1A1A1A', '#111', 3);
     drawRoundRect(rx+3, ry+3, rw-6, rh-6, 8, '#222', null);
-    // Antennas (taller)
+    // Antennas
     drawRoundRect(rx+18, ry-52, 8, 58, 4, '#333', '#222', 2);
     drawRoundRect(rx+rw-26, ry-52, 8, 58, 4, '#333', '#222', 2);
-    // Antenna tips
     ctx.fillStyle = '#555'; ctx.beginPath(); ctx.arc(rx+22, ry-55, 7, 0, Math.PI*2); ctx.fill();
     ctx.beginPath(); ctx.arc(rx+rw-22, ry-55, 7, 0, Math.PI*2); ctx.fill();
-    // Status LEDs (bigger)
+    // Status LEDs
     let lc = '#00E676';
     if (GAME.hazard === 'lag') lc = (Math.floor(performance.now()/200)%2===0) ? '#FF1744' : '#550000';
     ctx.fillStyle = lc;
     ctx.beginPath(); ctx.arc(rx+45, ry+28, 7, 0, Math.PI*2); ctx.fill();
     ctx.beginPath(); ctx.arc(rx+75, ry+28, 7, 0, Math.PI*2); ctx.fill();
     ctx.beginPath(); ctx.arc(rx+105, ry+28, 7, 0, Math.PI*2); ctx.fill();
-    // Label
     drawText('NET-O-MATIC', rx+rw/2, ry+46, 10, '#444', 'center', null, 0, 'normal');
     if (GAME.routerFlashTimer > 0) {
         ctx.fillStyle = `rgba(255,255,255,${GAME.routerFlashTimer/150})`;
         ctx.roundRectPolyfill(rx, ry, rw, rh, 10); ctx.fill();
     }
 
-    // === MUG (left side, below router, big) ===
+    // === MUG (left side, below router) ===
     const mx2 = 30, my2 = dy + 78;
     const mugW = 75, mugH = 90;
-    drawShadowRoundRect(mx2, my2, mugW, mugH, 14, '#FF8C00', '#E07000', 3);
+    drawShadowRoundRect(mx2, my2, mugW, mugH, 14, '#FAFAFA', '#E0E0E0', 3);
     // Handle
-    ctx.strokeStyle = '#FF8C00'; ctx.lineWidth = 8;
+    ctx.strokeStyle = '#FAFAFA'; ctx.lineWidth = 8;
     ctx.beginPath(); ctx.arc(mx2+mugW, my2+mugH*0.4, 20, -Math.PI*0.45, Math.PI*0.45); ctx.stroke();
     // Coffee surface
     ctx.fillStyle = '#3E2723';
@@ -868,93 +879,118 @@ function drawDeskItems() {
     ctx.beginPath(); ctx.moveTo(mx2+20, my2-6); ctx.quadraticCurveTo(mx2+26+so, my2-32, mx2+20, my2-55); ctx.stroke();
     ctx.beginPath(); ctx.moveTo(mx2+50, my2-4); ctx.quadraticCurveTo(mx2+56-so, my2-30, mx2+50, my2-52); ctx.stroke();
 
-    // === KEYBOARD (big, centered on desk) ===
-    const kbW = 500, kbH = 130;
-    const kx = 220, ky = dy + 42;
-    // Keyboard body
-    drawShadowRoundRect(kx, ky, kbW, kbH, 12, '#00ACC1', '#00838F', 3);
-    drawRoundRect(kx+4, ky+4, kbW-8, kbH-8, 10, '#00BCD4', null);
-    // Key rows
-    const keyColors = ['#0097A7', '#00838F', '#00ACC1', '#0097A7'];
-    const keysPerRow = [15, 14, 13, 11];
+    // === KEYBOARD (centered between left items and tablet) ===
+    const kbW = 480, kbH = 120;
+    const deskMidZone = CW - 230; // tablet starts here
+    const kbCenterX = (175 + deskMidZone) / 2; // center between router area and tablet
+    const kx = kbCenterX - kbW/2, ky = dy + 38;
+    // Keyboard body — dark like the rest of the desk tech
+    drawShadowRoundRect(kx, ky, kbW, kbH, 10, '#2A2A2A', '#1A1A1A', 3);
+    drawRoundRect(kx+3, ky+3, kbW-6, kbH-6, 8, '#333', null);
+    // Key rows — clean grid with proper spacing
+    const keyPad = 10; // padding inside keyboard
+    const keyGap = 3;
+    const keysPerRow = [14, 13, 12, 10];
+    const rowH = 18;
+    const rowGap = 4;
+    const keyAreaW = kbW - keyPad*2 - 80; // leave room for arrow cluster on right
     for (let row = 0; row < 4; row++) {
-        const rowY = ky + 12 + row * 24;
-        const rowOffset = row * 6 + 10;
-        const keyW = (kbW - 20 - rowOffset * 2) / keysPerRow[row] - 3;
+        const rowY = ky + keyPad + row * (rowH + rowGap);
+        const indent = row * 5;
+        const availW = keyAreaW - indent;
+        const keyW = (availW - (keysPerRow[row]-1)*keyGap) / keysPerRow[row];
         for (let k = 0; k < keysPerRow[row]; k++) {
-            const keyX = kx + rowOffset + k * (keyW + 3);
-            drawRoundRect(keyX, rowY, keyW, 19, 4, keyColors[row], '#006064', 1);
+            const keyX = kx + keyPad + indent + k * (keyW + keyGap);
+            drawRoundRect(keyX, rowY, keyW, rowH, 3, '#444', '#333', 1);
         }
     }
     // Spacebar
-    drawRoundRect(kx + 120, ky + kbH - 28, 260, 18, 6, '#0097A7', '#006064', 1);
-    // Arrow keys cluster (highlighted, bigger)
-    const akx = kx + kbW - 85, aky = ky + kbH - 55;
-    const akc = GAME.state === 'PLAYING' ? '#FFEB3B' : '#006064';
-    const akSz = 22;
-    drawRoundRect(akx, aky-akSz-2, akSz, akSz, 5, akc, '#004D40', 2); // up
-    drawRoundRect(akx-akSz-3, aky, akSz, akSz, 5, akc, '#004D40', 2); // left
-    drawRoundRect(akx, aky, akSz, akSz, 5, akc, '#004D40', 2);         // down
-    drawRoundRect(akx+akSz+3, aky, akSz, akSz, 5, akc, '#004D40', 2);  // right
-    // Arrow symbols
-    drawText('▲', akx+akSz/2, aky-akSz/2-2, 11, '#000', 'center');
-    drawText('◀', akx-akSz/2-3, aky+akSz/2, 11, '#000', 'center');
-    drawText('▼', akx+akSz/2, aky+akSz/2, 11, '#000', 'center');
-    drawText('▶', akx+akSz*1.5+3, aky+akSz/2, 11, '#000', 'center');
+    const spaceY = ky + keyPad + 4*(rowH+rowGap);
+    drawRoundRect(kx + keyPad + 80, spaceY, 200, rowH, 5, '#444', '#333', 1);
 
-    // === MOUSE (right of keyboard, chunky) ===
-    const msx = kx + kbW + 25, msy = dy + 60;
-    const msW = 60, msH = 85;
-    // Mouse body
+    // Arrow keys cluster — separate area on the right, no overlap
+    const arrowArea = kx + kbW - 72;
+    const arrowTop = ky + kbH - 58;
+    const akSz = 20;
+    const akGap = 3;
+    const akc = GAME.state === 'PLAYING' ? '#00E676' : '#555';
+    // Up
+    drawRoundRect(arrowArea + akSz + akGap, arrowTop, akSz, akSz, 4, akc, '#222', 1);
+    drawText('▲', arrowArea + akSz + akGap + akSz/2, arrowTop + akSz/2, 10, '#000', 'center');
+    // Left
+    drawRoundRect(arrowArea, arrowTop + akSz + akGap, akSz, akSz, 4, akc, '#222', 1);
+    drawText('◀', arrowArea + akSz/2, arrowTop + akSz*1.5 + akGap, 10, '#000', 'center');
+    // Down
+    drawRoundRect(arrowArea + akSz + akGap, arrowTop + akSz + akGap, akSz, akSz, 4, akc, '#222', 1);
+    drawText('▼', arrowArea + akSz + akGap + akSz/2, arrowTop + akSz*1.5 + akGap, 10, '#000', 'center');
+    // Right
+    drawRoundRect(arrowArea + (akSz + akGap)*2, arrowTop + akSz + akGap, akSz, akSz, 4, akc, '#222', 1);
+    drawText('▶', arrowArea + (akSz + akGap)*2 + akSz/2, arrowTop + akSz*1.5 + akGap, 10, '#000', 'center');
+
+    // === MOUSE (right of keyboard, centered with it) ===
+    const msx = kx + kbW + 20;
+    const msy = ky + kbH/2 - 42;
+    const msW = 55, msH = 80;
+    // Mouse body — dark to match keyboard
     ctx.save();
     ctx.beginPath();
     ctx.ellipse(msx + msW/2, msy + msH/2, msW/2, msH/2, 0, 0, Math.PI * 2);
     ctx.shadowColor = 'rgba(0,0,0,0.35)'; ctx.shadowBlur = 10; ctx.shadowOffsetY = 5;
-    ctx.fillStyle = '#2E7D32'; ctx.fill();
+    ctx.fillStyle = '#2A2A2A'; ctx.fill();
     ctx.shadowColor = 'transparent'; ctx.shadowBlur = 0; ctx.shadowOffsetY = 0;
-    ctx.strokeStyle = '#FFD600'; ctx.lineWidth = 3; ctx.stroke();
+    ctx.strokeStyle = '#1A1A1A'; ctx.lineWidth = 2; ctx.stroke();
     ctx.restore();
     // Mouse buttons divider
-    ctx.strokeStyle = '#1B5E20'; ctx.lineWidth = 2;
-    ctx.beginPath(); ctx.moveTo(msx + msW/2, msy + 8); ctx.lineTo(msx + msW/2, msy + msH*0.45); ctx.stroke();
+    ctx.strokeStyle = '#444'; ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(msx + msW/2, msy + 6); ctx.lineTo(msx + msW/2, msy + msH*0.4); ctx.stroke();
     // Left/right button shading
-    drawRoundRect(msx + 8, msy + 8, msW/2 - 12, msH*0.35, 8, '#388E3C', null);
-    drawRoundRect(msx + msW/2 + 4, msy + 8, msW/2 - 12, msH*0.35, 8, '#357A38', null);
+    drawRoundRect(msx + 6, msy + 6, msW/2 - 8, msH*0.3, 6, '#333', null);
+    drawRoundRect(msx + msW/2 + 2, msy + 6, msW/2 - 8, msH*0.3, 6, '#303030', null);
     // Scroll wheel
-    drawRoundRect(msx + msW/2 - 6, msy + 12, 12, 18, 6, '#1B5E20', '#0D3B0D', 2);
+    drawRoundRect(msx + msW/2 - 5, msy + 10, 10, 14, 5, '#555', '#444', 1);
     // LED glow
-    ctx.fillStyle = GAME.state === 'PLAYING' ? 'rgba(0,230,118,0.7)' : 'rgba(100,100,100,0.4)';
-    ctx.beginPath(); ctx.arc(msx + msW/2, msy + msH - 14, 6, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = GAME.state === 'PLAYING' ? 'rgba(0,230,118,0.6)' : 'rgba(100,100,100,0.3)';
+    ctx.beginPath(); ctx.arc(msx + msW/2, msy + msH - 12, 5, 0, Math.PI * 2); ctx.fill();
     // Mouse cord
-    ctx.strokeStyle = '#1B5E20'; ctx.lineWidth = 4;
+    ctx.strokeStyle = '#333'; ctx.lineWidth = 3;
     ctx.beginPath();
     ctx.moveTo(msx + msW/2, msy);
-    ctx.quadraticCurveTo(msx + msW/2, msy - 25, msx + msW/2 - 20, msy - 40);
-    ctx.quadraticCurveTo(msx - 10, msy - 60, msx - 30, msy - 45);
+    ctx.quadraticCurveTo(msx + msW/2, msy - 22, msx + msW/2 - 18, msy - 35);
+    ctx.quadraticCurveTo(msx - 8, msy - 50, msx - 25, msy - 40);
     ctx.stroke();
 
     // === TABLET / iPad (right side, full desk height) ===
     const px = CW - 230, py = dy + 4;
     const tw = 220, th = deskH - 12;
-    // Tablet body
-    drawShadowRoundRect(px, py, tw, th, 16, '#263238', '#1A1A1A', 3);
-    // Screen bezel (teal border like sketch)
-    drawRoundRect(px + 5, py + 5, tw - 10, th - 10, 12, '#00897B', null);
-    drawRoundRect(px + 10, py + 10, tw - 20, th - 20, 10, '#0D1B2A', '#37474F', 1);
-    // Camera dot
-    ctx.fillStyle = '#111'; ctx.beginPath(); ctx.arc(px + tw/2, py + 7, 4, 0, Math.PI*2); ctx.fill();
+    // iPad outer shell — rounded silver/space gray aluminum
+    ctx.save();
+    ctx.shadowColor = 'rgba(0,0,0,0.5)'; ctx.shadowBlur = 15; ctx.shadowOffsetY = 6;
+    drawRoundRect(px, py, tw, th, 18, '#3A3A3C', null); // space gray body
+    ctx.shadowColor = 'transparent'; ctx.shadowBlur = 0; ctx.shadowOffsetY = 0;
+    ctx.restore();
+    // Thin bezel
+    drawRoundRect(px+2, py+2, tw-4, th-4, 16, '#2C2C2E', null);
+    // Screen
+    drawRoundRect(px+8, py+12, tw-16, th-24, 8, '#0D1B2A', null);
+    // Front camera (top center, subtle)
+    ctx.fillStyle = '#1C1C1E';
+    ctx.beginPath(); ctx.arc(px + tw/2, py + 7, 3, 0, Math.PI*2); ctx.fill();
+    ctx.fillStyle = '#0A0A0A';
+    ctx.beginPath(); ctx.arc(px + tw/2, py + 7, 1.5, 0, Math.PI*2); ctx.fill();
+    // Subtle Apple-like home indicator bar at bottom
+    drawRoundRect(px + tw/2 - 30, py + th - 9, 60, 4, 2, '#555', null);
 
-    // Bank app
-    const bankH = 60;
-    drawRoundRect(px + 18, py + 22, tw - 36, bankH, 10, '#1B5E20', '#2E7D32', 2);
-    drawText('💰 BANK', px + tw/2, py + 40, 18, '#C8E6C9', 'center');
-    drawText('$' + GAME.cash, px + tw/2, py + 64, 30, '#FFF', 'center');
+    // Bank app on iPad screen
+    const bankH = 55;
+    drawRoundRect(px + 16, py + 20, tw - 32, bankH, 10, '#1B5E20', '#2E7D32', 2);
+    drawText('💰 BANK', px + tw/2, py + 36, 17, '#C8E6C9', 'center');
+    drawText('$' + GAME.cash, px + tw/2, py + 58, 28, '#FFF', 'center');
 
     // Installed plugins section
-    const plugY = py + 22 + bankH + 10;
-    const plugH = th - bankH - 50;
-    drawRoundRect(px + 18, plugY, tw - 36, plugH, 10, '#1A2332', '#2A3A4E', 2);
-    drawText('INSTALLED PLUGINS', px + tw/2, plugY + 18, 13, '#6B7A8E', 'center', null, 0, 'normal');
+    const plugY = py + 20 + bankH + 8;
+    const plugH = th - bankH - 48;
+    drawRoundRect(px + 16, plugY, tw - 32, plugH, 10, '#1A2332', '#2A3A4E', 2);
+    drawText('INSTALLED PLUGINS', px + tw/2, plugY + 18, 12, '#6B7A8E', 'center', null, 0, 'normal');
     let apps = [];
     Object.entries(GAME.upgrades).forEach(([k,v]) => { if(v) { const it = STORE_ITEMS.find(i=>i.id===k); if(it) apps.push(it.icon); }});
     if (apps.length === 0) {
@@ -965,7 +1001,7 @@ function drawDeskItems() {
         const startX = px + tw/2 - gridW/2 + 10;
         for (let i = 0; i < apps.length && i < 8; i++) {
             const col = i % 4, row = Math.floor(i / 4);
-            drawText(apps[i], startX + col * 36, plugY + 40 + row * 30, 22, '#FFF', 'left');
+            drawText(apps[i], startX + col * 36, plugY + 38 + row * 28, 20, '#FFF', 'left');
         }
     }
 }
@@ -1026,21 +1062,31 @@ function drawScreenPlaying() {
     drawRoundRect(M.sx+40, barY, M.sw-80, 18, 9, '#1A1A1A', '#333', 2);
     if ((M.sw-88)*pPct > 4) drawRoundRect(M.sx+44, barY+3, (M.sw-88)*pPct, 12, 6, COLORS.red, null);
 
-    // Hazard overlay
+    // Hazard overlay — dims the ENTIRE monitor screen, not just UI panel
     if (GAME.hazard) {
-        ctx.fillStyle = 'rgba(0,0,0,0.82)';
-        ctx.fillRect(M.sx, M.uiY, M.sw, M.uiH);
+        ctx.save();
+        ctx.beginPath(); ctx.roundRectPolyfill(M.sx, M.sy, M.sw, M.sh, 4); ctx.clip();
+        // Heavy dim over entire screen
+        ctx.fillStyle = 'rgba(0,0,0,0.75)';
+        ctx.fillRect(M.sx, M.sy, M.sw, M.sh);
+        // Pulsing vignette
+        let vigPulse = 0.15 + Math.sin(performance.now()/300)*0.08;
+        let vig = ctx.createRadialGradient(M.sx+M.sw/2, M.sy+M.sh/2, M.sw*0.2, M.sx+M.sw/2, M.sy+M.sh/2, M.sw*0.6);
+        vig.addColorStop(0, 'rgba(0,0,0,0)'); vig.addColorStop(1, `rgba(0,0,0,${vigPulse})`);
+        ctx.fillStyle = vig; ctx.fillRect(M.sx, M.sy, M.sw, M.sh);
+
         let title='', sub='', col=COLORS.red;
-        if (GAME.hazard==='cat')     { title='SHOO THE CAT!'; sub=`Click ${3-GAME.catClicks} more times!`; col='#FFA000'; }
-        else if (GAME.hazard==='battery') { title='BATTERY LOW!'; sub='Drag charger to outlet!'; }
-        else if (GAME.hazard==='lag')     { title='WI-FI DOWN!'; sub=`Click router ${3-GAME.routerClicks}x!`; }
-        else if (GAME.hazard==='coffee')  { title='COFFEE SPILL!'; sub='Wipe it up! Drag mouse over it!'; col='#D7CCC8'; }
-        else if (GAME.hazard==='ad')      { title='BOSS POPUP!'; sub='Click X or press ESC'; col='#1565C0'; }
-        let pulse = 1+Math.sin(performance.now()/150)*0.04;
-        ctx.save(); ctx.translate(M.sx+M.sw/2, M.uiY+M.uiH/2-12); ctx.scale(pulse, pulse);
-        drawText(title, 0, 0, 42, col, 'center', '#000', 4);
+        if (GAME.hazard==='cat')     { title='🐱 SHOO THE CAT!'; sub=`Click ${3-GAME.catClicks} more times!`; col='#FFA000'; }
+        else if (GAME.hazard==='battery') { title='🔋 BATTERY LOW!'; sub='Drag charger to outlet!'; }
+        else if (GAME.hazard==='lag')     { title='📶 WI-FI DOWN!'; sub=`Click router ${3-GAME.routerClicks}x!`; }
+        else if (GAME.hazard==='coffee')  { title='☕ COFFEE SPILL!'; sub='Wipe it up! Drag mouse over it!'; col='#D7CCC8'; }
+        else if (GAME.hazard==='ad')      { title='💼 BOSS POPUP!'; sub='Click X or press ESC'; col='#1565C0'; }
+        let pulse = 1+Math.sin(performance.now()/150)*0.06;
+        ctx.save(); ctx.translate(M.sx+M.sw/2, M.sy+M.sh/2-20); ctx.scale(pulse, pulse);
+        drawText(title, 0, 0, 52, col, 'center', '#000', 6);
         ctx.restore();
-        drawText(sub, M.sx+M.sw/2, M.uiY+M.uiH/2+32, 22, '#BBB', 'center', null, 0, 'normal');
+        drawText(sub, M.sx+M.sw/2, M.sy+M.sh/2+35, 26, '#CCC', 'center', null, 0, 'normal');
+        ctx.restore();
     }
 
     if (GAME.greenFlashTimer > 0) {
@@ -1166,7 +1212,7 @@ function drawHelpModal() {
     const cx = CW/2, cy = my + 220;
     if (GAME.helpPage === 0) {
         drawText('MATCH THE ARROWS', cx, cy-100, 34, COLORS.gold, 'center');
-        const keys = ['▲','▼','◀','▶'], colors = [COLORS.green, COLORS.gold, '#2A3A4E', '#2A3A4E'];
+        const keys = ['⇧','⇩','⇦','⇨'], colors = [COLORS.green, COLORS.gold, '#2A3A4E', '#2A3A4E'];
         for (let i = 0; i < 4; i++) {
             drawRoundRect(cx-155+i*82, cy-55, 70, 70, 14, colors[i], null);
             drawText(keys[i], cx-155+i*82+35, cy-20, 40, i<2?'#000':'#AAA', 'center');
