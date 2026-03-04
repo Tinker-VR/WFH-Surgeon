@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WFH Surgeon</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; }
+        body {
+            background-color: #111;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            overflow: hidden;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-image: radial-gradient(circle, #2a2a2a 0%, #080808 100%);
+        }
+        #game-container {
+            aspect-ratio: 16 / 9;
+            width: 100%;
+            max-width: 1280px;
+            max-height: 100vh;
+            position: relative;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 1);
+            border-radius: 12px;
+            overflow: hidden;
+            border: 4px solid #333;
+        }
+        canvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+            background-color: #000;
+            cursor: none;
+        }
+    </style>
+</head>
+<body>
+
+<div id="game-container">
+    <canvas id="gameCanvas" width="1280" height="720"></canvas>
+</div>
+
+<script src="js/constants.js"></script>
+<script src="js/globals.js"></script>
+<script src="js/audio.js"></script>
+<script src="js/utils.js"></script>
+<script src="js/logic.js"></script>
+<script src="js/input.js"></script>
+<script src="js/render-scene.js"></script>
+<script src="js/render-desk.js"></script>
+<script src="js/render-screens.js"></script>
+<script src="js/render-hazards.js"></script>
+<script src="js/render-ui.js"></script>
+<script src="js/main.js"></script>
+
+</body>
+</html>
