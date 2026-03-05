@@ -96,7 +96,7 @@ function loop(timestamp) {
     if (GAME.shakeTimer > 0) ctx.translate(shakeX, shakeY);
 
     drawBackground();
-    drawCatTailBehind();
+    //drawCatTailBehind();
     drawMonitorFrame();
     drawORScene();
 

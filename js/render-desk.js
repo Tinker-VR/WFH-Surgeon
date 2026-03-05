@@ -433,40 +433,96 @@ function drawDeskItems() {
     }
 }
 
-// Cat tail — drawn BEFORE monitor frame so it appears behind
+// Cat peeking + tail — drawn BEFORE monitor frame so it appears behind 
 function drawCatTailBehind() {
     if (GAME.upgrades.treats) return;
-    const tailT = performance.now() / 1000;
+    const t = performance.now() / 1000;
     const M = MONITOR;
-    const tailBaseX = M.x + M.w + 15;
-    const tailBaseY = DESK_Y + 5;
-    // Main tail — thick, curving upward
-    ctx.strokeStyle = '#FFA000'; ctx.lineWidth = 14; ctx.lineCap = 'round';
+    // Cat peeks from right side of monitor, top half of face visible
+    const peekX = M.x + M.w + 8;
+    const peekY = M.y + M.h * 0.35;
+    const earBob = Math.sin(t * 1.5) * 3;
+
+    // === CAT FACE (half visible, peeking from right edge of monitor) ===
+    // Head — orange circle, left half hidden behind monitor
+    ctx.fillStyle = '#FFA000';
+    ctx.beginPath(); ctx.arc(peekX + 10, peekY, 32, -Math.PI*0.5, Math.PI*0.5); ctx.fill();
+    // Darker cheek patch
+    ctx.fillStyle = '#E65100';
+    ctx.beginPath(); ctx.arc(peekX + 14, peekY + 10, 12, 0, Math.PI*2); ctx.fill();
+    // Left ear (triangle, peeking)
+    ctx.fillStyle = '#FFA000';
+    ctx.beginPath();
+    ctx.moveTo(peekX - 2, peekY - 24 + earBob);
+    ctx.lineTo(peekX + 12, peekY - 38 + earBob);
+    ctx.lineTo(peekX + 20, peekY - 20 + earBob);
+    ctx.closePath(); ctx.fill();
+    // Inner ear
+    ctx.fillStyle = '#FFAB91';
+    ctx.beginPath();
+    ctx.moveTo(peekX + 2, peekY - 24 + earBob);
+    ctx.lineTo(peekX + 12, peekY - 34 + earBob);
+    ctx.lineTo(peekX + 18, peekY - 22 + earBob);
+    ctx.closePath(); ctx.fill();
+    // Eye — big, round, looking at player
+    const blinkCycle = Math.floor(t * 0.3) % 8;
+    const eyeOpen = blinkCycle !== 0;
+    ctx.fillStyle = '#1B5E20';
+    if (eyeOpen) {
+        ctx.beginPath(); ctx.ellipse(peekX + 18, peekY - 6, 8, 10, 0, 0, Math.PI*2); ctx.fill();
+        // Pupil
+        ctx.fillStyle = '#000';
+        ctx.beginPath(); ctx.ellipse(peekX + 18, peekY - 6, 3, 8, 0, 0, Math.PI*2); ctx.fill();
+        // Eye shine
+        ctx.fillStyle = '#FFF';
+        ctx.beginPath(); ctx.arc(peekX + 21, peekY - 9, 2.5, 0, Math.PI*2); ctx.fill();
+    } else {
+        // Blink — horizontal line
+        ctx.strokeStyle = '#1B5E20'; ctx.lineWidth = 2;
+        ctx.beginPath(); ctx.moveTo(peekX + 10, peekY - 6); ctx.lineTo(peekX + 26, peekY - 6); ctx.stroke();
+    }
+    // Nose
+    ctx.fillStyle = '#FF8A80';
+    ctx.beginPath();
+    ctx.moveTo(peekX + 16, peekY + 4);
+    ctx.lineTo(peekX + 13, peekY + 8);
+    ctx.lineTo(peekX + 19, peekY + 8);
+    ctx.closePath(); ctx.fill();
+    // Whiskers
+    ctx.strokeStyle = '#FFF'; ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(peekX + 20, peekY + 6); ctx.lineTo(peekX + 50, peekY + 2); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(peekX + 20, peekY + 8); ctx.lineTo(peekX + 48, peekY + 12); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(peekX + 20, peekY + 10); ctx.lineTo(peekX + 46, peekY + 20); ctx.stroke();
+
+    // === TAIL — curving up from behind the monitor, above the cat ===
+    const tailBaseX = peekX - 5;
+    const tailBaseY = peekY + 28;
+    ctx.strokeStyle = '#FFA000'; ctx.lineWidth = 12; ctx.lineCap = 'round';
     ctx.beginPath();
     ctx.moveTo(tailBaseX, tailBaseY);
-    for (let i = 1; i <= 12; i++) {
-        const ty = tailBaseY - i * 14;
-        const tx = tailBaseX + Math.sin(tailT * 2.5 + i * 0.45) * (10 + i * 2);
+    for (let i = 1; i <= 8; i++) {
+        const ty = tailBaseY + i * 12;
+        const tx = tailBaseX + Math.sin(t * 2.5 + i * 0.5) * (8 + i * 2.5) + i * 3;
         ctx.lineTo(tx, ty);
     }
     ctx.stroke();
-    // Tabby stripes
-    ctx.strokeStyle = '#E65100'; ctx.lineWidth = 7;
+    // Tabby stripes on tail
+    ctx.strokeStyle = '#E65100'; ctx.lineWidth = 6;
     ctx.beginPath();
-    ctx.moveTo(tailBaseX + Math.sin(tailT * 2.5 + 1.35) * 13, tailBaseY - 42);
-    for (let i = 3; i <= 10; i++) {
-        const ty = tailBaseY - i * 14;
-        const tx = tailBaseX + Math.sin(tailT * 2.5 + i * 0.45) * (10 + i * 2);
-        if (i % 3 === 0) { ctx.moveTo(tx, ty); } else { ctx.lineTo(tx, ty); }
+    let started = false;
+    for (let i = 2; i <= 7; i++) {
+        const ty = tailBaseY + i * 12;
+        const tx = tailBaseX + Math.sin(t * 2.5 + i * 0.5) * (8 + i * 2.5) + i * 3;
+        if (i % 2 === 0) { ctx.moveTo(tx, ty); started = true; } else if (started) { ctx.lineTo(tx, ty); }
     }
     ctx.stroke();
-    // Fur tip at end — small flick
-    const tipI = 12;
-    const tipY = tailBaseY - tipI * 14;
-    const tipX = tailBaseX + Math.sin(tailT * 2.5 + tipI * 0.45) * (10 + tipI * 2);
-    ctx.strokeStyle = '#FF8F00'; ctx.lineWidth = 10; ctx.lineCap = 'round';
+    // Tail tip
+    const tipI = 8;
+    const tipY = tailBaseY + tipI * 12;
+    const tipX = tailBaseX + Math.sin(t * 2.5 + tipI * 0.5) * (8 + tipI * 2.5) + tipI * 3;
+    ctx.strokeStyle = '#FF8F00'; ctx.lineWidth = 9; ctx.lineCap = 'round';
     ctx.beginPath();
     ctx.moveTo(tipX, tipY);
-    ctx.lineTo(tipX + Math.sin(tailT * 3) * 8, tipY - 12);
+    ctx.lineTo(tipX + Math.sin(t * 3) * 6 + 5, tipY + 10);
     ctx.stroke();
 }

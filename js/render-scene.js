@@ -59,61 +59,61 @@ function drawORScene() {
     ctx.beginPath(); ctx.roundRectPolyfill(M.sx, M.sy, M.sw, M.orH, 4); ctx.clip();
 
     const orBot = M.sy + M.orH;
-    // Wall with subtle gradient
+    // Wall with subtle gradient — muted/dull
     const wallGrad = ctx.createLinearGradient(M.sx, M.sy, M.sx, orBot - 70);
-    wallGrad.addColorStop(0, '#D5EDE8'); wallGrad.addColorStop(1, COLORS.orWall);
+    wallGrad.addColorStop(0, '#C8D5D2'); wallGrad.addColorStop(1, '#BECCC8');
     ctx.fillStyle = wallGrad; ctx.fillRect(M.sx, M.sy, M.sw, M.orH);
-    // Wall tile lines
-    ctx.strokeStyle = '#C8DDD8'; ctx.lineWidth = 1;
+    // Wall tile lines — very subtle
+    ctx.strokeStyle = '#B8C8C4'; ctx.lineWidth = 1;
     for (let i = M.sx; i < M.sx+M.sw; i += 60) { ctx.beginPath(); ctx.moveTo(i, M.sy); ctx.lineTo(i, orBot-70); ctx.stroke(); }
     for (let j = M.sy; j < orBot-70; j += 40) { ctx.beginPath(); ctx.moveTo(M.sx, j); ctx.lineTo(M.sx+M.sw, j); ctx.stroke(); }
     // Baseboard
-    drawRect(M.sx, orBot-73, M.sw, 6, '#90A4AE');
-    // Floor with tile pattern
+    drawRect(M.sx, orBot-73, M.sw, 6, '#8A9A96');
+    // Floor with tile pattern — muted
     const floorGrad = ctx.createLinearGradient(M.sx, orBot-67, M.sx, orBot);
-    floorGrad.addColorStop(0, '#A8CCC4'); floorGrad.addColorStop(1, COLORS.orFloor);
+    floorGrad.addColorStop(0, '#98B8B0'); floorGrad.addColorStop(1, '#8CABA4');
     ctx.fillStyle = floorGrad; ctx.fillRect(M.sx, orBot - 67, M.sw, 67);
-    ctx.strokeStyle = '#9CC0B6'; ctx.lineWidth = 1;
+    ctx.strokeStyle = '#88A8A0'; ctx.lineWidth = 1;
     for (let i = M.sx; i < M.sx+M.sw; i += 50) {
         ctx.beginPath(); ctx.moveTo(i, orBot-67); ctx.lineTo(i-20, orBot); ctx.stroke();
     }
 
     const lx = M.sx + M.sw/2;
 
-    // === GLASS CABINET (left wall) — BIGGER ===
+    // === GLASS CABINET (left wall) — dulled colors ===
     const cabX = M.sx + 8, cabY = M.sy + 12, cabW = 85, cabH = M.orH * 0.55;
-    drawRoundRect(cabX, cabY, cabW, cabH, 5, '#CFD8DC', '#90A4AE', 2);
-    ctx.fillStyle = 'rgba(200,220,230,0.25)';
+    drawRoundRect(cabX, cabY, cabW, cabH, 5, '#B8C0C4', '#8A9498', 2);
+    ctx.fillStyle = 'rgba(180,195,205,0.2)';
     ctx.fillRect(cabX+4, cabY+4, cabW-8, cabH-8);
     for (let s = 1; s < 4; s++) {
         const shelfY = cabY + s * (cabH/4);
-        ctx.strokeStyle = '#B0BEC5'; ctx.lineWidth = 1;
+        ctx.strokeStyle = '#A0AAB0'; ctx.lineWidth = 1;
         ctx.beginPath(); ctx.moveTo(cabX+4, shelfY); ctx.lineTo(cabX+cabW-4, shelfY); ctx.stroke();
-        // Bigger bottles
-        ctx.fillStyle = ['#EF5350','#42A5F5','#66BB6A','#FFA726'][s-1];
+        // Bottles — muted tones
+        ctx.fillStyle = ['#B07070','#7090A8','#80A088','#B09870'][s-1];
         ctx.fillRect(cabX+10, shelfY-18, 10, 18);
-        ctx.fillStyle = '#78909C';
+        ctx.fillStyle = '#708088';
         ctx.fillRect(cabX+26, shelfY-14, 8, 14);
-        ctx.fillStyle = '#AB47BC';
+        ctx.fillStyle = '#907898';
         ctx.fillRect(cabX+42, shelfY-20, 10, 20);
-        ctx.fillStyle = '#4FC3F7';
+        ctx.fillStyle = '#7898A8';
         ctx.fillRect(cabX+58, shelfY-12, 8, 12);
     }
     // Cabinet handle
     ctx.strokeStyle = '#78909C'; ctx.lineWidth = 2;
     ctx.beginPath(); ctx.moveTo(cabX+cabW-12, cabY+cabH/2-12); ctx.lineTo(cabX+cabW-12, cabY+cabH/2+12); ctx.stroke();
 
-    // === HAND SANITIZER DISPENSER (left wall) ===
+    // === HAND SANITIZER DISPENSER (left wall) — muted ===
     const sanX = M.sx + 100, sanY = M.sy + 18;
-    drawRoundRect(sanX, sanY, 26, 40, 5, '#E8F5E9', '#A5D6A7', 1);
-    drawRoundRect(sanX + 7, sanY - 10, 12, 14, 4, '#C8E6C9', '#81C784', 1);
-    ctx.strokeStyle = '#A5D6A7'; ctx.lineWidth = 2;
+    drawRoundRect(sanX, sanY, 26, 40, 5, '#C8D0C8', '#98A898', 1);
+    drawRoundRect(sanX + 7, sanY - 10, 12, 14, 4, '#B0BCB0', '#88988A', 1);
+    ctx.strokeStyle = '#98A898'; ctx.lineWidth = 2;
     ctx.beginPath(); ctx.moveTo(sanX + 13, sanY - 10); ctx.lineTo(sanX + 13, sanY - 16); ctx.lineTo(sanX + 21, sanY - 16); ctx.stroke();
     drawText('🧴', sanX + 13, sanY + 20, 14, '#FFF', 'center');
 
-    // === WALL CLOCK (animated) ===
+    // === WALL CLOCK (animated) — muted ===
     const clockX = M.sx + M.sw/2 + 120, clockY = M.sy + 26;
-    ctx.fillStyle = '#ECEFF1'; ctx.strokeStyle = '#90A4AE'; ctx.lineWidth = 2;
+    ctx.fillStyle = '#C8CCD0'; ctx.strokeStyle = '#808C92'; ctx.lineWidth = 2;
     ctx.beginPath(); ctx.arc(clockX, clockY, 26, 0, Math.PI*2); ctx.fill(); ctx.stroke();
     for (let h = 0; h < 12; h++) {
         const cAngle = (h / 12) * Math.PI * 2 - Math.PI/2;
@@ -130,24 +130,24 @@ function drawORScene() {
     ctx.fillStyle = '#37474F';
     ctx.beginPath(); ctx.arc(clockX, clockY, 3, 0, Math.PI*2); ctx.fill();
 
-    // === GLASS CABINET (right wall) — BIGGER ===
+    // === GLASS CABINET (right wall) — dulled colors ===
     const cab2X = M.sx + M.sw - 93;
-    drawRoundRect(cab2X, cabY, cabW, cabH, 5, '#CFD8DC', '#90A4AE', 2);
-    ctx.fillStyle = 'rgba(200,220,230,0.25)';
+    drawRoundRect(cab2X, cabY, cabW, cabH, 5, '#B8C0C4', '#8A9498', 2);
+    ctx.fillStyle = 'rgba(180,195,205,0.2)';
     ctx.fillRect(cab2X+4, cabY+4, cabW-8, cabH-8);
     for (let s = 1; s < 4; s++) {
         const shelfY = cabY + s * (cabH/4);
-        ctx.strokeStyle = '#B0BEC5'; ctx.lineWidth = 1;
+        ctx.strokeStyle = '#A0AAB0'; ctx.lineWidth = 1;
         ctx.beginPath(); ctx.moveTo(cab2X+4, shelfY); ctx.lineTo(cab2X+cabW-4, shelfY); ctx.stroke();
-        ctx.fillStyle = '#E0E0E0'; ctx.fillRect(cab2X+10, shelfY-16, 16, 16);
-        ctx.fillStyle = '#FFB74D'; ctx.fillRect(cab2X+32, shelfY-12, 8, 12);
-        ctx.fillStyle = '#4FC3F7'; ctx.fillRect(cab2X+48, shelfY-18, 10, 18);
-        ctx.fillStyle = '#EF9A9A'; ctx.fillRect(cab2X+64, shelfY-14, 8, 14);
+        ctx.fillStyle = '#C0C0C0'; ctx.fillRect(cab2X+10, shelfY-16, 16, 16);
+        ctx.fillStyle = '#B09870'; ctx.fillRect(cab2X+32, shelfY-12, 8, 12);
+        ctx.fillStyle = '#7898A8'; ctx.fillRect(cab2X+48, shelfY-18, 10, 18);
+        ctx.fillStyle = '#B09090'; ctx.fillRect(cab2X+64, shelfY-14, 8, 14);
     }
 
-    // === BLOOD BAG / IV POLE (right side) — BIGGER ===
+    // === BLOOD BAG / IV POLE (right side) — muted ===
     const ivX = M.sx + M.sw - 125, ivBaseY = orBot - 55;
-    ctx.strokeStyle = '#B0BEC5'; ctx.lineWidth = 4;
+    ctx.strokeStyle = '#9AA4AA'; ctx.lineWidth = 4;
     ctx.beginPath(); ctx.moveTo(ivX, ivBaseY); ctx.lineTo(ivX, M.sy + 18); ctx.stroke();
     // Cross bar
     ctx.lineWidth = 3;
@@ -155,67 +155,72 @@ function drawORScene() {
     // Hook
     ctx.lineWidth = 2;
     ctx.beginPath(); ctx.arc(ivX - 8, M.sy + 24, 6, Math.PI, 0); ctx.stroke();
-    // Blood bag — BIGGER
-    drawRoundRect(ivX - 20, M.sy + 32, 32, 48, 8, '#C62828', '#B71C1C', 2);
-    drawText('A+', ivX - 4, M.sy + 56, 14, '#FFCDD2', 'center', null, 0, 'normal');
+    // Blood bag — muted red
+    drawRoundRect(ivX - 20, M.sy + 32, 32, 48, 8, '#8A3030', '#7A2828', 2);
+    drawText('A+', ivX - 4, M.sy + 56, 14, '#C8A0A0', 'center', null, 0, 'normal');
     // Tube
-    ctx.strokeStyle = '#EF9A9A'; ctx.lineWidth = 2;
+    ctx.strokeStyle = '#B08888'; ctx.lineWidth = 2;
     ctx.beginPath(); ctx.moveTo(ivX - 4, M.sy + 80); ctx.quadraticCurveTo(ivX + 14, M.sy + 115, ivX - 35, orBot - 30); ctx.stroke();
     // Tripod base
-    ctx.strokeStyle = '#B0BEC5'; ctx.lineWidth = 3;
+    ctx.strokeStyle = '#9AA4AA'; ctx.lineWidth = 3;
     ctx.beginPath(); ctx.moveTo(ivX, ivBaseY); ctx.lineTo(ivX - 20, orBot-2); ctx.stroke();
     ctx.beginPath(); ctx.moveTo(ivX, ivBaseY); ctx.lineTo(ivX + 20, orBot-2); ctx.stroke();
     ctx.beginPath(); ctx.moveTo(ivX, ivBaseY); ctx.lineTo(ivX, orBot-2); ctx.stroke();
 
-    // === DEFIBRILLATOR / CRASH CART (right side) ===
+    // === DEFIBRILLATOR / CRASH CART (right side) — muted ===
     const ccX = M.sx + M.sw - 185, ccBaseY = orBot - 62;
-    drawRoundRect(ccX, ccBaseY, 55, 52, 6, '#455A64', '#37474F', 2);
+    drawRoundRect(ccX, ccBaseY, 55, 52, 6, '#3A4A52', '#303C42', 2);
     // Defib screen
     drawRoundRect(ccX + 5, ccBaseY + 5, 24, 18, 3, '#000', null);
-    ctx.strokeStyle = '#00E676'; ctx.lineWidth = 1;
+    ctx.strokeStyle = '#408858'; ctx.lineWidth = 1;
     const defibEkg = (performance.now()/15) % 24;
     ctx.beginPath();
     ctx.moveTo(ccX+5, ccBaseY+14); ctx.lineTo(ccX+5+defibEkg/2, ccBaseY+14);
     ctx.lineTo(ccX+5+defibEkg/2+3, ccBaseY+8); ctx.lineTo(ccX+5+defibEkg/2+6, ccBaseY+20);
     ctx.lineTo(ccX+5+defibEkg/2+9, ccBaseY+14); ctx.lineTo(ccX+29, ccBaseY+14);
     ctx.stroke();
-    // Paddles
-    drawRoundRect(ccX+34, ccBaseY+6, 16, 16, 4, '#FF6F00', '#E65100', 1);
-    drawText('⚡', ccX+42, ccBaseY+14, 10, '#FFF', 'center');
+    // Paddles — muted
+    drawRoundRect(ccX+34, ccBaseY+6, 16, 16, 4, '#9A7030', '#7A5828', 1);
+    drawText('⚡', ccX+42, ccBaseY+14, 10, '#CCC', 'center');
     // Wheels
     ctx.fillStyle = '#333';
     ctx.beginPath(); ctx.arc(ccX + 10, ccBaseY + 55, 5, 0, Math.PI*2); ctx.fill();
     ctx.beginPath(); ctx.arc(ccX + 45, ccBaseY + 55, 5, 0, Math.PI*2); ctx.fill();
 
-    // === MAYO STAND (instrument table, left of patient) — BIGGER ===
+    // === MAYO STAND (instrument table, left of patient) — muted ===
     const mayoX = lx - 220, mayoTopY = orBot - 52;
-    ctx.strokeStyle = '#B0BEC5'; ctx.lineWidth = 3;
+    ctx.strokeStyle = '#9AA4AA'; ctx.lineWidth = 3;
     ctx.beginPath(); ctx.moveTo(mayoX, mayoTopY + 20); ctx.lineTo(mayoX, orBot - 2); ctx.stroke();
     // Base
     ctx.beginPath(); ctx.moveTo(mayoX - 14, orBot - 2); ctx.lineTo(mayoX + 14, orBot - 2); ctx.stroke();
-    // Tray — BIGGER
-    drawRoundRect(mayoX - 45, mayoTopY, 90, 20, 5, '#CFD8DC', '#90A4AE', 2);
+    // Tray — muted
+    drawRoundRect(mayoX - 45, mayoTopY, 90, 20, 5, '#B0B8BC', '#808C92', 2);
     // Instruments on tray
-    ctx.strokeStyle = '#78909C'; ctx.lineWidth = 2;
+    ctx.strokeStyle = '#687880'; ctx.lineWidth = 2;
     ctx.beginPath(); ctx.moveTo(mayoX - 28, mayoTopY); ctx.lineTo(mayoX - 28, mayoTopY - 16); ctx.stroke();
     ctx.beginPath(); ctx.moveTo(mayoX - 12, mayoTopY); ctx.lineTo(mayoX - 8, mayoTopY - 20); ctx.stroke();
     ctx.beginPath(); ctx.moveTo(mayoX + 5, mayoTopY); ctx.lineTo(mayoX + 5, mayoTopY - 14); ctx.stroke();
     ctx.beginPath(); ctx.moveTo(mayoX + 20, mayoTopY); ctx.lineTo(mayoX + 24, mayoTopY - 12); ctx.stroke();
     ctx.beginPath(); ctx.moveTo(mayoX + 34, mayoTopY); ctx.lineTo(mayoX + 34, mayoTopY - 18); ctx.stroke();
     // Scalpel blade highlight
-    ctx.fillStyle = '#E0E0E0';
+    ctx.fillStyle = '#C0C0C0';
     ctx.beginPath(); ctx.moveTo(mayoX - 30, mayoTopY - 16); ctx.lineTo(mayoX - 26, mayoTopY - 16); ctx.lineTo(mayoX - 28, mayoTopY - 8); ctx.fill();
 
-    // === INSTRUMENT TRAY (right of patient) — BIGGER ===
-    const trayX = lx + 180, trayY = orBot - 32;
-    drawRoundRect(trayX - 40, trayY, 80, 14, 4, '#CFD8DC', '#90A4AE', 1);
+    // === INSTRUMENT TRAY on side table (right of patient, raised) — muted ===
+    const trayX = lx + 170, trayTableY = orBot - 55;
+    // Table legs
+    ctx.strokeStyle = '#9AA4AA'; ctx.lineWidth = 3;
+    ctx.beginPath(); ctx.moveTo(trayX - 30, trayTableY + 14); ctx.lineTo(trayX - 30, orBot - 2); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(trayX + 30, trayTableY + 14); ctx.lineTo(trayX + 30, orBot - 2); ctx.stroke();
+    // Table top — muted
+    drawRoundRect(trayX - 40, trayTableY, 80, 14, 4, '#B0B8BC', '#808C92', 1);
     // Instruments
-    ctx.fillStyle = '#78909C';
-    ctx.fillRect(trayX - 24, trayY - 8, 4, 8);
-    ctx.fillRect(trayX - 12, trayY - 10, 4, 10);
-    ctx.fillRect(trayX + 4, trayY - 7, 4, 7);
-    ctx.fillRect(trayX + 18, trayY - 9, 4, 9);
-    ctx.fillRect(trayX + 30, trayY - 6, 4, 6);
+    ctx.fillStyle = '#687880';
+    ctx.fillRect(trayX - 24, trayTableY - 8, 4, 8);
+    ctx.fillRect(trayX - 12, trayTableY - 10, 4, 10);
+    ctx.fillRect(trayX + 4, trayTableY - 7, 4, 7);
+    ctx.fillRect(trayX + 18, trayTableY - 9, 4, 9);
+    ctx.fillRect(trayX + 30, trayTableY - 6, 4, 6);
 
     // === SHADOWS ON FLOOR — BIGGER ===
     ctx.fillStyle = 'rgba(0,0,0,0.12)';
@@ -224,24 +229,24 @@ function drawORScene() {
     ctx.beginPath(); ctx.ellipse(ivX, orBot - 1, 24, 6, 0, 0, Math.PI*2); ctx.fill();
     ctx.beginPath(); ctx.ellipse(ccX + 27, orBot - 1, 22, 5, 0, 0, Math.PI*2); ctx.fill();
 
-    // Lamp
+    // Lamp — muted housing, but keep light cone visible
     const lampX = lx;
-    drawRoundRect(lampX-18, M.sy-5, 36, 35, 10, '#90A4AE', '#546E7A', 2);
-    ctx.fillStyle = '#ECEFF1'; ctx.strokeStyle = '#78909C'; ctx.lineWidth = 2;
+    drawRoundRect(lampX-18, M.sy-5, 36, 35, 10, '#808C92', '#4A585E', 2);
+    ctx.fillStyle = '#C8CCD0'; ctx.strokeStyle = '#687078'; ctx.lineWidth = 2;
     ctx.beginPath(); ctx.arc(lampX, M.sy+22, 70, Math.PI, 0); ctx.fill(); ctx.stroke();
-    // Lamp bulbs
+    // Lamp bulbs — slightly muted
     for (let lb = -2; lb <= 2; lb++) {
-        ctx.fillStyle = '#FFF9C4';
+        ctx.fillStyle = '#E8E4B0';
         ctx.beginPath(); ctx.arc(lampX + lb*20, M.sy+18, 5, 0, Math.PI*2); ctx.fill();
     }
     let lg = ctx.createLinearGradient(lampX, M.sy+22, lampX, orBot);
-    lg.addColorStop(0, 'rgba(255,255,240,0.18)'); lg.addColorStop(1, 'rgba(255,255,255,0)');
+    lg.addColorStop(0, 'rgba(255,255,240,0.12)'); lg.addColorStop(1, 'rgba(255,255,255,0)');
     ctx.fillStyle = lg;
     ctx.beginPath(); ctx.moveTo(lampX-65, M.sy+22); ctx.lineTo(lampX+65, M.sy+22); ctx.lineTo(lampX+150, orBot); ctx.lineTo(lampX-150, orBot); ctx.fill();
 
-    // Heart monitor
+    // Heart monitor — muted housing
     const hmx = M.sx+80, hmy = M.sy+15;
-    drawShadowRoundRect(hmx, hmy, 95, 72, 10, '#37474F', '#263238', 2);
+    drawShadowRoundRect(hmx, hmy, 95, 72, 10, '#303840', '#222830', 2);
     drawRoundRect(hmx+6, hmy+6, 83, 38, 5, '#000');
     ctx.strokeStyle = '#00E676'; ctx.lineWidth = 2;
     let ekg = (performance.now()/12) % 83;
@@ -265,81 +270,81 @@ function drawORScene() {
     ctx.stroke();
     ctx.setLineDash([]);
 
-    // === ROLLING DRAWER CART (left side) ===
+    // === ROLLING DRAWER CART (left side) — muted ===
     const drawerX = M.sx + 18, drawerBaseY = orBot - 78;
-    drawRoundRect(drawerX, drawerBaseY, 60, 68, 6, '#546E7A', '#455A64', 2);
+    drawRoundRect(drawerX, drawerBaseY, 60, 68, 6, '#4A5A60', '#3A484E', 2);
     for (let d = 0; d < 3; d++) {
-        drawRoundRect(drawerX+4, drawerBaseY+4+d*20, 52, 16, 3, '#607D8B', '#546E7A', 1);
-        drawRoundRect(drawerX+22, drawerBaseY+9+d*20, 16, 6, 2, '#78909C', null);
+        drawRoundRect(drawerX+4, drawerBaseY+4+d*20, 52, 16, 3, '#506068', '#4A5860', 1);
+        drawRoundRect(drawerX+22, drawerBaseY+9+d*20, 16, 6, 2, '#607078', null);
     }
     ctx.fillStyle = '#333';
     ctx.beginPath(); ctx.arc(drawerX+10, drawerBaseY+72, 4, 0, Math.PI*2); ctx.fill();
     ctx.beginPath(); ctx.arc(drawerX+50, drawerBaseY+72, 4, 0, Math.PI*2); ctx.fill();
 
-    // === MEDICINE CABINET (left wall, below glass cabinet) ===
+    // === MEDICINE CABINET (left wall, below glass cabinet) — muted ===
     const medCabX = M.sx + 8, medCabY = cabY + cabH + 8;
-    drawRoundRect(medCabX, medCabY, 70, 50, 4, '#ECEFF1', '#B0BEC5', 1);
-    ctx.strokeStyle = '#B0BEC5'; ctx.lineWidth = 1;
+    drawRoundRect(medCabX, medCabY, 70, 50, 4, '#C0C4C8', '#9AA0A6', 1);
+    ctx.strokeStyle = '#9AA0A6'; ctx.lineWidth = 1;
     ctx.beginPath(); ctx.moveTo(medCabX+35, medCabY+4); ctx.lineTo(medCabX+35, medCabY+46); ctx.stroke();
-    drawRoundRect(medCabX+14, medCabY+20, 8, 10, 2, '#90A4AE', null);
-    drawRoundRect(medCabX+48, medCabY+20, 8, 10, 2, '#90A4AE', null);
+    drawRoundRect(medCabX+14, medCabY+20, 8, 10, 2, '#808C92', null);
+    drawRoundRect(medCabX+48, medCabY+20, 8, 10, 2, '#808C92', null);
 
-    // === WASTE BIN (right side, floor) ===
-    const binX = M.sx + M.sw - 55, binY = orBot - 42;
-    ctx.fillStyle = '#78909C'; ctx.strokeStyle = '#546E7A'; ctx.lineWidth = 2;
-    ctx.beginPath(); ctx.moveTo(binX, binY); ctx.lineTo(binX-4, binY+38); ctx.lineTo(binX+40, binY+38); ctx.lineTo(binX+36, binY); ctx.closePath();
+    // === WASTE BIN (left side, under drawer cart) — muted ===
+    const binX = M.sx + 85, binY = orBot - 38;
+    ctx.fillStyle = '#687880'; ctx.strokeStyle = '#4A5860'; ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.moveTo(binX, binY); ctx.lineTo(binX-3, binY+34); ctx.lineTo(binX+32, binY+34); ctx.lineTo(binX+29, binY); ctx.closePath();
     ctx.fill(); ctx.stroke();
-    drawRoundRect(binX-2, binY-4, 40, 6, 2, '#607D8B', '#455A64', 1);
+    drawRoundRect(binX-1, binY-3, 32, 5, 2, '#506068', '#3A484E', 1);
 
-    // === X-RAY LIGHTBOX (wall) ===
+    // === X-RAY LIGHTBOX (wall) — muted ===
     const xrayX = M.sx + M.sw/2 - 180, xrayY = M.sy + 10;
-    drawRoundRect(xrayX, xrayY, 55, 40, 4, '#263238', '#37474F', 2);
-    drawRoundRect(xrayX+4, xrayY+4, 47, 28, 2, '#1A237E', null);
-    ctx.strokeStyle = 'rgba(100,181,246,0.4)'; ctx.lineWidth = 1;
+    drawRoundRect(xrayX, xrayY, 55, 40, 4, '#222830', '#303840', 2);
+    drawRoundRect(xrayX+4, xrayY+4, 47, 28, 2, '#182050', null);
+    ctx.strokeStyle = 'rgba(80,130,170,0.3)'; ctx.lineWidth = 1;
     ctx.beginPath(); ctx.moveTo(xrayX+15, xrayY+10); ctx.lineTo(xrayX+15, xrayY+28); ctx.stroke();
     ctx.beginPath(); ctx.moveTo(xrayX+10, xrayY+18); ctx.lineTo(xrayX+20, xrayY+18); ctx.stroke();
     ctx.beginPath(); ctx.ellipse(xrayX+35, xrayY+18, 8, 10, 0, 0, Math.PI*2); ctx.stroke();
 
-    // === OXYGEN TANK (next to IV pole) ===
+    // === OXYGEN TANK (next to IV pole) — muted ===
     const o2X = ivX + 28, o2Y = orBot - 65;
-    drawRoundRect(o2X, o2Y, 16, 58, 8, '#42A5F5', '#1E88E5', 2);
-    drawRoundRect(o2X+3, o2Y-7, 10, 10, 3, '#78909C', '#546E7A', 1);
-    drawText('O2', o2X+8, o2Y+30, 9, '#FFF', 'center', null, 0, 'normal');
+    drawRoundRect(o2X, o2Y, 16, 58, 8, '#6888A0', '#507088', 2);
+    drawRoundRect(o2X+3, o2Y-7, 10, 10, 3, '#607078', '#4A585E', 1);
+    drawText('O2', o2X+8, o2Y+30, 9, '#CCC', 'center', null, 0, 'normal');
 
-    // === SUPPLY SHELF (right wall, higher up) ===
+    // === SUPPLY SHELF (right wall, higher up) — muted ===
     const shelfX = M.sx + M.sw - 95, shelfY = orBot - 80;
-    drawRoundRect(shelfX, shelfY, 35, 8, 2, '#B0BEC5', '#90A4AE', 1);
-    drawRoundRect(shelfX+4, shelfY-14, 12, 14, 2, '#E8F5E9', null);
-    drawRoundRect(shelfX+18, shelfY-12, 12, 12, 2, '#E3F2FD', null);
+    drawRoundRect(shelfX, shelfY, 35, 8, 2, '#9AA4AA', '#808C92', 1);
+    drawRoundRect(shelfX+4, shelfY-14, 12, 14, 2, '#B8C0B8', null);
+    drawRoundRect(shelfX+18, shelfY-12, 12, 12, 2, '#B0BCC4', null);
 
-    // === CLIPBOARD on wall (near heart monitor) ===
+    // === CLIPBOARD on wall (near heart monitor) — muted ===
     const clipX = hmx + 100, clipY = M.sy + 18;
-    drawRoundRect(clipX, clipY, 30, 40, 3, '#EFEBE9', '#BCAAA4', 1);
-    drawRoundRect(clipX+8, clipY-4, 14, 8, 2, '#8D6E63', null);
-    ctx.strokeStyle = '#BCAAA4'; ctx.lineWidth = 1;
+    drawRoundRect(clipX, clipY, 30, 40, 3, '#C8C4C0', '#A09890', 1);
+    drawRoundRect(clipX+8, clipY-4, 14, 8, 2, '#786858', null);
+    ctx.strokeStyle = '#A09890'; ctx.lineWidth = 1;
     for (let cl = 0; cl < 4; cl++) { ctx.beginPath(); ctx.moveTo(clipX+6, clipY+10+cl*7); ctx.lineTo(clipX+24, clipY+10+cl*7); ctx.stroke(); }
 
-    // === GLOVE BOX DISPENSER (wall-mounted, left of clock) ===
+    // === GLOVE BOX DISPENSER (wall-mounted, left of clock) — muted ===
     const gloveX = M.sx + M.sw/2 + 50, gloveY = M.sy + 10;
-    drawRoundRect(gloveX, gloveY, 50, 30, 4, '#E8F5E9', '#A5D6A7', 1);
-    drawRoundRect(gloveX+15, gloveY+22, 20, 12, 3, '#C8E6C9', null);
-    drawText('GLOVES', gloveX+25, gloveY+14, 7, '#66BB6A', 'center', null, 0, 'normal');
+    drawRoundRect(gloveX, gloveY, 50, 30, 4, '#C0C8C0', '#90A090', 1);
+    drawRoundRect(gloveX+15, gloveY+22, 20, 12, 3, '#A8B8A8', null);
+    drawText('GLOVES', gloveX+25, gloveY+14, 7, '#7A9A7A', 'center', null, 0, 'normal');
 
-    // === FIRE EXTINGUISHER BOX (wall-mounted, left side) ===
+    // === FIRE EXTINGUISHER BOX (wall-mounted, left side) — muted ===
     const feX = M.sx + 105, feY = M.sy + 65;
-    drawRoundRect(feX, feY, 28, 35, 3, '#FFCDD2', '#EF5350', 1);
-    drawRoundRect(feX+6, feY+8, 16, 22, 4, '#C62828', '#B71C1C', 1);
-    drawText('\uD83E\uDDEF', feX+14, feY+19, 12, '#FFF', 'center');
+    drawRoundRect(feX, feY, 28, 35, 3, '#D0B0B0', '#A07070', 1);
+    drawRoundRect(feX+6, feY+8, 16, 22, 4, '#8A4040', '#7A3535', 1);
+    drawText('\uD83E\uDDEF', feX+14, feY+19, 12, '#DDD', 'center');
 
-    // === PAPER TOWEL HOLDER (wall-mounted, right side) ===
+    // === PAPER TOWEL HOLDER (wall-mounted, right side) — muted ===
     const ptX = M.sx + M.sw - 60, ptY = M.sy + 40;
-    drawRoundRect(ptX, ptY, 35, 25, 3, '#ECEFF1', '#B0BEC5', 1);
-    drawRoundRect(ptX+4, ptY+8, 27, 14, 6, '#FAFAFA', '#E0E0E0', 1);
+    drawRoundRect(ptX, ptY, 35, 25, 3, '#C8CCD0', '#9AA0A6', 1);
+    drawRoundRect(ptX+4, ptY+8, 27, 14, 6, '#D8D8D8', '#C0C0C0', 1);
 
-    // === SHARPS CONTAINER (wall-mounted, near IV) ===
+    // === SHARPS CONTAINER (wall-mounted, near IV) — muted ===
     const scX = ivX - 50, scY = M.sy + 35;
-    drawRoundRect(scX, scY, 22, 28, 3, '#F44336', '#C62828', 1);
-    drawText('\u26A0', scX+11, scY+14, 10, '#FFF', 'center');
+    drawRoundRect(scX, scY, 22, 28, 3, '#A06060', '#804040', 1);
+    drawText('\u26A0', scX+11, scY+14, 10, '#DDD', 'center');
 
     // Patient — centered vertically in OR area, bigger
     const patientY = M.sy + M.orH * 0.55;
@@ -403,13 +408,13 @@ function drawORScene() {
 }
 
 function drawPatient(cx, y) {
-    // Bed — 460 wide, 36 tall
-    drawRoundRect(cx-230, y+8, 460, 36, 12, '#BDBDBD', '#999', 2);
+    // Bed — 460 wide, 36 tall — muted
+    drawRoundRect(cx-230, y+8, 460, 36, 12, '#A0A4A8', '#888C90', 2);
     // Bed legs
-    drawRect(cx-205, y+44, 18, 30, '#888');
-    drawRect(cx+187, y+44, 18, 30, '#888');
+    drawRect(cx-205, y+44, 18, 30, '#787C80');
+    drawRect(cx+187, y+44, 18, 30, '#787C80');
     // Bed rail hints
-    ctx.strokeStyle = '#AAA'; ctx.lineWidth = 2;
+    ctx.strokeStyle = '#909498'; ctx.lineWidth = 2;
     ctx.beginPath(); ctx.moveTo(cx-230, y+4); ctx.lineTo(cx-230, y-10); ctx.stroke();
     ctx.beginPath(); ctx.moveTo(cx+230, y+4); ctx.lineTo(cx+230, y-10); ctx.stroke();
     // Pillow — raised and plumper
@@ -417,6 +422,12 @@ function drawPatient(cx, y) {
     ctx.beginPath(); ctx.ellipse(cx-185, y+0, 48, 22, 0, 0, Math.PI*2); ctx.fill();
     ctx.strokeStyle = '#BBDEFB'; ctx.lineWidth = 1;
     ctx.beginPath(); ctx.ellipse(cx-185, y+0, 48, 22, 0, 0, Math.PI*2); ctx.stroke();
+    // Neck — connects head to blanket
+    //ctx.fillStyle = '#EAC086';
+    // ctx.fillRect(cx-195, y+8, 20, 18);
+    // Neck shadow
+    //ctx.fillStyle = 'rgba(180,140,80,0.3)';
+    //ctx.fillRect(cx-195, y+14, 20, 10);
     // Head — 32 radius, raised onto pillow
     ctx.fillStyle = '#EAC086'; ctx.beginPath(); ctx.arc(cx-185, y-8, 32, 0, Math.PI*2); ctx.fill();
     // Surgical cap

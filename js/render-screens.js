@@ -94,23 +94,23 @@ function drawScreenStore() {
         drawButton('NEXT OP \u25B6', nextBtnX, nextBtnY, nextBtnW, nextBtnH, COLORS.green, 18, true);
     }
 
-    // Single-page 3-col grid — all 11 items (wider cards for text)
-    const cols = 3;
+    // Single-page 4x3 grid — all 11 items
+    const cols = 4;
     const cardW = Math.floor((M.sw - 30 - (cols-1)*10) / cols);
-    const cardH = 95;
+    const cardH = 108;
     STORE_ITEMS.forEach((item, i) => {
         const col = i % cols, row = Math.floor(i / cols);
         const ix = M.sx + 15 + col * (cardW + 10);
-        const iy = M.sy + 78 + row * 102;
+        const iy = M.sy + 78 + row * 118;
         drawShadowRoundRect(ix, iy, cardW, cardH, 10, '#1A2332', '#2A3A4E', 2);
-        drawText(item.icon, ix+26, iy+26, 24, '#FFF', 'center');
-        drawText(item.title, ix+46, iy+18, 16, '#FFF', 'left');
-        drawText(item.desc, ix+46, iy+38, 12, '#7889A0', 'left', null, 0, 'normal');
+        drawText(item.icon, ix+28, iy+30, 28, '#FFF', 'center');
+        drawText(item.title, ix+50, iy+20, 18, '#FFF', 'left');
+        drawText(item.desc, ix+50, iy+42, 14, '#7889A0', 'left', null, 0, 'normal');
         const isMax = item.consumable && GAME.hearts >= GAME.maxHearts;
         const owned = !item.consumable && GAME.upgrades[item.id];
         const bc = (owned||isMax) ? '#555' : GAME.cash>=item.price ? COLORS.gold : '#555';
         const bt = owned ? 'OWNED' : isMax ? 'FULL' : `$${item.price}`;
-        drawButton(bt, ix+cardW/2-50, iy+66, 100, 24, bc, 13);
+        drawButton(bt, ix+cardW/2-50, iy+78, 100, 26, bc, 14);
     });
 
     ctx.restore();

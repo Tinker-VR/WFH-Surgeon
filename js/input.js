@@ -109,15 +109,15 @@ window.addEventListener('mousedown', (e) => {
                 return;
             }
         }
-        // Single-page grid — all items (3-col)
-        const cols = 3;
+        // Single-page grid — all items (4-col)
+        const cols = 4;
         const cardW = Math.floor((sw - 30 - (cols-1)*10) / cols);
         STORE_ITEMS.forEach((item, i) => {
             const col = i % cols, row = Math.floor(i / cols);
             const ix = sx + 15 + col * (cardW + 10);
-            const iy = sy + 78 + row * 102;
-            const bx2 = ix + cardW/2 - 50, by2 = iy + 66;
-            if (isHover(bx2, by2, 100, 24)) {
+            const iy = sy + 78 + row * 118;
+            const bx2 = ix + cardW/2 - 50, by2 = iy + 78;
+            if (isHover(bx2, by2, 100, 26)) {
                 if (item.consumable) {
                     if (GAME.cash >= item.price && GAME.hearts < GAME.maxHearts) {
                         GAME.cash -= item.price; GAME.hearts++;
