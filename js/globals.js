@@ -56,6 +56,9 @@ const GAME = {
     screwdriverPos: {x: 0, y: 0},
     virusIcons: [],
     virusesClicked: 0,
+    adCloseCorner: 0,
+    lastTimerWarnTime: 0,
+    lastAnesWarnTime: 0,
     deskMousePhaseX: Math.random() * Math.PI * 2,
     deskMousePhaseY: Math.random() * Math.PI * 2,
     deskRotations: {

@@ -189,18 +189,31 @@ function drawDeskItems() {
     const mugW = 75, mugH = 90;
     ctx.save();
     ctx.translate(mx2 + mugW/2, my2 + mugH/2);
-    ctx.rotate(GAME.deskRotations.mug);
+    const mugTilt = GAME.hazard === 'coffee' ? -0.4 : 0;
+    ctx.rotate(GAME.deskRotations.mug + mugTilt);
     ctx.translate(-(mx2 + mugW/2), -(my2 + mugH/2));
     drawShadowRoundRect(mx2, my2, mugW, mugH, 14, '#FAFAFA', '#E0E0E0', 3);
     ctx.strokeStyle = '#FAFAFA'; ctx.lineWidth = 8;
     ctx.beginPath(); ctx.arc(mx2+mugW, my2+mugH*0.4, 20, -Math.PI*0.45, Math.PI*0.45); ctx.stroke();
-    ctx.fillStyle = '#3E2723';
-    ctx.beginPath(); ctx.ellipse(mx2+mugW/2, my2+10, mugW*0.38, 12, 0, 0, Math.PI*2); ctx.fill();
-    // Steam
-    ctx.strokeStyle = 'rgba(220,220,220,0.5)'; ctx.lineWidth = 3;
-    let so = Math.sin(performance.now()/500)*8;
-    ctx.beginPath(); ctx.moveTo(mx2+20, my2-6); ctx.quadraticCurveTo(mx2+26+so, my2-32, mx2+20, my2-55); ctx.stroke();
-    ctx.beginPath(); ctx.moveTo(mx2+50, my2-4); ctx.quadraticCurveTo(mx2+56-so, my2-30, mx2+50, my2-52); ctx.stroke();
+    if (GAME.hazard !== 'coffee') {
+        ctx.fillStyle = '#3E2723';
+        ctx.beginPath(); ctx.ellipse(mx2+mugW/2, my2+10, mugW*0.38, 12, 0, 0, Math.PI*2); ctx.fill();
+    }
+    // Mug lid (when upgrade active)
+    if (GAME.upgrades.mugLid) {
+        drawRoundRect(mx2+4, my2-2, mugW-8, 10, 5, '#FFD54F', '#FFA000', 2);
+    } else if (GAME.hazard !== 'coffee') {
+        // Steam (no lid, no spill)
+        ctx.strokeStyle = 'rgba(220,220,220,0.5)'; ctx.lineWidth = 3;
+        let so = Math.sin(performance.now()/500)*8;
+        ctx.beginPath(); ctx.moveTo(mx2+20, my2-6); ctx.quadraticCurveTo(mx2+26+so, my2-32, mx2+20, my2-55); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(mx2+50, my2-4); ctx.quadraticCurveTo(mx2+56-so, my2-30, mx2+50, my2-52); ctx.stroke();
+    }
+    // Coffee puddle on desk during coffee hazard
+    if (GAME.hazard === 'coffee') {
+        ctx.fillStyle = 'rgba(62,39,35,0.4)';
+        ctx.beginPath(); ctx.ellipse(mx2+mugW+10, my2+mugH-5, 30, 12, 0.3, 0, Math.PI*2); ctx.fill();
+    }
     ctx.restore();
 
     // === KEYBOARD (centered, with shake + rotation) — shake ×3 ===
@@ -221,10 +234,15 @@ function drawDeskItems() {
     ctx.translate(-kbCenterX, -(ky + kbH/2));
 
     const kbBroken = GAME.hazard === 'kbbreak';
-    const kbBaseColor = kbBroken ? '#3A1A1A' : '#2A2A2A';
-    const kbBorderColor = kbBroken ? '#661111' : '#1A1A1A';
+    const kbGamer = GAME.upgrades.gamerKB && !kbBroken;
+    const kbBaseColor = kbBroken ? '#3A1A1A' : kbGamer ? '#0A0A0A' : '#2A2A2A';
+    const kbBorderColor = kbBroken ? '#661111' : kbGamer ? '#00E676' : '#1A1A1A';
+    if (kbGamer) {
+        ctx.shadowColor = '#00E676'; ctx.shadowBlur = 12;
+    }
     drawShadowRoundRect(kx, ky, kbW, kbH, 10, kbBaseColor, kbBorderColor, 3);
-    drawRoundRect(kx+3, ky+3, kbW-6, kbH-6, 8, kbBroken ? '#332222' : '#333', null);
+    ctx.shadowColor = 'transparent'; ctx.shadowBlur = 0;
+    drawRoundRect(kx+3, ky+3, kbW-6, kbH-6, 8, kbBroken ? '#332222' : kbGamer ? '#111' : '#333', null);
     const keyPad = 10, keyGap = 3;
     const keysPerRow = [14, 13, 12, 10];
     const rowH = 18, rowGap = 4;
@@ -236,12 +254,12 @@ function drawDeskItems() {
         const keyW = (availW - (keysPerRow[row]-1)*keyGap) / keysPerRow[row];
         for (let k = 0; k < keysPerRow[row]; k++) {
             const keyX = kx + keyPad + indent + k * (keyW + keyGap);
-            const keyColor = kbBroken ? '#553333' : '#444';
-            drawRoundRect(keyX, rowY, keyW, rowH, 3, keyColor, '#333', 1);
+            const keyColor = kbBroken ? '#553333' : kbGamer ? '#1A3A1A' : '#444';
+            drawRoundRect(keyX, rowY, keyW, rowH, 3, keyColor, kbGamer ? '#00E676' : '#333', 1);
         }
     }
     const spaceY = ky + keyPad + 4*(rowH+rowGap);
-    drawRoundRect(kx + keyPad + 80, spaceY, 200, rowH, 5, kbBroken ? '#553333' : '#444', '#333', 1);
+    drawRoundRect(kx + keyPad + 80, spaceY, 200, rowH, 5, kbBroken ? '#553333' : kbGamer ? '#1A3A1A' : '#444', kbGamer ? '#00E676' : '#333', 1);
 
     // Arrow keys cluster
     const arrowArea = kx + kbW - 72;
@@ -272,13 +290,14 @@ function drawDeskItems() {
     let msy = ky + kbH/2 - 42;
     if (GAME.state === 'PLAYING') {
         const mt = performance.now() / 1000;
-        msx += Math.sin(mt * 0.4 + GAME.deskMousePhaseX) * 8 + Math.sin(mt * 0.9) * 3;
-        msy += Math.cos(mt * 0.35 + GAME.deskMousePhaseY) * 6 + Math.cos(mt * 0.7) * 2;
+        msx += Math.sin(mt * 0.4 + GAME.deskMousePhaseX) * 18 + Math.sin(mt * 0.9) * 8;
+        msy += Math.cos(mt * 0.35 + GAME.deskMousePhaseY) * 14 + Math.cos(mt * 0.7) * 6;
     }
     const msW = 55, msH = 80;
     ctx.save();
+    const mouseDriftRot = GAME.state === 'PLAYING' ? Math.sin(performance.now()/2000) * 0.08 : 0;
     ctx.translate(msx + msW/2 + kbShkX*0.5, msy + msH/2 + kbShkY*0.5);
-    ctx.rotate(GAME.deskRotations.mouse);
+    ctx.rotate(GAME.deskRotations.mouse + mouseDriftRot);
     ctx.translate(-(msx + msW/2), -(msy + msH/2));
 
     ctx.beginPath();
@@ -353,4 +372,51 @@ function drawDeskItems() {
         }
     }
     ctx.restore();
+
+    // === CAT TAIL (right edge, below desk, wiggles) ===
+    if (!GAME.upgrades.treats) {
+        const tailT = performance.now() / 1000;
+        const tailX = CW - 15;
+        const tailBaseY = dy + 50;
+        ctx.strokeStyle = '#FFA000'; ctx.lineWidth = 8; ctx.lineCap = 'round';
+        ctx.beginPath();
+        ctx.moveTo(tailX, tailBaseY);
+        for (let i = 1; i <= 10; i++) {
+            const ty = tailBaseY + i * 10;
+            const tx = tailX + Math.sin(tailT * 3 + i * 0.5) * (6 + i * 1.2);
+            ctx.lineTo(tx, ty);
+        }
+        ctx.stroke();
+        // Orange stripe highlights
+        ctx.strokeStyle = '#E65100'; ctx.lineWidth = 3;
+        ctx.beginPath();
+        ctx.moveTo(tailX, tailBaseY + 20);
+        for (let i = 2; i <= 8; i++) {
+            const ty = tailBaseY + i * 10;
+            const tx = tailX + Math.sin(tailT * 3 + i * 0.5) * (6 + i * 1.2);
+            ctx.lineTo(tx, ty);
+        }
+        ctx.stroke();
+    }
+
+    // === ETHERNET CABLE (router to monitor) ===
+    if (GAME.upgrades.ethernet) {
+        ctx.strokeStyle = '#1565C0'; ctx.lineWidth = 6; ctx.lineCap = 'round';
+        ctx.beginPath();
+        ctx.moveTo(210, dy + 37);
+        ctx.quadraticCurveTo(300, dy - 10, MONITOR.x + MONITOR.w/2, MONITOR.y + MONITOR.h);
+        ctx.stroke();
+        ctx.strokeStyle = '#0D47A1'; ctx.lineWidth = 3;
+        ctx.beginPath();
+        ctx.moveTo(210, dy + 37);
+        ctx.quadraticCurveTo(300, dy - 10, MONITOR.x + MONITOR.w/2, MONITOR.y + MONITOR.h);
+        ctx.stroke();
+    }
+
+    // === ENERGY CAN (next to mug when energy_time active) ===
+    if (GAME.upgrades.energy_time) {
+        const ecx = 310, ecy = dy + 85;
+        drawShadowRoundRect(ecx, ecy, 28, 50, 6, '#00C853', '#1B5E20', 2);
+        drawText('\u26A1', ecx + 14, ecy + 25, 20, '#FFD54F', 'center');
+    }
 }

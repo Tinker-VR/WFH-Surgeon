@@ -9,7 +9,7 @@ function processArrow(code) {
         GAME.arrowPopTimer = 100;
         GAME.armReach = Math.min(300, GAME.armReach + 80);
         AudioEngine.playCorrectKey();
-        if (GAME.upgrades.keyboard) GAME.anesthesia = Math.min(GAME.anesthesiaMax, GAME.anesthesia + 200);
+        // energy_anes healing removed — drain reduction handled in main loop
         if (GAME.currentIndex >= GAME.sequence.length) { GAME.armReach = 300; chunkComplete(); }
     } else {
         if (!DEBUG_GOD_MODE) GAME.hearts--;
@@ -32,14 +32,15 @@ function startOperation() {
     GAME.kbScrews=[false,false,false,false]; GAME.hasScrewdriver=false;
     GAME.virusIcons=[]; GAME.virusesClicked=0; GAME.routerShakeTimer=0;
     GAME.catFlashTimer=0; GAME.catStars=[]; GAME.mouseIdleTimer=0;
+    GAME.lastTimerWarnTime=0; GAME.lastAnesWarnTime=0;
     resetHospitalAnimations();
     GAME.maxHearts = GAME.upgrades.lawyer ? 4 : 3;
     if (GAME.hearts > GAME.maxHearts) GAME.hearts = GAME.maxHearts;
     GAME.anesthesiaMax = (50 - GAME.rank*1.1)*1000;
-    if (GAME.upgrades.energy) GAME.anesthesiaMax *= 1.2;
+    // energy_anes: drain rate reduction handled in main loop (no max boost)
     GAME.anesthesia = GAME.anesthesiaMax;
     GAME.phaseTimerMax = 9500 - GAME.rank*250;
-    if (GAME.upgrades.keyboard) GAME.phaseTimerMax *= 1.2;
+    if (GAME.upgrades.energy_time) GAME.phaseTimerMax *= 1.4;
     GAME.phasesNeeded = 3 + Math.floor(GAME.rank*0.5);
     GAME.phasesCompleted = 0; GAME.perfectStreak = 0;
     GAME.flavorText = `${PROCEDURES[Math.floor(Math.random()*PROCEDURES.length)]} | ${PATIENTS[Math.floor(Math.random()*PATIENTS.length)]}`;
@@ -49,6 +50,7 @@ function startOperation() {
     GAME.routerFlashTimer = 0;
     generateSequence(5 + Math.floor(GAME.rank * 0.45));
     GAME.state = 'PLAYING';
+    AudioEngine.setBGMMode('gameplay');
 }
 
 function generateSequence(len) {
@@ -79,7 +81,7 @@ function spawnHazard() {
         if (!GAME.upgrades.ethernet) pool.push('lag');
         if (!GAME.upgrades.mugLid) pool.push('coffee');
         if (!GAME.upgrades.treats) pool.push('cat');
-        if (!GAME.upgrades.wrench) pool.push('kbbreak');
+        if (!GAME.upgrades.gamerKB) pool.push('kbbreak');
         if (!GAME.upgrades.antivirus) pool.push('malware');
         if (!pool.length) return;
         GAME.hazard = pool[Math.floor(Math.random()*pool.length)];
@@ -93,11 +95,13 @@ function spawnHazard() {
         GAME.adPos.x = M.sx + 20;
         GAME.adPos.y = M.sy + 15;
         GAME.adIndex = Math.floor(Math.random() * CHEEKY_ADS.length);
+        GAME.adCloseCorner = Math.floor(Math.random() * 4);
     }
     if (GAME.hazard === 'battery') {
         GAME.dimLevel=0; GAME.batteryDrag=false;
-        GAME.plugPos = {x: CW/2 - 100, y: DESK_Y + 90};
-        GAME.socketPos = {x: CW/2 + 200, y: DESK_Y + 90};
+        const M = MONITOR;
+        GAME.plugPos = {x: M.sx + 50, y: M.sy + M.sh/2};
+        GAME.socketPos = {x: M.sx + M.sw - 50, y: M.sy + M.sh/2};
         AudioEngine.playBatteryWarning();
     }
     if (GAME.hazard === 'lag') { AudioEngine.playWifiStatic(); GAME.routerShakeTimer = 999999; }
@@ -116,6 +120,8 @@ function spawnHazard() {
             GAME.virusIcons.push({
                 x: M.sx + 60 + Math.random() * (M.sw - 120),
                 y: M.sy + 60 + Math.random() * (M.sh - 120),
+                vx: (Math.random()-0.5)*300,
+                vy: (Math.random()-0.5)*300,
                 alive: true
             });
         }
@@ -149,4 +155,5 @@ function triggerResolution(result) {
         if (GAME.rank > GAME.highestRank) { GAME.highestRank = GAME.rank; addNotification('Promoted to ' + getRankName(GAME.rank) + '!', '⭐', 3000); }
     } else { GAME.payout = 0; AudioEngine.playLevelFail(); }
     GAME.upgrades = { ...DEFAULT_UPGRADES };
+    AudioEngine.setBGMMode('gameover');
 }

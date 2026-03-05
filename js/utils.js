@@ -52,6 +52,6 @@ function drawButton(text, x, y, w, h, color, fontSize = 20, pulse = false) {
 }
 
 function getRankName(ri) {
-    const t = ['Intern','Resident','Attending','Chief','Surgeon General'];
-    return `${t[Math.floor(ri/3)] || 'God of Surgery'} ${['I','II','III'][ri%3] || 'III'}`;
+    const t = ['Unpaid Intern','Sleep-Deprived Resident','Malpractice Magnet','Chief of Chaos','God Complex'];
+    return `${t[Math.floor(ri/3)] || 'Literally God'} ${['I','II','III'][ri%3] || 'III'}`;
 }

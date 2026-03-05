@@ -8,16 +8,15 @@ function drawScreenMenu() {
     ctx.beginPath(); ctx.roundRectPolyfill(M.sx, M.uiY, M.sw, M.uiH, 4); ctx.clip();
     drawRect(M.sx, M.uiY, M.sw, M.uiH, 'rgba(8,18,35,0.95)');
     const cy = M.uiY + M.uiH/2;
-    drawText('WFH SURGEON', M.sx+M.sw/2, cy - 20, 42, '#FFF', 'center', 'rgba(0,0,0,0.5)', 4);
-    drawText('Work-From-Home Surgery Simulator', M.sx+M.sw/2, cy + 6, 15, '#6B7A8E', 'center', null, 0, 'normal');
+    drawText('WFH SURGEON', M.sx+M.sw/2, cy - 12, 42, '#FFF', 'center', 'rgba(0,0,0,0.5)', 4);
     const btnW = 200, btnH = 44, gap = 25;
     const total = btnW*3+gap*2;
     const bx0 = M.sx + (M.sw - total)/2;
-    const by = cy + 22;
+    const by = cy + 18;
     drawButton('START', bx0, by, btnW, btnH, COLORS.green, 22, true);
-    drawButton('SCAMAZON', bx0+btnW+gap, by, btnW, btnH, COLORS.scamOrange, 20);
+    drawButton('SHOP', bx0+btnW+gap, by, btnW, btnH, COLORS.gold, 20);
     drawButton('HELP', bx0+(btnW+gap)*2, by, btnW, btnH, '#1976D2', 22);
-    drawText('Vibe coded by Michael at Tinker Studio', M.sx+M.sw/2, M.uiY+M.uiH-8, 11, '#445', 'center', null, 0, 'normal');
+    drawText('Vibe coded by Michael at Tinker Studio', M.sx+M.sw/2, M.uiY+M.uiH-4, 9, '#445', 'center', null, 0, 'normal');
     ctx.restore();
 }
 
@@ -27,13 +26,13 @@ function drawScreenPlaying() {
     ctx.beginPath(); ctx.roundRectPolyfill(M.sx, M.uiY, M.sw, M.uiH, 4); ctx.clip();
     drawRect(M.sx, M.uiY, M.sw, M.uiH, 'rgba(8,18,35,0.95)');
 
-    // Info text — compact for smaller UI area
-    drawText(GAME.flavorText, M.sx+M.sw/2, M.uiY+12, 13, '#7889A0', 'center', null, 0, 'normal');
-    drawText(`${getRankName(GAME.rank)}  ·  Phase ${GAME.phasesCompleted}/${GAME.phasesNeeded}`, M.sx+M.sw/2, M.uiY+28, 17, '#FFF', 'center');
+    // Info text — bigger
+    drawText(GAME.flavorText, M.sx+M.sw/2, M.uiY+14, 16, '#7889A0', 'center', null, 0, 'normal');
+    drawText(`${getRankName(GAME.rank)}  ·  Phase ${GAME.phasesCompleted}/${GAME.phasesNeeded}`, M.sx+M.sw/2, M.uiY+32, 19, '#FFF', 'center');
 
     // Arrow keys — sized to fill the panel
-    const arrowY = M.uiY + 38;
-    const maxSqH = M.uiH - 38 - 24;
+    const arrowY = M.uiY + 42;
+    const maxSqH = M.uiH - 42 - 24;
     const sqW = Math.min(65, maxSqH);
     const sqGap = 8;
     const availW = M.sw - 50;
@@ -55,11 +54,18 @@ function drawScreenPlaying() {
         kx2 += finalSqW + sqGap;
     }
 
-    // Timer bar
+    // Timer bar — color changes green -> gold -> red
     const barY = M.uiY + M.uiH - 18;
     const pPct = Math.max(0, GAME.phaseTimer/GAME.phaseTimerMax);
+    let barColor = pPct > 0.5 ? COLORS.green : pPct > 0.2 ? COLORS.gold : COLORS.red;
     drawRoundRect(M.sx+40, barY, M.sw-80, 14, 7, '#1A1A1A', '#333', 2);
-    if ((M.sw-88)*pPct > 4) drawRoundRect(M.sx+44, barY+2, (M.sw-88)*pPct, 10, 5, COLORS.red, null);
+    if ((M.sw-88)*pPct > 4) {
+        if (pPct <= 0.2) {
+            ctx.shadowColor = COLORS.red; ctx.shadowBlur = 8 + Math.sin(performance.now()/150)*4;
+        }
+        drawRoundRect(M.sx+44, barY+2, (M.sw-88)*pPct, 10, 5, barColor, null);
+        ctx.shadowColor = 'transparent'; ctx.shadowBlur = 0;
+    }
 
     if (GAME.greenFlashTimer > 0) {
         ctx.fillStyle = `rgba(0,230,118,${Math.min(0.35, GAME.greenFlashTimer/150)})`;
@@ -72,21 +78,24 @@ function drawScreenStore() {
     const M = MONITOR;
     ctx.save();
     ctx.beginPath(); ctx.roundRectPolyfill(M.sx, M.sy, M.sw, M.sh, 4); ctx.clip();
-    drawRect(M.sx, M.sy, M.sw, M.sh, COLORS.scamDark);
+    drawRect(M.sx, M.sy, M.sw, M.sh, '#0D1117');
 
-    // Header
-    drawRect(M.sx, M.sy, M.sw, 58, COLORS.scamBlue);
-    drawText('scamazon', M.sx+M.sw/2, M.sy+23, 32, COLORS.scamOrange, 'center', null, 0, 'normal');
-    ctx.strokeStyle = COLORS.scamOrange; ctx.lineWidth = 2;
-    const smX = M.sx+M.sw/2-48;
-    ctx.beginPath(); ctx.moveTo(smX, M.sy+37); ctx.quadraticCurveTo(smX+48, M.sy+48, smX+96, M.sy+35); ctx.stroke();
-    ctx.beginPath(); ctx.moveTo(smX+89, M.sy+28); ctx.lineTo(smX+96, M.sy+35); ctx.lineTo(smX+87, M.sy+38); ctx.stroke();
-    drawText('Purchase plugins from Scamazon.', M.sx+M.sw/2, M.sy+49, 15, '#CCC', 'center', null, 0, 'normal');
-    drawText('All plugins last ONE ROUND only!', M.sx+M.sw/2, M.sy+64, 13, '#FF9800', 'center', null, 0, 'normal');
+    // Header — clean shop branding
+    drawRect(M.sx, M.sy, M.sw, 58, '#161B22');
+    drawText('PURCHASE PLUGINS', M.sx+M.sw/2, M.sy+25, 30, '#FFF', 'center');
+    drawText('All plugins last ONE ROUND only!', M.sx+M.sw/2, M.sy+48, 15, '#FF9800', 'center', null, 0, 'normal');
 
-    drawButton('← BACK', M.sx+20, M.sy+14, 110, 38, '#444', 16);
+    drawButton('\u2190 BACK', M.sx+20, M.sy+14, 110, 38, '#444', 16);
 
-    // Single-page 4×3 grid — all 11 items
+    // NEXT OPERATION button — top-right (only from resolution)
+    if (GAME.storeReturnState === 'RESOLUTION') {
+        const nextBtnW = 220, nextBtnH = 38;
+        const nextBtnX = M.sx + M.sw - 20 - nextBtnW;
+        const nextBtnY = M.sy + 14;
+        drawButton('NEXT OP \u25B6', nextBtnX, nextBtnY, nextBtnW, nextBtnH, COLORS.green, 18, true);
+    }
+
+    // Single-page 4x3 grid — all 11 items
     const cols = 4;
     const cardW = Math.floor((M.sw - 30 - (cols-1)*10) / cols);
     const cardH = 108;
@@ -100,18 +109,10 @@ function drawScreenStore() {
         drawText(item.desc, ix+50, iy+42, 14, '#7889A0', 'left', null, 0, 'normal');
         const isMax = item.consumable && GAME.hearts >= GAME.maxHearts;
         const owned = !item.consumable && GAME.upgrades[item.id];
-        const bc = (owned||isMax) ? '#555' : GAME.cash>=item.price ? COLORS.scamOrange : '#555';
+        const bc = (owned||isMax) ? '#555' : GAME.cash>=item.price ? COLORS.gold : '#555';
         const bt = owned ? 'OWNED' : isMax ? 'FULL' : `$${item.price}`;
         drawButton(bt, ix+cardW/2-50, iy+78, 100, 26, bc, 14);
     });
-
-    // NEXT OPERATION button — only when navigating from resolution screen
-    if (GAME.storeReturnState === 'RESOLUTION') {
-        const nextBtnW = 280, nextBtnH = 44;
-        const nextBtnX = M.sx + M.sw/2 - nextBtnW/2;
-        const nextBtnY = M.sy + M.sh - 55;
-        drawButton('NEXT OPERATION \u25B6', nextBtnX, nextBtnY, nextBtnW, nextBtnH, COLORS.green, 20, true);
-    }
 
     ctx.restore();
 }
@@ -133,7 +134,7 @@ function drawScreenResolution() {
         ctx.restore(); return;
     }
 
-    const titleIcon = isWin ? '✅' : '❌';
+    const titleIcon = isWin ? '\u2705' : '\u274C';
     let title = isWin ? 'OPERATION SUCCESS' : GAME.lastResult==='AWAKE' ? 'PATIENT WOKE UP' : 'MALPRACTICE LAWSUIT';
     drawText(titleIcon, M.sx+M.sw/2, M.sy+55, 56, '#FFF', 'center');
     drawText(title, M.sx+M.sw/2, M.sy+105, 42, '#FFF', 'center', 'rgba(0,0,0,0.5)', 3);
@@ -142,6 +143,7 @@ function drawScreenResolution() {
         drawText(`BASE: +$${200+GAME.rank*100}   HEARTS: +$${GAME.hearts*(50+GAME.rank*10)}   SPEED: +$${Math.floor((GAME.anesthesia/1000)*10)}`, M.sx+M.sw/2, M.sy+155, 18, '#AAA', 'center', null, 0, 'normal');
         drawText(`TOTAL PAYOUT: $${GAME.payout}`, M.sx+M.sw/2, M.sy+200, 44, COLORS.green, 'center', 'rgba(0,0,0,0.5)', 3);
         drawText(`Rank: ${getRankName(GAME.rank)}`, M.sx+M.sw/2, M.sy+245, 22, '#6B7A8E', 'center', null, 0, 'normal');
+        drawText('Visit the shop or quit.', M.sx+M.sw/2, M.sy+275, 15, '#888', 'center', null, 0, 'normal');
     } else {
         const retryCost = (GAME.rank+1)*300;
         const canAfford = GAME.cash >= retryCost;
@@ -149,7 +151,7 @@ function drawScreenResolution() {
         drawText('PAYOUT: $0', M.sx+M.sw/2, M.sy+195, 32, '#555', 'center');
         if (!canAfford) {
             drawText('Not enough cash to retry!', M.sx+M.sw/2, M.sy+235, 18, COLORS.red, 'center', null, 0, 'normal');
-            drawText('Visit Scamazon or quit.', M.sx+M.sw/2, M.sy+255, 15, '#888', 'center', null, 0, 'normal');
+            drawText('Visit the shop or quit.', M.sx+M.sw/2, M.sy+255, 15, '#888', 'center', null, 0, 'normal');
         }
     }
 
@@ -157,7 +159,7 @@ function drawScreenResolution() {
     const total2=btnW*2+gap;
     const bx0 = M.sx+(M.sw-total2)/2, by = M.sy+M.sh-80;
     if (isWin) {
-        drawButton('OPEN SHOP', bx0, by, btnW, btnH, COLORS.scamOrange, 22, true);
+        drawButton('OPEN SHOP', bx0, by, btnW, btnH, COLORS.gold, 22, true);
         drawButton('QUIT', bx0+btnW+gap, by, btnW, btnH, COLORS.red, 22);
     } else {
         const retryCost = (GAME.rank+1)*300;
@@ -175,7 +177,7 @@ function drawHelpModal() {
     const mx = CW/2-360, my = CH/2-280, mw = 720, mh = 560;
     drawShadowRoundRect(mx, my, mw, mh, 18, '#1A1A2E', '#444', 2);
     drawText('HOW TO PLAY', CW/2, my+42, 38, '#FFF', 'center');
-    drawButton('✕', mx+mw-55, my+12, 42, 38, '#444', 22);
+    drawButton('\u2715', mx+mw-55, my+12, 42, 38, '#444', 22);
 
     for (let i = 0; i < 4; i++) {
         ctx.fillStyle = i === GAME.helpPage ? COLORS.green : '#444';
@@ -185,7 +187,7 @@ function drawHelpModal() {
     const cx = CW/2, cy = my + 220;
     if (GAME.helpPage === 0) {
         drawText('MATCH THE ARROWS', cx, cy-100, 34, COLORS.gold, 'center');
-        const keys = ['⇧','⇩','⇦','⇨'], colors = [COLORS.green, COLORS.gold, '#2A3A4E', '#2A3A4E'];
+        const keys = ['\u21E7','\u21E9','\u21E6','\u21E8'], colors = [COLORS.green, COLORS.gold, '#2A3A4E', '#2A3A4E'];
         for (let i = 0; i < 4; i++) {
             drawRoundRect(cx-155+i*82, cy-55, 70, 70, 14, colors[i], null);
             drawText(keys[i], cx-155+i*82+35, cy-20, 40, i<2?'#000':'#AAA', 'center');
@@ -194,19 +196,19 @@ function drawHelpModal() {
         drawText('the timer runs out.', cx, cy+78, 22, '#FFF', 'center');
     } else if (GAME.helpPage === 1) {
         drawText('PROTECT YOUR HEARTS', cx, cy-100, 34, COLORS.red, 'center');
-        for (let i = 0; i < 3; i++) drawText('❤', cx-70+i*70, cy-20, 56, i<2?COLORS.red:'#444', 'center');
+        for (let i = 0; i < 3; i++) drawText('\u2764', cx-70+i*70, cy-20, 56, i<2?COLORS.red:'#444', 'center');
         drawText('Wrong keys & timeouts cost hearts.', cx, cy+55, 22, '#CCC', 'center', null, 0, 'normal');
         drawText('Lose all hearts = game over!', cx, cy+88, 22, COLORS.red, 'center');
         drawText('3 perfect sequences in a row = bonus heart!', cx, cy+125, 18, COLORS.green, 'center', null, 0, 'normal');
     } else if (GAME.helpPage === 2) {
         drawText('WFH HAZARDS', cx, cy-100, 34, '#FFA000', 'center');
-        const hz1 = [{i:'🐱',a:'Click 3x'},{i:'☕',a:'Wipe it'},{i:'📶',a:'Click router'},{i:'🔋',a:'Plug in'}];
+        const hz1 = [{i:'\uD83D\uDC31',a:'Click 3x'},{i:'\u2615',a:'Wipe it'},{i:'\uD83D\uDCF6',a:'Click router'},{i:'\uD83D\uDD0B',a:'Plug in'}];
         for (let i = 0; i < 4; i++) {
             drawRoundRect(cx-165+i*88, cy-55, 72, 72, 12, '#2A3A4E', null);
             drawText(hz1[i].i, cx-165+i*88+36, cy-22, 28, '#FFF', 'center');
             drawText(hz1[i].a, cx-165+i*88+36, cy+10, 11, '#AAA', 'center', null, 0, 'normal');
         }
-        const hz2 = [{i:'💼',a:'Close popup'},{i:'🔧',a:'Fix screws'},{i:'🦠',a:'Zap viruses'}];
+        const hz2 = [{i:'\uD83D\uDCBC',a:'Close popup'},{i:'\uD83D\uDD27',a:'Fix screws'},{i:'\uD83E\uDDA0',a:'Zap viruses'}];
         for (let i = 0; i < 3; i++) {
             drawRoundRect(cx-120+i*88, cy+30, 72, 72, 12, '#2A3A4E', null);
             drawText(hz2[i].i, cx-120+i*88+36, cy+63, 28, '#FFF', 'center');
@@ -214,14 +216,14 @@ function drawHelpModal() {
         }
         drawText('Deal with interruptions to get back to surgery!', cx, cy+130, 19, '#CCC', 'center', null, 0, 'normal');
     } else {
-        drawText('EARN & UPGRADE', cx, cy-100, 34, COLORS.scamOrange, 'center');
-        drawText('💰', cx, cy-30, 66, '#FFF', 'center');
+        drawText('EARN & UPGRADE', cx, cy-100, 34, COLORS.gold, 'center');
+        drawText('\uD83D\uDCB0', cx, cy-30, 66, '#FFF', 'center');
         drawText('Complete operations to earn cash.', cx, cy+45, 22, '#CCC', 'center', null, 0, 'normal');
-        drawText('Spend it on Scamazon for upgrades!', cx, cy+78, 22, COLORS.scamOrange, 'center');
+        drawText('Spend it at the shop for plugins!', cx, cy+78, 22, COLORS.gold, 'center');
         drawText('Upgrades reset each shift.', cx, cy+115, 17, '#777', 'center', null, 0, 'normal');
     }
 
-    if (GAME.helpPage > 0) drawButton('← PREV', mx+25, my+mh-65, 110, 44, '#444', 18);
-    if (GAME.helpPage < 3) drawButton('NEXT →', mx+mw-135, my+mh-65, 110, 44, '#444', 18);
+    if (GAME.helpPage > 0) drawButton('\u2190 PREV', mx+25, my+mh-65, 110, 44, '#444', 18);
+    if (GAME.helpPage < 3) drawButton('NEXT \u2192', mx+mw-135, my+mh-65, 110, 44, '#444', 18);
     drawButton(GAME.pendingStart ? 'START OPERATION' : 'CLOSE', CW/2-130, my+mh-70, 260, 50, GAME.pendingStart ? COLORS.green : '#555', 22, GAME.pendingStart);
 }

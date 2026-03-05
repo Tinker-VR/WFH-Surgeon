@@ -32,7 +32,7 @@ window.addEventListener('mouseup', (e) => {
 
 window.addEventListener('mousedown', (e) => {
     updateMousePos(e);
-    if (!AudioEngine.ctx) { AudioEngine.init(); AudioEngine.startBGM(); }
+    if (!AudioEngine.ctx) { AudioEngine.init(); AudioEngine.setBGMMode('menu'); AudioEngine.startBGM(); }
 
     // Pause button — only during PLAYING state (check BEFORE paused block)
     const pb = GAME.pauseBtn;
@@ -62,11 +62,11 @@ window.addEventListener('mousedown', (e) => {
     const sx = M.sx, sy = M.sy, sw = M.sw, sh = M.sh;
 
     if (GAME.state === 'MENU') {
-        const btnW = 220, btnH = 58, btnGap = 30;
+        const btnW = 200, btnH = 44, btnGap = 25;
         const total = btnW * 3 + btnGap * 2;
         const bx0 = sx + (sw - total) / 2;
         const cy = M.uiY + M.uiH/2;
-        const by = cy + 20;
+        const by = cy + 18;
         if (isHover(bx0, by, btnW, btnH)) {
             AudioEngine.playClick(); GAME.rank = STARTING_RANK; GAME.hearts = 3;
             GAME.pendingStart = true; GAME.state = 'HELP'; GAME.helpPage = 0;
@@ -98,11 +98,11 @@ window.addEventListener('mousedown', (e) => {
             AudioEngine.playClick();
             GAME.state = GAME.storeReturnState || 'MENU';
         }
-        // NEXT OPERATION button (only when coming from resolution)
+        // NEXT OPERATION button — top-right (only when coming from resolution)
         if (GAME.storeReturnState === 'RESOLUTION') {
-            const nextBtnW = 280, nextBtnH = 44;
-            const nextBtnX = sx + sw/2 - nextBtnW/2;
-            const nextBtnY = sy + sh - 55;
+            const nextBtnW = 220, nextBtnH = 38;
+            const nextBtnX = sx + sw - 20 - nextBtnW;
+            const nextBtnY = sy + 14;
             if (isHover(nextBtnX, nextBtnY, nextBtnW, nextBtnH)) {
                 AudioEngine.playClick();
                 startOperation();
@@ -144,7 +144,7 @@ window.addEventListener('mousedown', (e) => {
                 GAME.cash = STARTING_CASH; GAME.highestRank = STARTING_RANK; GAME.rank = STARTING_RANK;
                 GAME.hearts = 3; GAME.maxHearts = 3;
                 GAME.upgrades = { ...DEFAULT_UPGRADES };
-                GAME.showQuitConfirm = false; GAME.state = 'MENU'; resetHospitalAnimations();
+                GAME.showQuitConfirm = false; GAME.state = 'MENU'; resetHospitalAnimations(); AudioEngine.setBGMMode('menu');
             }
             if (isHover(qx + 220, qy + 103, 170, 52)) { AudioEngine.playClick(); GAME.showQuitConfirm = false; }
             return;
@@ -197,8 +197,15 @@ window.addEventListener('mousedown', (e) => {
             }
         }
         else if (GAME.hazard === 'ad') {
-            // Real close button (bigger hitbox)
-            if (isHover(GAME.adPos.x + GAME.adPos.w - 48, GAME.adPos.y + 8, 40, 40)) clearHazard();
+            // Single X button — randomized corner
+            const {x,y,w,h} = GAME.adPos;
+            const corner = GAME.adCloseCorner;
+            let closeX, closeY;
+            if (corner === 0)      { closeX = x + 8;       closeY = y + 8; }
+            else if (corner === 1) { closeX = x + w - 58;  closeY = y + 8; }
+            else if (corner === 2) { closeX = x + 8;       closeY = y + h - 58; }
+            else                   { closeX = x + w - 58;  closeY = y + h - 58; }
+            if (isHover(closeX, closeY, 50, 50)) clearHazard();
         }
         else if (GAME.hazard === 'battery') {
             if (Math.hypot(GAME.mouseX - GAME.plugPos.x, GAME.mouseY - GAME.plugPos.y) < 90) GAME.batteryDrag = true;
@@ -210,25 +217,17 @@ window.addEventListener('mousedown', (e) => {
             }
         }
         else if (GAME.hazard === 'kbbreak') {
+            // Only handle screwdriver pickup click — fixing screws is hover-based (in main.js)
             if (!GAME.hasScrewdriver) {
                 if (Math.hypot(GAME.mouseX - GAME.screwdriverPos.x, GAME.mouseY - GAME.screwdriverPos.y) < 55) {
                     GAME.hasScrewdriver = true;
                     AudioEngine.playClick();
                 }
-            } else {
-                const screws = getKBScrewPositions();
-                screws.forEach((sp, idx) => {
-                    if (!GAME.kbScrews[idx] && Math.hypot(GAME.mouseX - sp.x, GAME.mouseY - sp.y) < 28) {
-                        GAME.kbScrews[idx] = true;
-                        AudioEngine.playScrewdriver();
-                        if (GAME.kbScrews.every(s => s)) clearHazard();
-                    }
-                });
             }
         }
         else if (GAME.hazard === 'malware') {
             GAME.virusIcons.forEach(v => {
-                if (v.alive && Math.hypot(GAME.mouseX - v.x, GAME.mouseY - v.y) < 45) {
+                if (v.alive && Math.hypot(GAME.mouseX - v.x, GAME.mouseY - v.y) < 135) {
                     v.alive = false;
                     GAME.virusesClicked++;
                     AudioEngine.playVirusZap();

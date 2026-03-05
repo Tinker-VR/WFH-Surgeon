@@ -26,7 +26,7 @@ function drawMonitorFrame() {
     drawRoundRect(M.x+M.w/2 - M.baseW/2, M.y+M.h+M.standH, M.baseW, M.baseH, 3, '#333', '#222', 2);
     ctx.fillStyle = GAME.state === 'PLAYING' ? '#00E676' : '#4CAF50';
     ctx.beginPath(); ctx.arc(M.x+M.w/2, M.y+M.h-8, 4, 0, Math.PI*2); ctx.fill();
-    drawText('LG (Legally Gray)', M.x+M.w/2, M.y+M.h-8, 10, '#444', 'center', null, 0, 'normal');
+    drawText('LG (Laundering Gray)', M.x+M.w/2, M.y+M.h-8, 10, '#444', 'center', null, 0, 'normal');
 }
 
 function drawMonitorEffects() {
@@ -319,6 +319,28 @@ function drawORScene() {
     ctx.strokeStyle = '#BCAAA4'; ctx.lineWidth = 1;
     for (let cl = 0; cl < 4; cl++) { ctx.beginPath(); ctx.moveTo(clipX+6, clipY+10+cl*7); ctx.lineTo(clipX+24, clipY+10+cl*7); ctx.stroke(); }
 
+    // === GLOVE BOX DISPENSER (wall-mounted, left of clock) ===
+    const gloveX = M.sx + M.sw/2 + 50, gloveY = M.sy + 10;
+    drawRoundRect(gloveX, gloveY, 50, 30, 4, '#E8F5E9', '#A5D6A7', 1);
+    drawRoundRect(gloveX+15, gloveY+22, 20, 12, 3, '#C8E6C9', null);
+    drawText('GLOVES', gloveX+25, gloveY+14, 7, '#66BB6A', 'center', null, 0, 'normal');
+
+    // === FIRE EXTINGUISHER BOX (wall-mounted, left side) ===
+    const feX = M.sx + 105, feY = M.sy + 65;
+    drawRoundRect(feX, feY, 28, 35, 3, '#FFCDD2', '#EF5350', 1);
+    drawRoundRect(feX+6, feY+8, 16, 22, 4, '#C62828', '#B71C1C', 1);
+    drawText('\uD83E\uDDEF', feX+14, feY+19, 12, '#FFF', 'center');
+
+    // === PAPER TOWEL HOLDER (wall-mounted, right side) ===
+    const ptX = M.sx + M.sw - 60, ptY = M.sy + 65;
+    drawRoundRect(ptX, ptY, 35, 25, 3, '#ECEFF1', '#B0BEC5', 1);
+    drawRoundRect(ptX+4, ptY+8, 27, 14, 6, '#FAFAFA', '#E0E0E0', 1);
+
+    // === SHARPS CONTAINER (wall-mounted, near IV) ===
+    const scX = ivX - 50, scY = M.sy + 50;
+    drawRoundRect(scX, scY, 22, 28, 3, '#F44336', '#C62828', 1);
+    drawText('\u26A0', scX+11, scY+14, 10, '#FFF', 'center');
+
     // Patient — centered vertically in OR area, bigger
     const patientY = M.sy + M.orH * 0.55;
     drawPatient(lx, patientY);
@@ -351,12 +373,20 @@ function drawORScene() {
     if (GAME.state === 'PLAYING' || GAME.state === 'RESOLUTION') {
         drawRoundRect(M.sx+12, M.sy+6, M.sw-24, 44, 12, 'rgba(0,0,0,0.65)', null);
         let hx = M.sx+28;
-        for (let i = 0; i < GAME.maxHearts; i++) { drawText('❤', hx, M.sy+28, 32, i < GAME.hearts ? COLORS.red : '#444', 'left'); hx += 42; }
+        for (let i = 0; i < GAME.maxHearts; i++) {
+            const isLawyer = GAME.upgrades.lawyer && i === GAME.maxHearts - 1;
+            const hColor = i < GAME.hearts ? (isLawyer ? COLORS.gold : COLORS.red) : '#444';
+            drawText('\u2764', hx, M.sy+28, 32, hColor, 'left'); hx += 42;
+        }
         const barX = hx + 15, barW = M.sx+M.sw-40 - barX;
         const pct = Math.max(0, GAME.anesthesia/GAME.anesthesiaMax);
-        const barC = pct > 0.5 ? COLORS.green : pct > 0.2 ? COLORS.gold : COLORS.red;
+        let barC = GAME.upgrades.energy_anes ? '#42A5F5' : (pct > 0.5 ? COLORS.green : pct > 0.2 ? COLORS.gold : COLORS.red);
         drawRoundRect(barX, M.sy+14, barW, 28, 14, '#1A1A1A', null);
-        if (barW*pct > 5) drawRoundRect(barX+3, M.sy+17, (barW-6)*pct, 22, 11, barC, null);
+        if (barW*pct > 5) {
+            if (pct <= 0.2) { ctx.shadowColor = COLORS.red; ctx.shadowBlur = 8 + Math.sin(performance.now()/150)*4; }
+            drawRoundRect(barX+3, M.sy+17, (barW-6)*pct, 22, 11, barC, null);
+            ctx.shadowColor = 'transparent'; ctx.shadowBlur = 0;
+        }
         drawText('ANESTHESIA', barX+14, M.sy+28, 16, '#DDD', 'left', '#000', 3, 'bold');
     } else {
         drawRoundRect(M.sx+M.sw/2-120, M.sy+12, 240, 36, 12, 'rgba(0,0,0,0.5)', null);
@@ -382,6 +412,11 @@ function drawPatient(cx, y) {
     ctx.strokeStyle = '#AAA'; ctx.lineWidth = 2;
     ctx.beginPath(); ctx.moveTo(cx-230, y+4); ctx.lineTo(cx-230, y-10); ctx.stroke();
     ctx.beginPath(); ctx.moveTo(cx+230, y+4); ctx.lineTo(cx+230, y-10); ctx.stroke();
+    // Pillow
+    ctx.fillStyle = '#E3F2FD';
+    ctx.beginPath(); ctx.ellipse(cx-185, y+8, 45, 16, 0, 0, Math.PI*2); ctx.fill();
+    ctx.strokeStyle = '#BBDEFB'; ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.ellipse(cx-185, y+8, 45, 16, 0, 0, Math.PI*2); ctx.stroke();
     // Head — 32 radius
     ctx.fillStyle = '#EAC086'; ctx.beginPath(); ctx.arc(cx-185, y+2, 32, 0, Math.PI*2); ctx.fill();
     // Surgical cap
@@ -411,6 +446,10 @@ function drawPatient(cx, y) {
     ctx.beginPath(); ctx.moveTo(cx-100, y+2); ctx.lineTo(cx+140, y+2); ctx.stroke();
     ctx.beginPath(); ctx.moveTo(cx-80, y-8); ctx.lineTo(cx+120, y-10); ctx.stroke();
     ctx.beginPath(); ctx.moveTo(cx-50, y-18); ctx.lineTo(cx+80, y-20); ctx.stroke();
+    // Surgical drape edges hanging over bed sides
+    ctx.fillStyle = 'rgba(129,212,250,0.5)';
+    ctx.beginPath(); ctx.moveTo(cx-155, y+6); ctx.lineTo(cx-155, y+28); ctx.lineTo(cx-130, y+28); ctx.lineTo(cx-130, y+6); ctx.fill();
+    ctx.beginPath(); ctx.moveTo(cx+190, y+6); ctx.lineTo(cx+190, y+28); ctx.lineTo(cx+210, y+28); ctx.lineTo(cx+210, y+6); ctx.fill();
 }
 
 function drawArm(sx2, sy2, tx, ty, erratic, flip) {
