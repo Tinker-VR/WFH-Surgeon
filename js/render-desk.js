@@ -364,59 +364,109 @@ function drawDeskItems() {
         drawText('None', px + tw/2, plugY + plugH/2, 14, '#444', 'center', null, 0, 'normal');
     } else {
         for (let i = 0; i < apps.length && i < 10; i++) {
-            const col = i % 4, row = Math.floor(i / 4);
-            const ix = px + 22 + col * 56;
-            const iy = plugY + 28 + row * 50;
-            drawRoundRect(ix, iy, 44, 40, 8, '#263248', '#3A4A5E', 1);
-            drawText(apps[i].icon, ix + 22, iy + 20, 20, '#FFF', 'center');
+            const col = i % 5, row = Math.floor(i / 5);
+            const ix = px + 18 + col * 44;
+            const iy = plugY + 26 + row * 38;
+            drawRoundRect(ix, iy, 36, 32, 6, '#263248', '#3A4A5E', 1);
+            drawText(apps[i].icon, ix + 18, iy + 16, 16, '#FFF', 'center');
         }
     }
     ctx.restore();
 
-    // === CAT TAIL (right edge, below desk, wiggles) ===
-    if (!GAME.upgrades.treats) {
-        const tailT = performance.now() / 1000;
-        const tailX = CW - 15;
-        const tailBaseY = dy + 50;
-        ctx.strokeStyle = '#FFA000'; ctx.lineWidth = 8; ctx.lineCap = 'round';
-        ctx.beginPath();
-        ctx.moveTo(tailX, tailBaseY);
-        for (let i = 1; i <= 10; i++) {
-            const ty = tailBaseY + i * 10;
-            const tx = tailX + Math.sin(tailT * 3 + i * 0.5) * (6 + i * 1.2);
-            ctx.lineTo(tx, ty);
-        }
-        ctx.stroke();
-        // Orange stripe highlights
-        ctx.strokeStyle = '#E65100'; ctx.lineWidth = 3;
-        ctx.beginPath();
-        ctx.moveTo(tailX, tailBaseY + 20);
-        for (let i = 2; i <= 8; i++) {
-            const ty = tailBaseY + i * 10;
-            const tx = tailX + Math.sin(tailT * 3 + i * 0.5) * (6 + i * 1.2);
-            ctx.lineTo(tx, ty);
-        }
-        ctx.stroke();
-    }
+    // Cat tail moved to drawCatTailBehind() — drawn before monitor in main.js
 
-    // === ETHERNET CABLE (router to monitor) ===
+    // === ETHERNET CABLE (router to monitor) — black, thick, loopy ===
     if (GAME.upgrades.ethernet) {
-        ctx.strokeStyle = '#1565C0'; ctx.lineWidth = 6; ctx.lineCap = 'round';
+        const cableStartX = 210, cableStartY = dy + 37;
+        const cableEndX = MONITOR.x + MONITOR.w/2, cableEndY = MONITOR.y + MONITOR.h;
+        // RJ45 connector at router end
+        drawRoundRect(cableStartX - 4, cableStartY - 6, 8, 12, 2, '#333', '#222', 1);
+        // Outer cable — black, thick, with loops
+        ctx.strokeStyle = '#1A1A1A'; ctx.lineWidth = 10; ctx.lineCap = 'round';
         ctx.beginPath();
-        ctx.moveTo(210, dy + 37);
-        ctx.quadraticCurveTo(300, dy - 10, MONITOR.x + MONITOR.w/2, MONITOR.y + MONITOR.h);
+        ctx.moveTo(cableStartX, cableStartY);
+        ctx.bezierCurveTo(250, dy + 80, 300, dy + 85, 340, dy + 30);
+        ctx.bezierCurveTo(380, dy - 15, 420, dy + 70, 460, dy + 20);
+        ctx.bezierCurveTo(500, dy - 20, 540, dy + 40, cableEndX, cableEndY);
         ctx.stroke();
-        ctx.strokeStyle = '#0D47A1'; ctx.lineWidth = 3;
+        // Inner highlight — dark gray
+        ctx.strokeStyle = '#333'; ctx.lineWidth = 5;
         ctx.beginPath();
-        ctx.moveTo(210, dy + 37);
-        ctx.quadraticCurveTo(300, dy - 10, MONITOR.x + MONITOR.w/2, MONITOR.y + MONITOR.h);
+        ctx.moveTo(cableStartX, cableStartY);
+        ctx.bezierCurveTo(250, dy + 80, 300, dy + 85, 340, dy + 30);
+        ctx.bezierCurveTo(380, dy - 15, 420, dy + 70, 460, dy + 20);
+        ctx.bezierCurveTo(500, dy - 20, 540, dy + 40, cableEndX, cableEndY);
         ctx.stroke();
+        // RJ45 connector at monitor end
+        drawRoundRect(cableEndX - 4, cableEndY - 6, 8, 12, 2, '#333', '#222', 1);
     }
 
-    // === ENERGY CAN (next to mug when energy_time active) ===
+    // === ENERGY CAN (next to mug when energy_time active) — bigger, realistic ===
     if (GAME.upgrades.energy_time) {
-        const ecx = 310, ecy = dy + 85;
-        drawShadowRoundRect(ecx, ecy, 28, 50, 6, '#00C853', '#1B5E20', 2);
-        drawText('\u26A1', ecx + 14, ecy + 25, 20, '#FFD54F', 'center');
+        const ecx = 295, ecy = dy + 58;
+        ctx.save();
+        ctx.translate(ecx + 22, ecy + 38);
+        ctx.rotate(0.05);
+        ctx.translate(-(ecx + 22), -(ecy + 38));
+        // Shadow
+        ctx.fillStyle = 'rgba(0,0,0,0.2)';
+        ctx.beginPath(); ctx.ellipse(ecx + 22, ecy + 76, 20, 6, 0, 0, Math.PI*2); ctx.fill();
+        // Can body
+        drawShadowRoundRect(ecx, ecy, 44, 76, 8, '#004D40', '#00251A', 2);
+        // Green stripe
+        drawRoundRect(ecx + 4, ecy + 18, 36, 30, 4, '#00C853', null);
+        // Lightning bolt
+        drawText('\u26A1', ecx + 22, ecy + 33, 28, '#FFD54F', 'center');
+        // Brand text
+        drawText('MONSTER', ecx + 22, ecy + 56, 8, '#76FF03', 'center', null, 0, 'bold');
+        // Silver rim top
+        drawRoundRect(ecx + 2, ecy, 40, 8, 4, '#B0BEC5', '#78909C', 1);
+        // Pull tab
+        ctx.fillStyle = '#90A4AE';
+        ctx.beginPath(); ctx.ellipse(ecx + 22, ecy + 2, 8, 3, 0, 0, Math.PI*2); ctx.fill();
+        // Condensation droplets
+        ctx.fillStyle = 'rgba(255,255,255,0.2)';
+        ctx.beginPath(); ctx.arc(ecx + 10, ecy + 42, 2, 0, Math.PI*2); ctx.fill();
+        ctx.beginPath(); ctx.arc(ecx + 34, ecy + 50, 1.5, 0, Math.PI*2); ctx.fill();
+        ctx.beginPath(); ctx.arc(ecx + 14, ecy + 60, 2, 0, Math.PI*2); ctx.fill();
+        ctx.restore();
     }
+}
+
+// Cat tail — drawn BEFORE monitor frame so it appears behind
+function drawCatTailBehind() {
+    if (GAME.upgrades.treats) return;
+    const tailT = performance.now() / 1000;
+    const M = MONITOR;
+    const tailBaseX = M.x + M.w + 15;
+    const tailBaseY = DESK_Y + 5;
+    // Main tail — thick, curving upward
+    ctx.strokeStyle = '#FFA000'; ctx.lineWidth = 14; ctx.lineCap = 'round';
+    ctx.beginPath();
+    ctx.moveTo(tailBaseX, tailBaseY);
+    for (let i = 1; i <= 12; i++) {
+        const ty = tailBaseY - i * 14;
+        const tx = tailBaseX + Math.sin(tailT * 2.5 + i * 0.45) * (10 + i * 2);
+        ctx.lineTo(tx, ty);
+    }
+    ctx.stroke();
+    // Tabby stripes
+    ctx.strokeStyle = '#E65100'; ctx.lineWidth = 7;
+    ctx.beginPath();
+    ctx.moveTo(tailBaseX + Math.sin(tailT * 2.5 + 1.35) * 13, tailBaseY - 42);
+    for (let i = 3; i <= 10; i++) {
+        const ty = tailBaseY - i * 14;
+        const tx = tailBaseX + Math.sin(tailT * 2.5 + i * 0.45) * (10 + i * 2);
+        if (i % 3 === 0) { ctx.moveTo(tx, ty); } else { ctx.lineTo(tx, ty); }
+    }
+    ctx.stroke();
+    // Fur tip at end — small flick
+    const tipI = 12;
+    const tipY = tailBaseY - tipI * 14;
+    const tipX = tailBaseX + Math.sin(tailT * 2.5 + tipI * 0.45) * (10 + tipI * 2);
+    ctx.strokeStyle = '#FF8F00'; ctx.lineWidth = 10; ctx.lineCap = 'round';
+    ctx.beginPath();
+    ctx.moveTo(tipX, tipY);
+    ctx.lineTo(tipX + Math.sin(tailT * 3) * 8, tipY - 12);
+    ctx.stroke();
 }

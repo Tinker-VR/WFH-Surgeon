@@ -306,8 +306,8 @@ function drawORScene() {
     drawRoundRect(o2X+3, o2Y-7, 10, 10, 3, '#78909C', '#546E7A', 1);
     drawText('O2', o2X+8, o2Y+30, 9, '#FFF', 'center', null, 0, 'normal');
 
-    // === SUPPLY SHELF (right wall, near floor) ===
-    const shelfX = M.sx + M.sw - 95, shelfY = orBot - 35;
+    // === SUPPLY SHELF (right wall, higher up) ===
+    const shelfX = M.sx + M.sw - 95, shelfY = orBot - 80;
     drawRoundRect(shelfX, shelfY, 35, 8, 2, '#B0BEC5', '#90A4AE', 1);
     drawRoundRect(shelfX+4, shelfY-14, 12, 14, 2, '#E8F5E9', null);
     drawRoundRect(shelfX+18, shelfY-12, 12, 12, 2, '#E3F2FD', null);
@@ -332,12 +332,12 @@ function drawORScene() {
     drawText('\uD83E\uDDEF', feX+14, feY+19, 12, '#FFF', 'center');
 
     // === PAPER TOWEL HOLDER (wall-mounted, right side) ===
-    const ptX = M.sx + M.sw - 60, ptY = M.sy + 65;
+    const ptX = M.sx + M.sw - 60, ptY = M.sy + 40;
     drawRoundRect(ptX, ptY, 35, 25, 3, '#ECEFF1', '#B0BEC5', 1);
     drawRoundRect(ptX+4, ptY+8, 27, 14, 6, '#FAFAFA', '#E0E0E0', 1);
 
     // === SHARPS CONTAINER (wall-mounted, near IV) ===
-    const scX = ivX - 50, scY = M.sy + 50;
+    const scX = ivX - 50, scY = M.sy + 35;
     drawRoundRect(scX, scY, 22, 28, 3, '#F44336', '#C62828', 1);
     drawText('\u26A0', scX+11, scY+14, 10, '#FFF', 'center');
 
@@ -412,44 +412,44 @@ function drawPatient(cx, y) {
     ctx.strokeStyle = '#AAA'; ctx.lineWidth = 2;
     ctx.beginPath(); ctx.moveTo(cx-230, y+4); ctx.lineTo(cx-230, y-10); ctx.stroke();
     ctx.beginPath(); ctx.moveTo(cx+230, y+4); ctx.lineTo(cx+230, y-10); ctx.stroke();
-    // Pillow
+    // Pillow — raised and plumper
     ctx.fillStyle = '#E3F2FD';
-    ctx.beginPath(); ctx.ellipse(cx-185, y+8, 45, 16, 0, 0, Math.PI*2); ctx.fill();
+    ctx.beginPath(); ctx.ellipse(cx-185, y+0, 48, 22, 0, 0, Math.PI*2); ctx.fill();
     ctx.strokeStyle = '#BBDEFB'; ctx.lineWidth = 1;
-    ctx.beginPath(); ctx.ellipse(cx-185, y+8, 45, 16, 0, 0, Math.PI*2); ctx.stroke();
-    // Head — 32 radius
-    ctx.fillStyle = '#EAC086'; ctx.beginPath(); ctx.arc(cx-185, y+2, 32, 0, Math.PI*2); ctx.fill();
+    ctx.beginPath(); ctx.ellipse(cx-185, y+0, 48, 22, 0, 0, Math.PI*2); ctx.stroke();
+    // Head — 32 radius, raised onto pillow
+    ctx.fillStyle = '#EAC086'; ctx.beginPath(); ctx.arc(cx-185, y-8, 32, 0, Math.PI*2); ctx.fill();
     // Surgical cap
-    ctx.fillStyle = '#00ACC1'; ctx.beginPath(); ctx.arc(cx-185, y-5, 33, Math.PI, 0); ctx.fill();
+    ctx.fillStyle = '#00ACC1'; ctx.beginPath(); ctx.arc(cx-185, y-15, 33, Math.PI, 0); ctx.fill();
     // Body/gown — bigger blanket with more volume
     let breath = Math.sin(performance.now()/500)*5;
-    // Blanket shadow (depth)
+    // Blanket shadow (depth) — taller
     ctx.fillStyle = 'rgba(1,87,155,0.2)';
     ctx.beginPath();
-    ctx.moveTo(cx-155, y+10); ctx.quadraticCurveTo(cx-40, y-42-breath, cx+10, y-22-breath);
-    ctx.quadraticCurveTo(cx+100, y-36, cx+210, y+10); ctx.lineTo(cx-155, y+10);
+    ctx.moveTo(cx-155, y+14); ctx.quadraticCurveTo(cx-40, y-58-breath, cx+10, y-36-breath);
+    ctx.quadraticCurveTo(cx+100, y-50, cx+210, y+14); ctx.lineTo(cx-155, y+14);
     ctx.fill();
-    // Main blanket
+    // Main blanket — taller peak, covers more bed
     ctx.fillStyle = '#81D4FA'; ctx.strokeStyle = '#0288D1'; ctx.lineWidth = 2;
     ctx.beginPath();
-    ctx.moveTo(cx-155, y+6); ctx.quadraticCurveTo(cx-40, y-48-breath, cx+10, y-26-breath);
-    ctx.quadraticCurveTo(cx+100, y-38, cx+210, y+6); ctx.lineTo(cx-155, y+6);
+    ctx.moveTo(cx-155, y+12); ctx.quadraticCurveTo(cx-40, y-65-breath, cx+10, y-40-breath);
+    ctx.quadraticCurveTo(cx+100, y-52, cx+210, y+12); ctx.lineTo(cx-155, y+12);
     ctx.fill(); ctx.stroke();
     // Blanket highlight strip (top ridge)
     ctx.strokeStyle = 'rgba(179,229,252,0.6)'; ctx.lineWidth = 3;
     ctx.beginPath();
-    ctx.moveTo(cx-120, y-8); ctx.quadraticCurveTo(cx-20, y-44-breath, cx+10, y-26-breath);
-    ctx.quadraticCurveTo(cx+60, y-34, cx+140, y-8);
+    ctx.moveTo(cx-120, y-8); ctx.quadraticCurveTo(cx-20, y-60-breath, cx+10, y-40-breath);
+    ctx.quadraticCurveTo(cx+60, y-48, cx+140, y-8);
     ctx.stroke();
     // Drape fold lines
     ctx.strokeStyle = 'rgba(2,136,209,0.25)'; ctx.lineWidth = 1;
-    ctx.beginPath(); ctx.moveTo(cx-100, y+2); ctx.lineTo(cx+140, y+2); ctx.stroke();
-    ctx.beginPath(); ctx.moveTo(cx-80, y-8); ctx.lineTo(cx+120, y-10); ctx.stroke();
-    ctx.beginPath(); ctx.moveTo(cx-50, y-18); ctx.lineTo(cx+80, y-20); ctx.stroke();
-    // Surgical drape edges hanging over bed sides
+    ctx.beginPath(); ctx.moveTo(cx-100, y+6); ctx.lineTo(cx+140, y+6); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(cx-80, y-4); ctx.lineTo(cx+120, y-6); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(cx-50, y-16); ctx.lineTo(cx+80, y-18); ctx.stroke();
+    // Surgical drape edges hanging over bed sides — longer
     ctx.fillStyle = 'rgba(129,212,250,0.5)';
-    ctx.beginPath(); ctx.moveTo(cx-155, y+6); ctx.lineTo(cx-155, y+28); ctx.lineTo(cx-130, y+28); ctx.lineTo(cx-130, y+6); ctx.fill();
-    ctx.beginPath(); ctx.moveTo(cx+190, y+6); ctx.lineTo(cx+190, y+28); ctx.lineTo(cx+210, y+28); ctx.lineTo(cx+210, y+6); ctx.fill();
+    ctx.beginPath(); ctx.moveTo(cx-155, y+12); ctx.lineTo(cx-155, y+36); ctx.lineTo(cx-130, y+36); ctx.lineTo(cx-130, y+12); ctx.fill();
+    ctx.beginPath(); ctx.moveTo(cx+190, y+12); ctx.lineTo(cx+190, y+36); ctx.lineTo(cx+210, y+36); ctx.lineTo(cx+210, y+12); ctx.fill();
 }
 
 function drawArm(sx2, sy2, tx, ty, erratic, flip) {

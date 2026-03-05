@@ -8,15 +8,15 @@ function drawScreenMenu() {
     ctx.beginPath(); ctx.roundRectPolyfill(M.sx, M.uiY, M.sw, M.uiH, 4); ctx.clip();
     drawRect(M.sx, M.uiY, M.sw, M.uiH, 'rgba(8,18,35,0.95)');
     const cy = M.uiY + M.uiH/2;
-    drawText('WFH SURGEON', M.sx+M.sw/2, cy - 12, 42, '#FFF', 'center', 'rgba(0,0,0,0.5)', 4);
+    drawText('WFH SURGEON', M.sx+M.sw/2, cy - 22, 42, '#FFF', 'center', 'rgba(0,0,0,0.5)', 4);
     const btnW = 200, btnH = 44, gap = 25;
     const total = btnW*3+gap*2;
     const bx0 = M.sx + (M.sw - total)/2;
-    const by = cy + 18;
+    const by = cy + 10;
     drawButton('START', bx0, by, btnW, btnH, COLORS.green, 22, true);
     drawButton('SHOP', bx0+btnW+gap, by, btnW, btnH, COLORS.gold, 20);
     drawButton('HELP', bx0+(btnW+gap)*2, by, btnW, btnH, '#1976D2', 22);
-    drawText('Vibe coded by Michael at Tinker Studio', M.sx+M.sw/2, M.uiY+M.uiH-4, 9, '#445', 'center', null, 0, 'normal');
+    drawText('Vibe coded by Michael at Tinker Studio', M.sx+M.sw/2, M.uiY+M.uiH-6, 11, '#667', 'center', null, 0, 'normal');
     ctx.restore();
 }
 
@@ -26,13 +26,12 @@ function drawScreenPlaying() {
     ctx.beginPath(); ctx.roundRectPolyfill(M.sx, M.uiY, M.sw, M.uiH, 4); ctx.clip();
     drawRect(M.sx, M.uiY, M.sw, M.uiH, 'rgba(8,18,35,0.95)');
 
-    // Info text — bigger
-    drawText(GAME.flavorText, M.sx+M.sw/2, M.uiY+14, 16, '#7889A0', 'center', null, 0, 'normal');
-    drawText(`${getRankName(GAME.rank)}  ·  Phase ${GAME.phasesCompleted}/${GAME.phasesNeeded}`, M.sx+M.sw/2, M.uiY+32, 19, '#FFF', 'center');
+    // Info text — combined into one line for more arrow space
+    drawText(`${getRankName(GAME.rank)}  ·  Phase ${GAME.phasesCompleted}/${GAME.phasesNeeded}  ·  ${GAME.flavorText}`, M.sx+M.sw/2, M.uiY+14, 15, '#AAB8CC', 'center', null, 0, 'normal');
 
-    // Arrow keys — sized to fill the panel
-    const arrowY = M.uiY + 42;
-    const maxSqH = M.uiH - 42 - 24;
+    // Arrow keys — more vertical space
+    const arrowY = M.uiY + 28;
+    const maxSqH = M.uiH - 28 - 24;
     const sqW = Math.min(65, maxSqH);
     const sqGap = 8;
     const availW = M.sw - 50;
@@ -55,15 +54,15 @@ function drawScreenPlaying() {
     }
 
     // Timer bar — color changes green -> gold -> red
-    const barY = M.uiY + M.uiH - 18;
+    const barY = M.uiY + M.uiH - 20;
     const pPct = Math.max(0, GAME.phaseTimer/GAME.phaseTimerMax);
     let barColor = pPct > 0.5 ? COLORS.green : pPct > 0.2 ? COLORS.gold : COLORS.red;
-    drawRoundRect(M.sx+40, barY, M.sw-80, 14, 7, '#1A1A1A', '#333', 2);
+    drawRoundRect(M.sx+40, barY, M.sw-80, 16, 8, '#1A1A1A', '#333', 2);
     if ((M.sw-88)*pPct > 4) {
         if (pPct <= 0.2) {
             ctx.shadowColor = COLORS.red; ctx.shadowBlur = 8 + Math.sin(performance.now()/150)*4;
         }
-        drawRoundRect(M.sx+44, barY+2, (M.sw-88)*pPct, 10, 5, barColor, null);
+        drawRoundRect(M.sx+44, barY+2, (M.sw-88)*pPct, 12, 6, barColor, null);
         ctx.shadowColor = 'transparent'; ctx.shadowBlur = 0;
     }
 
@@ -95,23 +94,23 @@ function drawScreenStore() {
         drawButton('NEXT OP \u25B6', nextBtnX, nextBtnY, nextBtnW, nextBtnH, COLORS.green, 18, true);
     }
 
-    // Single-page 4x3 grid — all 11 items
-    const cols = 4;
+    // Single-page 3-col grid — all 11 items (wider cards for text)
+    const cols = 3;
     const cardW = Math.floor((M.sw - 30 - (cols-1)*10) / cols);
-    const cardH = 108;
+    const cardH = 95;
     STORE_ITEMS.forEach((item, i) => {
         const col = i % cols, row = Math.floor(i / cols);
         const ix = M.sx + 15 + col * (cardW + 10);
-        const iy = M.sy + 78 + row * 118;
+        const iy = M.sy + 78 + row * 102;
         drawShadowRoundRect(ix, iy, cardW, cardH, 10, '#1A2332', '#2A3A4E', 2);
-        drawText(item.icon, ix+28, iy+30, 28, '#FFF', 'center');
-        drawText(item.title, ix+50, iy+20, 18, '#FFF', 'left');
-        drawText(item.desc, ix+50, iy+42, 14, '#7889A0', 'left', null, 0, 'normal');
+        drawText(item.icon, ix+26, iy+26, 24, '#FFF', 'center');
+        drawText(item.title, ix+46, iy+18, 16, '#FFF', 'left');
+        drawText(item.desc, ix+46, iy+38, 12, '#7889A0', 'left', null, 0, 'normal');
         const isMax = item.consumable && GAME.hearts >= GAME.maxHearts;
         const owned = !item.consumable && GAME.upgrades[item.id];
         const bc = (owned||isMax) ? '#555' : GAME.cash>=item.price ? COLORS.gold : '#555';
         const bt = owned ? 'OWNED' : isMax ? 'FULL' : `$${item.price}`;
-        drawButton(bt, ix+cardW/2-50, iy+78, 100, 26, bc, 14);
+        drawButton(bt, ix+cardW/2-50, iy+66, 100, 24, bc, 13);
     });
 
     ctx.restore();
@@ -143,7 +142,7 @@ function drawScreenResolution() {
         drawText(`BASE: +$${200+GAME.rank*100}   HEARTS: +$${GAME.hearts*(50+GAME.rank*10)}   SPEED: +$${Math.floor((GAME.anesthesia/1000)*10)}`, M.sx+M.sw/2, M.sy+155, 18, '#AAA', 'center', null, 0, 'normal');
         drawText(`TOTAL PAYOUT: $${GAME.payout}`, M.sx+M.sw/2, M.sy+200, 44, COLORS.green, 'center', 'rgba(0,0,0,0.5)', 3);
         drawText(`Rank: ${getRankName(GAME.rank)}`, M.sx+M.sw/2, M.sy+245, 22, '#6B7A8E', 'center', null, 0, 'normal');
-        drawText('Visit the shop or quit.', M.sx+M.sw/2, M.sy+275, 15, '#888', 'center', null, 0, 'normal');
+        drawText('Visit the shop or quit.', M.sx+M.sw/2, M.sy+275, 17, '#888', 'center', null, 0, 'normal');
     } else {
         const retryCost = (GAME.rank+1)*300;
         const canAfford = GAME.cash >= retryCost;
@@ -151,7 +150,7 @@ function drawScreenResolution() {
         drawText('PAYOUT: $0', M.sx+M.sw/2, M.sy+195, 32, '#555', 'center');
         if (!canAfford) {
             drawText('Not enough cash to retry!', M.sx+M.sw/2, M.sy+235, 18, COLORS.red, 'center', null, 0, 'normal');
-            drawText('Visit the shop or quit.', M.sx+M.sw/2, M.sy+255, 15, '#888', 'center', null, 0, 'normal');
+            drawText('Visit the shop or quit.', M.sx+M.sw/2, M.sy+255, 17, '#888', 'center', null, 0, 'normal');
         }
     }
 

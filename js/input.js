@@ -66,7 +66,7 @@ window.addEventListener('mousedown', (e) => {
         const total = btnW * 3 + btnGap * 2;
         const bx0 = sx + (sw - total) / 2;
         const cy = M.uiY + M.uiH/2;
-        const by = cy + 18;
+        const by = cy + 10;
         if (isHover(bx0, by, btnW, btnH)) {
             AudioEngine.playClick(); GAME.rank = STARTING_RANK; GAME.hearts = 3;
             GAME.pendingStart = true; GAME.state = 'HELP'; GAME.helpPage = 0;
@@ -109,15 +109,15 @@ window.addEventListener('mousedown', (e) => {
                 return;
             }
         }
-        // Single-page grid — all items
-        const cols = 4;
+        // Single-page grid — all items (3-col)
+        const cols = 3;
         const cardW = Math.floor((sw - 30 - (cols-1)*10) / cols);
         STORE_ITEMS.forEach((item, i) => {
             const col = i % cols, row = Math.floor(i / cols);
             const ix = sx + 15 + col * (cardW + 10);
-            const iy = sy + 78 + row * 118;
-            const bx2 = ix + cardW/2 - 50, by2 = iy + 78;
-            if (isHover(bx2, by2, 100, 26)) {
+            const iy = sy + 78 + row * 102;
+            const bx2 = ix + cardW/2 - 50, by2 = iy + 66;
+            if (isHover(bx2, by2, 100, 24)) {
                 if (item.consumable) {
                     if (GAME.cash >= item.price && GAME.hearts < GAME.maxHearts) {
                         GAME.cash -= item.price; GAME.hearts++;
