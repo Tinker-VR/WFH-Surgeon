@@ -84,8 +84,8 @@ function drawORScene() {
 
     const lx = M.sx + M.sw/2;
 
-    // === GLASS CABINET (left wall) — dulled colors ===
-    const cabX = M.sx + 8, cabY = M.sy + 12, cabW = 85, cabH = M.orH * 0.55;
+    // === GLASS CABINET (left wall) — shifted down to clear HUD bar ===
+    const cabX = M.sx + 8, cabY = M.sy + 55, cabW = 85, cabH = M.orH * 0.42;
     drawRoundRect(cabX, cabY, cabW, cabH, 5, '#B8C0C4', '#8A9498', 2);
     ctx.fillStyle = 'rgba(180,195,205,0.2)';
     ctx.fillRect(cabX+4, cabY+4, cabW-8, cabH-8);
@@ -123,16 +123,16 @@ function drawORScene() {
     ctx.fillStyle = cabInnerTop; ctx.fillRect(cabX+4, cabY+4, cabW-8, cabH-8);
     ctx.restore();
 
-    // === HAND SANITIZER DISPENSER (left wall) — muted ===
-    const sanX = M.sx + 100, sanY = M.sy + 18;
+    // === HAND SANITIZER DISPENSER (left wall, below cabinet) — muted ===
+    const sanX = M.sx + 49, sanY = cabY + cabH - 10;
     drawRoundRect(sanX, sanY, 26, 40, 5, '#C8D0C8', '#98A898', 1);
     drawRoundRect(sanX + 7, sanY - 10, 12, 14, 4, '#B0BCB0', '#88988A', 1);
     ctx.strokeStyle = '#98A898'; ctx.lineWidth = 2;
     ctx.beginPath(); ctx.moveTo(sanX + 13, sanY - 10); ctx.lineTo(sanX + 13, sanY - 16); ctx.lineTo(sanX + 21, sanY - 16); ctx.stroke();
-    drawText('🧴', sanX + 13, sanY + 20, 14, '#FFF', 'center');
+    //drawText('🧴', sanX + 13, sanY + 20, 14, '#FFF', 'center');
 
-    // === WALL CLOCK (animated) — muted ===
-    const clockX = M.sx + M.sw/2 + 160, clockY = M.sy + 26;
+    // === WALL CLOCK (animated, center-right, below HUD) — muted ===
+    const clockX = M.sx + M.sw/2 + 170, clockY = M.sy + 40;
     ctx.fillStyle = '#C8CCD0'; ctx.strokeStyle = '#808C92'; ctx.lineWidth = 2;
     ctx.beginPath(); ctx.arc(clockX, clockY, 26, 0, Math.PI*2); ctx.fill(); ctx.stroke();
     for (let h = 0; h < 12; h++) {
@@ -150,7 +150,7 @@ function drawORScene() {
     ctx.fillStyle = '#37474F';
     ctx.beginPath(); ctx.arc(clockX, clockY, 3, 0, Math.PI*2); ctx.fill();
 
-    // === GLASS CABINET (right wall) — dulled colors ===
+    // === GLASS CABINET (right wall, shifted down to clear HUD) — dulled colors ===
     const cab2X = M.sx + M.sw - 93;
     drawRoundRect(cab2X, cabY, cabW, cabH, 5, '#B8C0C4', '#8A9498', 2);
     ctx.fillStyle = 'rgba(180,195,205,0.2)';
@@ -181,28 +181,28 @@ function drawORScene() {
     ctx.fillStyle = cab2InnerTop; ctx.fillRect(cab2X+4, cabY+4, cabW-8, cabH-8);
     ctx.restore();
 
-    // === BLOOD BAG / IV POLE (right side) — muted ===
+    // === BLOOD BAG / IV POLE (right side, top lowered below HUD) — muted ===
     const ivX = M.sx + M.sw - 125, ivBaseY = orBot - 55;
+    const ivTopY = M.sy + 58;
     ctx.strokeStyle = '#9AA4AA'; ctx.lineWidth = 4;
-    ctx.beginPath(); ctx.moveTo(ivX, ivBaseY); ctx.lineTo(ivX, M.sy + 18); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(ivX, ivBaseY); ctx.lineTo(ivX, ivTopY); ctx.stroke();
     // IV pole reflection highlight (thin white stripe)
     ctx.strokeStyle = 'rgba(255,255,255,0.18)'; ctx.lineWidth = 1;
-    ctx.beginPath(); ctx.moveTo(ivX - 1, ivBaseY); ctx.lineTo(ivX - 1, M.sy + 18); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(ivX - 1, ivBaseY); ctx.lineTo(ivX - 1, ivTopY); ctx.stroke();
     // Cross bar
-    ctx.lineWidth = 3;
-    ctx.beginPath(); ctx.moveTo(ivX - 22, M.sy + 18); ctx.lineTo(ivX + 22, M.sy + 18); ctx.stroke();
+    ctx.strokeStyle = '#9AA4AA'; ctx.lineWidth = 3;
+    ctx.beginPath(); ctx.moveTo(ivX - 22, ivTopY); ctx.lineTo(ivX + 22, ivTopY); ctx.stroke();
     // Hook
     ctx.lineWidth = 2;
-    ctx.beginPath(); ctx.arc(ivX - 8, M.sy + 24, 6, Math.PI, 0); ctx.stroke();
+    ctx.beginPath(); ctx.arc(ivX - 8, ivTopY + 6, 6, Math.PI, 0); ctx.stroke();
     // Blood bag — muted red
-    drawRoundRect(ivX - 20, M.sy + 32, 32, 48, 8, '#8A3030', '#7A2828', 2);
+    drawRoundRect(ivX - 20, ivTopY + 14, 32, 48, 8, '#8A3030', '#7A2828', 2);
     // Shadow beneath blood bag
     ctx.fillStyle = 'rgba(0,0,0,0.15)';
-    ctx.beginPath(); ctx.ellipse(ivX - 4, M.sy + 82, 14, 4, 0, 0, Math.PI*2); ctx.fill();
-    //drawText('A+', ivX - 4, M.sy + 56, 16, '#C8A0A0', 'center', null, 0, 'normal');
+    ctx.beginPath(); ctx.ellipse(ivX - 4, ivTopY + 64, 14, 4, 0, 0, Math.PI*2); ctx.fill();
     // Tube
     ctx.strokeStyle = '#B08888'; ctx.lineWidth = 2;
-    ctx.beginPath(); ctx.moveTo(ivX - 4, M.sy + 80); ctx.quadraticCurveTo(ivX + 14, M.sy + 115, ivX - 35, orBot - 30); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(ivX - 4, ivTopY + 62); ctx.quadraticCurveTo(ivX + 14, ivTopY + 95, ivX - 35, orBot - 30); ctx.stroke();
     // Tripod base
     ctx.strokeStyle = '#9AA4AA'; ctx.lineWidth = 3;
     ctx.beginPath(); ctx.moveTo(ivX, ivBaseY); ctx.lineTo(ivX - 20, orBot-2); ctx.stroke();
@@ -226,14 +226,14 @@ function drawORScene() {
     ctx.stroke();
     // Paddles — muted
     drawRoundRect(ccX+34, ccBaseY+6, 16, 16, 4, '#9A7030', '#7A5828', 1);
-    drawText('\u26A1', ccX+42, ccBaseY+14, 16, '#CCC', 'center');
+    //drawText('\u26A1', ccX+42, ccBaseY+14, 16, '#CCC', 'center');
     // Wheels
     ctx.fillStyle = '#333';
     ctx.beginPath(); ctx.arc(ccX + 10, ccBaseY + 55, 5, 0, Math.PI*2); ctx.fill();
     ctx.beginPath(); ctx.arc(ccX + 45, ccBaseY + 55, 5, 0, Math.PI*2); ctx.fill();
 
     // === MAYO STAND (instrument table, left of patient) — muted ===
-    const mayoX = lx - 220, mayoTopY = orBot - 52;
+    const mayoX = lx - 250, mayoTopY = orBot - 15;
     ctx.strokeStyle = '#9AA4AA'; ctx.lineWidth = 3;
     ctx.beginPath(); ctx.moveTo(mayoX, mayoTopY + 20); ctx.lineTo(mayoX, orBot - 2); ctx.stroke();
     // Base
@@ -255,7 +255,7 @@ function drawORScene() {
     ctx.beginPath(); ctx.moveTo(mayoX - 30, mayoTopY - 16); ctx.lineTo(mayoX - 26, mayoTopY - 16); ctx.lineTo(mayoX - 28, mayoTopY - 8); ctx.fill();
 
     // === INSTRUMENT TRAY on side table (right of patient, raised) — muted ===
-    const trayX = lx + 170, trayTableY = orBot - 55;
+    const trayX = lx + 220, trayTableY = orBot - 10;
     // Table legs
     ctx.strokeStyle = '#9AA4AA'; ctx.lineWidth = 3;
     ctx.beginPath(); ctx.moveTo(trayX - 30, trayTableY + 14); ctx.lineTo(trayX - 30, orBot - 2); ctx.stroke();
@@ -271,11 +271,11 @@ function drawORScene() {
     ctx.fillRect(trayX + 30, trayTableY - 6, 4, 6);
 
     // === SHADOWS ON FLOOR — BIGGER + under freestanding props ===
-    ctx.fillStyle = 'rgba(0,0,0,0.12)';
+    /*ctx.fillStyle = 'rgba(0,0,0,0.12)';
     ctx.beginPath(); ctx.ellipse(lx, orBot - 3, 200, 12, 0, 0, Math.PI*2); ctx.fill();
     ctx.beginPath(); ctx.ellipse(mayoX, orBot - 1, 22, 6, 0, 0, Math.PI*2); ctx.fill();
     ctx.beginPath(); ctx.ellipse(ivX, orBot - 1, 24, 6, 0, 0, Math.PI*2); ctx.fill();
-    ctx.beginPath(); ctx.ellipse(ccX + 27, orBot - 1, 22, 5, 0, 0, Math.PI*2); ctx.fill();
+    ctx.beginPath(); ctx.ellipse(ccX + 27, orBot - 1, 22, 5, 0, 0, Math.PI*2); ctx.fill();*/
     // Floor shadow under bed legs
     ctx.fillStyle = 'rgba(0,0,0,0.10)';
     ctx.beginPath(); ctx.ellipse(lx - 196, orBot - 1, 16, 5, 0, 0, Math.PI*2); ctx.fill();
@@ -284,17 +284,17 @@ function drawORScene() {
     ctx.fillStyle = 'rgba(0,0,0,0.10)';
     ctx.beginPath(); ctx.ellipse(ivX, orBot - 1, 26, 7, 0, 0, Math.PI*2); ctx.fill();
     // Floor shadow under crash cart wheels
-    ctx.fillStyle = 'rgba(0,0,0,0.10)';
-    ctx.beginPath(); ctx.ellipse(ccX + 10, orBot - 1, 8, 3, 0, 0, Math.PI*2); ctx.fill();
-    ctx.beginPath(); ctx.ellipse(ccX + 45, orBot - 1, 8, 3, 0, 0, Math.PI*2); ctx.fill();
+    //ctx.fillStyle = 'rgba(0,0,0,0.10)';
+    //ctx.beginPath(); ctx.ellipse(ccX + 10, orBot - 1, 8, 3, 0, 0, Math.PI*2); ctx.fill();
+    //ctx.beginPath(); ctx.ellipse(ccX + 45, orBot - 1, 8, 3, 0, 0, Math.PI*2); ctx.fill();
     // Floor shadow under drawer cart wheels
     ctx.fillStyle = 'rgba(0,0,0,0.10)';
     const drawerX = M.sx + 18;
-    ctx.beginPath(); ctx.ellipse(drawerX+10, orBot - 1, 7, 3, 0, 0, Math.PI*2); ctx.fill();
-    ctx.beginPath(); ctx.ellipse(drawerX+50, orBot - 1, 7, 3, 0, 0, Math.PI*2); ctx.fill();
+    //ctx.beginPath(); ctx.ellipse(drawerX+10, orBot - 1, 7, 3, 0, 0, Math.PI*2); ctx.fill();
+    //ctx.beginPath(); ctx.ellipse(drawerX+50, orBot - 1, 7, 3, 0, 0, Math.PI*2); ctx.fill();
     // Floor shadow under tray table legs
-    ctx.beginPath(); ctx.ellipse(trayX - 30, orBot - 1, 8, 3, 0, 0, Math.PI*2); ctx.fill();
-    ctx.beginPath(); ctx.ellipse(trayX + 30, orBot - 1, 8, 3, 0, 0, Math.PI*2); ctx.fill();
+    //ctx.beginPath(); ctx.ellipse(trayX - 30, orBot - 1, 8, 3, 0, 0, Math.PI*2); ctx.fill();
+    //ctx.beginPath(); ctx.ellipse(trayX + 30, orBot - 1, 8, 3, 0, 0, Math.PI*2); ctx.fill();
 
     // Lamp — metallic gradient housing, but keep light cone visible
     const lampX = lx;
@@ -320,8 +320,8 @@ function drawORScene() {
     ctx.fillStyle = lg;
     ctx.beginPath(); ctx.moveTo(lampX-65, M.sy+22); ctx.lineTo(lampX+65, M.sy+22); ctx.lineTo(lampX+150, orBot); ctx.lineTo(lampX-150, orBot); ctx.fill();
 
-    // Heart monitor — muted housing + green glow behind EKG
-    const hmx = M.sx+80, hmy = M.sy+15;
+    // Heart monitor — moved to center-left wall, below HUD + arms
+    const hmx = M.sx + M.sw/2 - 340, hmy = M.sy + 80;
     drawShadowRoundRect(hmx, hmy, 95, 72, 10, '#303840', '#222830', 2);
     drawRoundRect(hmx+6, hmy+6, 83, 38, 5, '#000');
     // Subtle green glow behind EKG line area
@@ -344,13 +344,13 @@ function drawORScene() {
     //drawText('98', hmx+70, hmy+66, 16, '#42A5F5', 'right', null, 0, 'normal');
 
     // === EKG WIRE from patient to monitor ===
-    ctx.strokeStyle = '#66BB6A'; ctx.lineWidth = 1.5;
+    /*ctx.strokeStyle = '#66BB6A'; ctx.lineWidth = 1.5;
     ctx.setLineDash([4, 4]);
     ctx.beginPath();
     ctx.moveTo(hmx + 47, hmy + 44);
     ctx.quadraticCurveTo(lx - 80, M.sy + M.orH * 0.35, lx - 30, M.sy + M.orH * 0.55);
     ctx.stroke();
-    ctx.setLineDash([]);
+    ctx.setLineDash([]);*/
 
     // === ROLLING DRAWER CART (left side) — muted + gradient per drawer ===
     const drawerBaseY = orBot - 78;
@@ -367,12 +367,12 @@ function drawORScene() {
     ctx.beginPath(); ctx.arc(drawerX+50, drawerBaseY+72, 4, 0, Math.PI*2); ctx.fill();
 
     // === MEDICINE CABINET (left wall, below glass cabinet) — muted ===
-    const medCabX = M.sx + 8, medCabY = cabY + cabH + 8;
+    /* const medCabX = M.sx + 8, medCabY = cabY + cabH + 8;
     drawRoundRect(medCabX, medCabY, 70, 50, 4, '#C0C4C8', '#9AA0A6', 1);
     ctx.strokeStyle = '#9AA0A6'; ctx.lineWidth = 1;
     ctx.beginPath(); ctx.moveTo(medCabX+35, medCabY+4); ctx.lineTo(medCabX+35, medCabY+46); ctx.stroke();
     drawRoundRect(medCabX+14, medCabY+20, 8, 10, 2, '#808C92', null);
-    drawRoundRect(medCabX+48, medCabY+20, 8, 10, 2, '#808C92', null);
+    drawRoundRect(medCabX+48, medCabY+20, 8, 10, 2, '#808C92', null); */
 
     // === WASTE BIN (left side, under drawer cart) — muted ===
     const binX = M.sx + 85, binY = orBot - 38;
@@ -381,94 +381,52 @@ function drawORScene() {
     ctx.fill(); ctx.stroke();
     drawRoundRect(binX-1, binY-3, 32, 5, 2, '#506068', '#3A484E', 1);
 
-    // === X-RAY LIGHTBOX (wall) — muted ===
-    const xrayX = M.sx + M.sw/2 - 180, xrayY = M.sy + 10;
+    // === X-RAY LIGHTBOX (wall, center, below HUD) — muted ===
+    /* const xrayX = M.sx + M.sw/2 - 100, xrayY = M.sy + 60;
     drawRoundRect(xrayX, xrayY, 55, 40, 4, '#222830', '#303840', 2);
     drawRoundRect(xrayX+4, xrayY+4, 47, 28, 2, '#182050', null);
     ctx.strokeStyle = 'rgba(80,130,170,0.3)'; ctx.lineWidth = 1;
     ctx.beginPath(); ctx.moveTo(xrayX+15, xrayY+10); ctx.lineTo(xrayX+15, xrayY+28); ctx.stroke();
     ctx.beginPath(); ctx.moveTo(xrayX+10, xrayY+18); ctx.lineTo(xrayX+20, xrayY+18); ctx.stroke();
-    ctx.beginPath(); ctx.ellipse(xrayX+35, xrayY+18, 8, 10, 0, 0, Math.PI*2); ctx.stroke();
+    ctx.beginPath(); ctx.ellipse(xrayX+35, xrayY+18, 8, 10, 0, 0, Math.PI*2); ctx.stroke(); */
 
     // === OXYGEN TANK (next to IV pole) — muted ===
-    const o2X = ivX + 28, o2Y = orBot - 65;
+    const o2X = ivX + 20, o2Y = orBot - 60;
     drawRoundRect(o2X, o2Y, 16, 58, 8, '#6888A0', '#507088', 2);
     drawRoundRect(o2X+3, o2Y-7, 10, 10, 3, '#607078', '#4A585E', 1);
     //drawText('O2', o2X+8, o2Y+30, 16, '#CCC', 'center', null, 0, 'normal');
 
     // === SUPPLY SHELF (right wall, higher up) — muted ===
-    const shelfX = M.sx + M.sw - 95, shelfY = orBot - 80;
+    /*const shelfX = M.sx + M.sw - 95, shelfY = orBot - 70;
     drawRoundRect(shelfX, shelfY, 35, 8, 2, '#9AA4AA', '#808C92', 1);
     drawRoundRect(shelfX+4, shelfY-14, 12, 14, 2, '#B8C0B8', null);
-    drawRoundRect(shelfX+18, shelfY-12, 12, 12, 2, '#B0BCC4', null);
+    drawRoundRect(shelfX+18, shelfY-12, 12, 12, 2, '#B0BCC4', null);*/
 
-    // === CLIPBOARD on wall (near heart monitor) — muted ===
-    const clipX = hmx + 100, clipY = M.sy + 18;
+    // === CLIPBOARD on wall (center-right, below HUD) — muted ===
+    const clipX = M.sx + M.sw/2 + 290, clipY = M.sy + 62;
     drawRoundRect(clipX, clipY, 30, 40, 3, '#C8C4C0', '#A09890', 1);
     drawRoundRect(clipX+8, clipY-4, 14, 8, 2, '#786858', null);
     ctx.strokeStyle = '#A09890'; ctx.lineWidth = 1;
     for (let cl = 0; cl < 4; cl++) { ctx.beginPath(); ctx.moveTo(clipX+6, clipY+10+cl*7); ctx.lineTo(clipX+24, clipY+10+cl*7); ctx.stroke(); }
 
-    // === GLOVE BOX DISPENSER (wall-mounted, left of clock) — muted ===
-    const gloveX = M.sx + M.sw/2 + 50, gloveY = M.sy + 10;
+    // === GLOVE BOX DISPENSER (wall-mounted, center-right, below HUD) — muted ===
+    const gloveX = M.sx + M.sw/2 + 275, gloveY = M.sy + 120;
     drawRoundRect(gloveX, gloveY, 50, 30, 4, '#C0C8C0', '#90A090', 1);
     drawRoundRect(gloveX+15, gloveY+22, 20, 12, 3, '#A8B8A8', null);
     //drawText('GLOVES', gloveX+25, gloveY+14, 16, '#7A9A7A', 'center', null, 0, 'normal');
 
-    // === FIRE EXTINGUISHER (wall-mounted, left side) — drawn version ===
-    const feX = M.sx + 105, feY = M.sy + 65;
-    // Wall-mount bracket
-    drawRoundRect(feX+4, feY, 20, 6, 2, '#808C92', '#606C72', 1);
-    // Cylinder body with gradient
-    const feGrad = ctx.createLinearGradient(feX+6, feY+5, feX+22, feY+5);
-    feGrad.addColorStop(0, '#6A2020'); feGrad.addColorStop(0.3, '#C03030'); feGrad.addColorStop(0.7, '#B02828'); feGrad.addColorStop(1, '#7A2020');
-    ctx.fillStyle = feGrad;
-    ctx.beginPath();
-    ctx.moveTo(feX+8, feY+6); ctx.lineTo(feX+20, feY+6);
-    ctx.quadraticCurveTo(feX+24, feY+6, feX+24, feY+12);
-    ctx.lineTo(feX+24, feY+42);
-    ctx.quadraticCurveTo(feX+24, feY+48, feX+20, feY+48);
-    ctx.lineTo(feX+8, feY+48);
-    ctx.quadraticCurveTo(feX+4, feY+48, feX+4, feY+42);
-    ctx.lineTo(feX+4, feY+12);
-    ctx.quadraticCurveTo(feX+4, feY+6, feX+8, feY+6);
-    ctx.fill();
-    ctx.strokeStyle = '#5A1818'; ctx.lineWidth = 1;
-    ctx.stroke();
-    // Handle/lever on top
-    ctx.fillStyle = '#222'; ctx.strokeStyle = '#111'; ctx.lineWidth = 1;
-    ctx.fillRect(feX+10, feY+2, 8, 6);
-    // Lever arm
-    ctx.strokeStyle = '#333'; ctx.lineWidth = 2;
-    ctx.beginPath(); ctx.moveTo(feX+18, feY+4); ctx.lineTo(feX+24, feY+0); ctx.stroke();
-    // Small hose curving down
-    ctx.strokeStyle = '#222'; ctx.lineWidth = 2;
-    ctx.beginPath();
-    ctx.moveTo(feX+6, feY+8);
-    ctx.quadraticCurveTo(feX-2, feY+16, feX+2, feY+28);
-    ctx.stroke();
-    // Nozzle at end of hose
-    ctx.fillStyle = '#333';
-    ctx.beginPath(); ctx.arc(feX+2, feY+28, 2, 0, Math.PI*2); ctx.fill();
-    // Pressure gauge circle
-    ctx.fillStyle = '#DDD'; ctx.strokeStyle = '#888'; ctx.lineWidth = 1;
-    ctx.beginPath(); ctx.arc(feX+14, feY+16, 4, 0, Math.PI*2); ctx.fill(); ctx.stroke();
-    // Label band
-    ctx.fillStyle = 'rgba(255,255,255,0.25)';
-    ctx.fillRect(feX+5, feY+30, 18, 6);
-
-    // === PAPER TOWEL HOLDER (wall-mounted, right side) — muted ===
-    const ptX = M.sx + M.sw - 60, ptY = M.sy + 40;
+    // === PAPER TOWEL HOLDER (wall-mounted, right side, below HUD) — muted ===
+    const ptX = M.sx + M.sw - 60, ptY = M.sy + 180;
     drawRoundRect(ptX, ptY, 35, 25, 3, '#C8CCD0', '#9AA0A6', 1);
     drawRoundRect(ptX+4, ptY+8, 27, 14, 6, '#D8D8D8', '#C0C0C0', 1);
 
-    // === SHARPS CONTAINER (wall-mounted, near IV) — muted ===
-    const scX = ivX - 50, scY = M.sy + 35;
+    // === SHARPS CONTAINER (wall-mounted, near IV, below HUD) — muted ===
+    /*const scX = ivX - 50, scY = M.sy + 70;
     drawRoundRect(scX, scY, 22, 28, 3, '#A06060', '#804040', 1);
-    drawText('\u26A0', scX+11, scY+14, 16, '#DDD', 'center');
+    drawText('\u26A0', scX+11, scY+14, 16, '#DDD', 'center');*/
 
     // Patient — centered vertically in OR area, bigger
-    const patientY = M.sy + M.orH * 0.55;
+    const patientY = M.sy + M.orH * 0.58;
 
     // === ROBOT ARM VARIABLES (computed before drawPatient) ===
     let speed = GAME.state==='PLAYING' ? 600 : 2000;
@@ -567,6 +525,20 @@ function drawPatient(cx, y) {
     ctx.fillStyle = 'rgba(0,0,0,0.12)';
     ctx.beginPath(); ctx.ellipse(cx, y+76, 220, 10, 0, 0, Math.PI*2); ctx.fill();
 
+    
+
+    // Head — 32 radius, raised onto pillow
+    ctx.fillStyle = '#EAC086'; ctx.beginPath(); ctx.arc(cx-155, y-11, 32, 0, Math.PI*2); ctx.fill();
+    // Surgical cap
+    //ctx.fillStyle = '#00ACC1'; ctx.beginPath(); ctx.arc(cx-170, y-15, 32, Math.PI, 0); ctx.fill();
+
+
+    // Pillow — raised and plumper
+    ctx.fillStyle = '#E3F2FD';
+    ctx.beginPath(); ctx.ellipse(cx-170, y+0, 48, 22, 0, 0, Math.PI*2); ctx.fill();
+    ctx.strokeStyle = '#BBDEFB'; ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.ellipse(cx-170, y+0, 48, 22, 0, 0, Math.PI*2); ctx.stroke();
+
     // Bed — 460 wide, 36 tall — muted + gradient
     const bedGrad = ctx.createLinearGradient(cx-230, y+8, cx-230, y+44);
     bedGrad.addColorStop(0, '#B0B4B8'); bedGrad.addColorStop(0.5, '#A0A4A8'); bedGrad.addColorStop(1, '#909498');
@@ -575,18 +547,14 @@ function drawPatient(cx, y) {
     drawRect(cx-205, y+44, 18, 30, '#787C80');
     drawRect(cx+187, y+44, 18, 30, '#787C80');
     // Bed rail hints with reflections
-    ctx.strokeStyle = '#909498'; ctx.lineWidth = 2;
-    ctx.beginPath(); ctx.moveTo(cx-230, y+4); ctx.lineTo(cx-230, y-10); ctx.stroke();
-    ctx.beginPath(); ctx.moveTo(cx+230, y+4); ctx.lineTo(cx+230, y-10); ctx.stroke();
+    //ctx.strokeStyle = '#909498'; ctx.lineWidth = 2;
+    //ctx.beginPath(); ctx.moveTo(cx-230, y+4); ctx.lineTo(cx-230, y-10); ctx.stroke();
+    //ctx.beginPath(); ctx.moveTo(cx+230, y+4); ctx.lineTo(cx+230, y-10); ctx.stroke();
     // Rail reflection highlights
     ctx.strokeStyle = 'rgba(255,255,255,0.2)'; ctx.lineWidth = 1;
     ctx.beginPath(); ctx.moveTo(cx-229, y+4); ctx.lineTo(cx-229, y-10); ctx.stroke();
     ctx.beginPath(); ctx.moveTo(cx+231, y+4); ctx.lineTo(cx+231, y-10); ctx.stroke();
-    // Pillow — raised and plumper
-    ctx.fillStyle = '#E3F2FD';
-    ctx.beginPath(); ctx.ellipse(cx-185, y+0, 48, 22, 0, 0, Math.PI*2); ctx.fill();
-    ctx.strokeStyle = '#BBDEFB'; ctx.lineWidth = 1;
-    ctx.beginPath(); ctx.ellipse(cx-185, y+0, 48, 22, 0, 0, Math.PI*2); ctx.stroke();
+    
 
     // Body/gown — bigger blanket with more volume
     let breath = Math.sin(performance.now()/500)*5;
@@ -614,29 +582,7 @@ function drawPatient(cx, y) {
     ctx.beginPath(); ctx.moveTo(cx-80, y-4); ctx.lineTo(cx+120, y-6); ctx.stroke();
     ctx.beginPath(); ctx.moveTo(cx-50, y-16); ctx.lineTo(cx+80, y-18); ctx.stroke();
 
-    // Neck trapezoid — drawn AFTER blanket so it's visible between head and blanket
-    ctx.fillStyle = '#EAC086';
-    ctx.beginPath();
-    ctx.moveTo(cx-210, y+2);    // left side wider
-    ctx.lineTo(cx-160, y+2);    // right side wider
-    ctx.lineTo(cx-150, y+14);   // blanket edge right
-    ctx.lineTo(cx-220, y+14);   // blanket edge left
-    ctx.closePath();
-    ctx.fill();
-    // Neck shadow
-    ctx.fillStyle = 'rgba(180,140,80,0.3)';
-    ctx.beginPath();
-    ctx.moveTo(cx-205, y+6);
-    ctx.lineTo(cx-165, y+6);
-    ctx.lineTo(cx-155, y+14);
-    ctx.lineTo(cx-215, y+14);
-    ctx.closePath();
-    ctx.fill();
-
-    // Head — 32 radius, raised onto pillow (drawn AFTER blanket+neck so head is on top)
-    ctx.fillStyle = '#EAC086'; ctx.beginPath(); ctx.arc(cx-185, y-8, 32, 0, Math.PI*2); ctx.fill();
-    // Surgical cap
-    ctx.fillStyle = '#00ACC1'; ctx.beginPath(); ctx.arc(cx-185, y-15, 33, Math.PI, 0); ctx.fill();
+    
 
     // Surgical drape edges hanging over bed sides — longer
     ctx.fillStyle = 'rgba(129,212,250,0.5)';
