@@ -6,137 +6,140 @@ function drawDeskItems() {
     const dy = DESK_Y;
     const deskH = CH - DESK_Y;
 
+    // Dim desk props during keyboard hazard so screwdriver stands out
+    if (GAME.hazard === 'kbbreak') ctx.globalAlpha = 0.4;
+
     // === DESK DECOR — draw FIRST so it's BEHIND everything ===
 
-    // Scattered papers (behind keyboard area, not overlapping main items)
+    // Scattered papers (behind keyboard area, not overlapping main items) — muted
     ctx.save(); ctx.translate(320, dy + 155); ctx.rotate(-0.08);
-    drawRoundRect(-40, -30, 80, 60, 2, '#FFFDE7', '#E0E0E0', 1);
-    ctx.strokeStyle = '#BBDEFB'; ctx.lineWidth = 1;
+    drawRoundRect(-40, -30, 80, 60, 2, '#E8E4D8', '#C8C4B8', 1);
+    ctx.strokeStyle = '#B0B8C0'; ctx.lineWidth = 1;
     for (let ln = 0; ln < 4; ln++) { ctx.beginPath(); ctx.moveTo(-28, -18+ln*12); ctx.lineTo(28, -18+ln*12); ctx.stroke(); }
-    ctx.fillStyle = '#E53935'; ctx.fillRect(-40, -30, 4, 60);
+    ctx.fillStyle = '#A07070'; ctx.fillRect(-40, -30, 4, 60);
     ctx.restore();
 
     ctx.save(); ctx.translate(230, dy + 165); ctx.rotate(0.15);
-    drawRoundRect(-32, -24, 64, 48, 2, '#E3F2FD', '#BBDEFB', 1);
-    ctx.strokeStyle = '#90CAF9'; ctx.lineWidth = 1;
+    drawRoundRect(-32, -24, 64, 48, 2, '#D8DCE0', '#B0B8C0', 1);
+    ctx.strokeStyle = '#A0AAB0'; ctx.lineWidth = 1;
     for (let ln = 0; ln < 3; ln++) { ctx.beginPath(); ctx.moveTo(-22, -12+ln*12); ctx.lineTo(22, -12+ln*12); ctx.stroke(); }
     ctx.restore();
 
     ctx.save(); ctx.translate(860, dy + 158); ctx.rotate(0.12);
-    drawRoundRect(-28, -20, 56, 40, 2, '#FFF3E0', '#FFE0B2', 1);
-    ctx.strokeStyle = '#FFCC80'; ctx.lineWidth = 1;
+    drawRoundRect(-28, -20, 56, 40, 2, '#E8E0D4', '#D0C8B8', 1);
+    ctx.strokeStyle = '#C0B8A8'; ctx.lineWidth = 1;
     for (let ln = 0; ln < 2; ln++) { ctx.beginPath(); ctx.moveTo(-18, -8+ln*12); ctx.lineTo(18, -8+ln*12); ctx.stroke(); }
     ctx.restore();
 
-    // Sticky notes cluster (between router and mug)
+    // Sticky notes cluster (between router and mug) — muted
     ctx.save(); ctx.translate(145, dy + 100); ctx.rotate(0.12);
-    drawRoundRect(-22, -22, 44, 44, 3, '#FFF176', '#F9A825', 1);
-    ctx.strokeStyle = '#E0E0E0'; ctx.lineWidth = 1;
+    drawRoundRect(-22, -22, 44, 44, 3, '#D8D0A0', '#B0A870', 1);
+    ctx.strokeStyle = '#C0C0B0'; ctx.lineWidth = 1;
     for (let ln = 0; ln < 3; ln++) { ctx.beginPath(); ctx.moveTo(-14, -8+ln*10); ctx.lineTo(14, -8+ln*10); ctx.stroke(); }
     ctx.restore();
 
     ctx.save(); ctx.translate(163, dy + 68); ctx.rotate(-0.08);
-    drawRoundRect(-20, -20, 40, 40, 3, '#80DEEA', '#00ACC1', 1);
-    ctx.strokeStyle = '#B2EBF2'; ctx.lineWidth = 1;
+    drawRoundRect(-20, -20, 40, 40, 3, '#A0C8D0', '#708890', 1);
+    ctx.strokeStyle = '#90B0B8'; ctx.lineWidth = 1;
     ctx.beginPath(); ctx.moveTo(-12, -6); ctx.lineTo(12, -6); ctx.stroke();
     ctx.beginPath(); ctx.moveTo(-12, 2); ctx.lineTo(8, 2); ctx.stroke();
     ctx.restore();
 
     ctx.save(); ctx.translate(130, dy + 140); ctx.rotate(-0.14);
-    drawRoundRect(-18, -18, 36, 36, 3, '#F8BBD0', '#EC407A', 1);
-    ctx.strokeStyle = '#F48FB1'; ctx.lineWidth = 1;
+    drawRoundRect(-18, -18, 36, 36, 3, '#C8A8B0', '#987080', 1);
+    ctx.strokeStyle = '#B090A0'; ctx.lineWidth = 1;
     ctx.beginPath(); ctx.moveTo(-10, -4); ctx.lineTo(10, -4); ctx.stroke();
     ctx.restore();
 
-    // Pen lying on desk
+    // Pen lying on desk — muted
     ctx.save(); ctx.translate(180, dy + 155); ctx.rotate(0.3);
-    ctx.strokeStyle = '#1565C0'; ctx.lineWidth = 5; ctx.lineCap = 'round';
+    ctx.strokeStyle = '#506880'; ctx.lineWidth = 5; ctx.lineCap = 'round';
     ctx.beginPath(); ctx.moveTo(-30, 0); ctx.lineTo(30, 0); ctx.stroke();
-    ctx.strokeStyle = '#0D47A1'; ctx.lineWidth = 3;
+    ctx.strokeStyle = '#405868'; ctx.lineWidth = 3;
     ctx.beginPath(); ctx.moveTo(30, 0); ctx.lineTo(38, 0); ctx.stroke();
-    ctx.fillStyle = '#B0BEC5'; ctx.beginPath(); ctx.moveTo(38, -2); ctx.lineTo(44, 0); ctx.lineTo(38, 2); ctx.fill();
+    ctx.fillStyle = '#90989E'; ctx.beginPath(); ctx.moveTo(38, -2); ctx.lineTo(44, 0); ctx.lineTo(38, 2); ctx.fill();
     ctx.restore();
 
-    // Another pen (red)
+    // Another pen (muted red)
     ctx.save(); ctx.translate(920, dy + 170); ctx.rotate(-0.2);
-    ctx.strokeStyle = '#C62828'; ctx.lineWidth = 4; ctx.lineCap = 'round';
+    ctx.strokeStyle = '#8A5050'; ctx.lineWidth = 4; ctx.lineCap = 'round';
     ctx.beginPath(); ctx.moveTo(-25, 0); ctx.lineTo(25, 0); ctx.stroke();
-    ctx.fillStyle = '#B0BEC5'; ctx.beginPath(); ctx.moveTo(25, -2); ctx.lineTo(30, 0); ctx.lineTo(25, 2); ctx.fill();
+    ctx.fillStyle = '#90989E'; ctx.beginPath(); ctx.moveTo(25, -2); ctx.lineTo(30, 0); ctx.lineTo(25, 2); ctx.fill();
     ctx.restore();
 
     // Paper clip
     ctx.save(); ctx.translate(280, dy + 130); ctx.rotate(0.4);
-    ctx.strokeStyle = '#B0BEC5'; ctx.lineWidth = 2;
+    ctx.strokeStyle = '#90989E'; ctx.lineWidth = 2;
     ctx.beginPath(); ctx.moveTo(-5, -8); ctx.lineTo(-5, 8); ctx.arc(-2, 8, 3, Math.PI, 0); ctx.lineTo(1, -5); ctx.arc(-2, -5, 3, 0, Math.PI); ctx.stroke();
     ctx.restore();
 
-    // Eraser
+    // Eraser — muted
     ctx.save(); ctx.translate(380, dy + 168); ctx.rotate(0.25);
-    drawRoundRect(-12, -8, 24, 16, 3, '#F8BBD0', '#EC407A', 1);
+    drawRoundRect(-12, -8, 24, 16, 3, '#C0A0A8', '#987080', 1);
     ctx.restore();
 
-    // Tape dispenser
+    // Tape dispenser — muted
     ctx.save(); ctx.translate(780, dy + 140); ctx.rotate(-0.1);
     drawRoundRect(-20, -12, 40, 24, 4, '#333', '#222', 1);
-    ctx.fillStyle = '#90CAF9'; ctx.fillRect(-16, -8, 28, 16);
+    ctx.fillStyle = '#708898'; ctx.fillRect(-16, -8, 28, 16);
     ctx.restore();
 
-    // Stapler
+    // Stapler — muted
     ctx.save(); ctx.translate(950, dy + 100); ctx.rotate(0.08);
-    drawRoundRect(-30, -8, 60, 16, 4, '#C62828', '#B71C1C', 2);
-    drawRoundRect(-28, -14, 56, 8, 3, '#D32F2F', null);
+    drawRoundRect(-30, -8, 60, 16, 4, '#8A5050', '#704040', 2);
+    drawRoundRect(-28, -14, 56, 8, 3, '#905858', null);
     ctx.restore();
 
     // Headphones
     ctx.save(); ctx.translate(110, dy + 180); ctx.rotate(-0.3);
     ctx.strokeStyle = '#333'; ctx.lineWidth = 8;
     ctx.beginPath(); ctx.arc(0, 0, 52, Math.PI, 0); ctx.stroke();
-    drawRoundRect(-58, -10, 28, 40, 8, '#444', '#333', 1);
-    drawRoundRect(-54, -4, 20, 28, 5, '#666', null); // inner cushion left
-    drawRoundRect(30, -10, 28, 40, 8, '#444', '#333', 1);
-    drawRoundRect(34, -4, 20, 28, 5, '#666', null); // inner cushion right
+    drawRoundRect(-58, -10, 28, 40, 8, '#3A3A3A', '#2A2A2A', 1);
+    drawRoundRect(-54, -4, 20, 28, 5, '#505050', null);
+    drawRoundRect(30, -10, 28, 40, 8, '#3A3A3A', '#2A2A2A', 1);
+    drawRoundRect(34, -4, 20, 28, 5, '#505050', null);
     ctx.restore();
 
-    // Snack wrapper
+    // Snack wrapper — muted
     ctx.save(); ctx.translate(830, dy + 180); ctx.rotate(0.35);
-    drawRoundRect(-22, -10, 44, 20, 3, '#FFD54F', '#FFA000', 1);
-    ctx.strokeStyle = '#FF6F00'; ctx.lineWidth = 1;
+    drawRoundRect(-22, -10, 44, 20, 3, '#C0A870', '#988050', 1);
+    ctx.strokeStyle = '#907040'; ctx.lineWidth = 1;
     ctx.beginPath(); ctx.moveTo(-22, -4); ctx.lineTo(-28, -8); ctx.stroke();
     ctx.beginPath(); ctx.moveTo(22, -4); ctx.lineTo(28, -8); ctx.stroke();
     ctx.restore();
 
-    // Extra sticky note (green)
+    // Extra sticky note (green) — muted
     ctx.save(); ctx.translate(750, dy + 70); ctx.rotate(0.06);
-    drawRoundRect(-18, -18, 36, 36, 3, '#C5E1A5', '#8BC34A', 1);
-    ctx.strokeStyle = '#AED581'; ctx.lineWidth = 1;
+    drawRoundRect(-18, -18, 36, 36, 3, '#A0B890', '#708858', 1);
+    ctx.strokeStyle = '#90A880'; ctx.lineWidth = 1;
     ctx.beginPath(); ctx.moveTo(-10, -6); ctx.lineTo(10, -6); ctx.stroke();
     ctx.beginPath(); ctx.moveTo(-10, 2); ctx.lineTo(6, 2); ctx.stroke();
     ctx.restore();
 
-    // Extra sticky note (yellow)
+    // Extra sticky note (yellow) — muted
     ctx.save(); ctx.translate(400, dy + 180); ctx.rotate(-0.12);
-    drawRoundRect(-18, -18, 36, 36, 3, '#FFE082', '#FFB300', 1);
-    ctx.strokeStyle = '#FFCA28'; ctx.lineWidth = 1;
+    drawRoundRect(-18, -18, 36, 36, 3, '#D0C098', '#A89060', 1);
+    ctx.strokeStyle = '#B8A878'; ctx.lineWidth = 1;
     ctx.beginPath(); ctx.moveTo(-10, -4); ctx.lineTo(10, -4); ctx.stroke();
     ctx.restore();
 
-    // Extra paper (purple-tinted)
+    // Extra paper (muted purple-tinted)
     ctx.save(); ctx.translate(700, dy + 170); ctx.rotate(-0.2);
-    drawRoundRect(-30, -22, 60, 44, 2, '#F3E5F5', '#CE93D8', 1);
-    ctx.strokeStyle = '#BA68C8'; ctx.lineWidth = 1;
+    drawRoundRect(-30, -22, 60, 44, 2, '#D8D0D8', '#A898A8', 1);
+    ctx.strokeStyle = '#9888A0'; ctx.lineWidth = 1;
     for (let ln = 0; ln < 3; ln++) { ctx.beginPath(); ctx.moveTo(-20, -10+ln*10); ctx.lineTo(20, -10+ln*10); ctx.stroke(); }
     ctx.restore();
 
-    // Green pen
+    // Green pen — muted
     ctx.save(); ctx.translate(500, dy + 175); ctx.rotate(-0.4);
-    ctx.strokeStyle = '#2E7D32'; ctx.lineWidth = 4; ctx.lineCap = 'round';
+    ctx.strokeStyle = '#507050'; ctx.lineWidth = 4; ctx.lineCap = 'round';
     ctx.beginPath(); ctx.moveTo(-22, 0); ctx.lineTo(22, 0); ctx.stroke();
-    ctx.fillStyle = '#B0BEC5'; ctx.beginPath(); ctx.moveTo(22, -2); ctx.lineTo(27, 0); ctx.lineTo(22, 2); ctx.fill();
+    ctx.fillStyle = '#90989E'; ctx.beginPath(); ctx.moveTo(22, -2); ctx.lineTo(27, 0); ctx.lineTo(22, 2); ctx.fill();
     ctx.restore();
 
-    // Gold paper clip
+    // Paper clip (muted gold)
     ctx.save(); ctx.translate(650, dy + 155); ctx.rotate(-0.3);
-    ctx.strokeStyle = '#FFD54F'; ctx.lineWidth = 2;
+    ctx.strokeStyle = '#B0A070'; ctx.lineWidth = 2;
     ctx.beginPath(); ctx.moveTo(-5, -8); ctx.lineTo(-5, 8); ctx.arc(-2, 8, 3, Math.PI, 0); ctx.lineTo(1, -5); ctx.arc(-2, -5, 3, 0, Math.PI); ctx.stroke();
     ctx.restore();
 
@@ -189,9 +192,11 @@ function drawDeskItems() {
     // === MUG (moved right to clear router, with rotation) ===
     const mx2 = 220, my2 = dy + 80;
     const mugW = 75, mugH = 90;
-    // Ground shadow directly under mug
-    ctx.fillStyle = 'rgba(0,0,0,0.12)';
-    ctx.beginPath(); ctx.ellipse(mx2 + mugW/2, my2 + mugH + 4, mugW*0.45, 8, 0, 0, Math.PI*2); ctx.fill();
+    // Ground shadow — only when NOT spilling (avoids double shadow)
+    if (GAME.hazard !== 'coffee') {
+        ctx.fillStyle = 'rgba(0,0,0,0.12)';
+        ctx.beginPath(); ctx.ellipse(mx2 + mugW/2, my2 + mugH + 4, mugW*0.45, 8, 0, 0, Math.PI*2); ctx.fill();
+    }
     ctx.save();
     ctx.translate(mx2 + mugW/2, my2 + mugH/2);
     const mugTilt = GAME.hazard === 'coffee' ? -0.4 : 0;
@@ -372,7 +377,9 @@ function drawDeskItems() {
             const col = i % 5, row = Math.floor(i / 5);
             const ix = px + 18 + col * 44;
             const iy = plugY + 26 + row * 38;
-            drawRoundRect(ix, iy, 36, 32, 6, '#263248', '#3A4A5E', 1);
+            // Flash on purchase
+            const flashBg = GAME.shopFlashTimer > 0 ? '#2A4A38' : '#263248';
+            drawRoundRect(ix, iy, 36, 32, 6, flashBg, '#3A4A5E', 1);
             drawText(apps[i].icon, ix + 18, iy + 16, 16, '#FFF', 'center');
         }
     }
@@ -406,36 +413,38 @@ function drawDeskItems() {
         drawRoundRect(cableEndX - 4, cableEndY - 6, 8, 12, 2, '#333', '#222', 1);
     }
 
-    // === ENERGY CAN (next to mug when energy_time active) — bigger, realistic ===
+    // === ENERGY CAN (next to mug when energy_time active) — bigger, moved higher/right ===
     if (GAME.upgrades.energy_time) {
-        const ecx = 295, ecy = dy + 58;
+        const ecx = 330, ecy = dy + 30;
+        const canW = 56, canH = 96;
         ctx.save();
-        ctx.translate(ecx + 22, ecy + 38);
+        ctx.translate(ecx + canW/2, ecy + canH/2);
         ctx.rotate(0.05);
-        ctx.translate(-(ecx + 22), -(ecy + 38));
+        ctx.translate(-(ecx + canW/2), -(ecy + canH/2));
         // Shadow
         ctx.fillStyle = 'rgba(0,0,0,0.2)';
-        ctx.beginPath(); ctx.ellipse(ecx + 22, ecy + 76, 20, 6, 0, 0, Math.PI*2); ctx.fill();
+        ctx.beginPath(); ctx.ellipse(ecx + canW/2, ecy + canH + 4, canW*0.45, 7, 0, 0, Math.PI*2); ctx.fill();
         // Can body
-        drawShadowRoundRect(ecx, ecy, 44, 76, 8, '#004D40', '#00251A', 2);
+        drawShadowRoundRect(ecx, ecy, canW, canH, 10, '#004D40', '#00251A', 2);
         // Green stripe
-        drawRoundRect(ecx + 4, ecy + 18, 36, 30, 4, '#00C853', null);
+        drawRoundRect(ecx + 5, ecy + 22, canW-10, 38, 5, '#00C853', null);
         // Lightning bolt
-        drawText('\u26A1', ecx + 22, ecy + 33, 28, '#FFD54F', 'center');
-        // Brand text
-        drawText('MONSTER', ecx + 22, ecy + 56, 16, '#76FF03', 'center', null, 0, 'bold');
+        drawText('\u26A1', ecx + canW/2, ecy + 42, 36, '#FFD54F', 'center');
         // Silver rim top
-        drawRoundRect(ecx + 2, ecy, 40, 8, 4, '#B0BEC5', '#78909C', 1);
+        drawRoundRect(ecx + 3, ecy, canW-6, 10, 5, '#B0BEC5', '#78909C', 1);
         // Pull tab
         ctx.fillStyle = '#90A4AE';
-        ctx.beginPath(); ctx.ellipse(ecx + 22, ecy + 2, 8, 3, 0, 0, Math.PI*2); ctx.fill();
+        ctx.beginPath(); ctx.ellipse(ecx + canW/2, ecy + 3, 10, 4, 0, 0, Math.PI*2); ctx.fill();
         // Condensation droplets
         ctx.fillStyle = 'rgba(255,255,255,0.2)';
-        ctx.beginPath(); ctx.arc(ecx + 10, ecy + 42, 2, 0, Math.PI*2); ctx.fill();
-        ctx.beginPath(); ctx.arc(ecx + 34, ecy + 50, 1.5, 0, Math.PI*2); ctx.fill();
-        ctx.beginPath(); ctx.arc(ecx + 14, ecy + 60, 2, 0, Math.PI*2); ctx.fill();
+        ctx.beginPath(); ctx.arc(ecx + 12, ecy + 52, 2.5, 0, Math.PI*2); ctx.fill();
+        ctx.beginPath(); ctx.arc(ecx + canW-12, ecy + 62, 2, 0, Math.PI*2); ctx.fill();
+        ctx.beginPath(); ctx.arc(ecx + 16, ecy + 74, 2.5, 0, Math.PI*2); ctx.fill();
         ctx.restore();
     }
+
+    // Restore alpha after keyboard hazard dimming
+    if (GAME.hazard === 'kbbreak') ctx.globalAlpha = 1;
 }
 
 // Cat peeking from behind the DESK on the right side — drawn separately from main.js

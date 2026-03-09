@@ -312,11 +312,11 @@ function drawORScene() {
     ctx.beginPath(); ctx.arc(lampX, M.sy+22, 69, Math.PI+0.1, -0.1); ctx.stroke();
     // Lamp bulbs — slightly muted
     for (let lb = -2; lb <= 2; lb++) {
-        ctx.fillStyle = '#E8E4B0';
+        ctx.fillStyle = '#C8C498';
         ctx.beginPath(); ctx.arc(lampX + lb*20, M.sy+18, 5, 0, Math.PI*2); ctx.fill();
     }
     let lg = ctx.createLinearGradient(lampX, M.sy+22, lampX, orBot);
-    lg.addColorStop(0, 'rgba(255,255,240,0.12)'); lg.addColorStop(1, 'rgba(255,255,255,0)');
+    lg.addColorStop(0, 'rgba(255,255,240,0.06)'); lg.addColorStop(1, 'rgba(255,255,255,0)');
     ctx.fillStyle = lg;
     ctx.beginPath(); ctx.moveTo(lampX-65, M.sy+22); ctx.lineTo(lampX+65, M.sy+22); ctx.lineTo(lampX+150, orBot); ctx.lineTo(lampX-150, orBot); ctx.fill();
 
@@ -330,12 +330,23 @@ function drawORScene() {
     ctx.fillStyle = 'rgba(0,230,118,0.06)';
     ctx.fillRect(hmx+6, hmy+6, 83, 38);
     ctx.restore();
-    ctx.strokeStyle = '#00E676'; ctx.lineWidth = 2;
+    // Dynamic EKG based on hearts — more zigzags at full health, fewer at low
+    const heartsRatio = GAME.state === 'PLAYING' ? GAME.hearts / GAME.maxHearts : 1;
+    const ekgColor = heartsRatio > 0.6 ? '#00E676' : heartsRatio > 0.3 ? '#FFD54F' : '#FF4444';
+    ctx.strokeStyle = ekgColor; ctx.lineWidth = 2;
     let ekg = (performance.now()/12) % 83;
+    const ekgAmp = 8 + heartsRatio * 8; // amplitude scales with health
     ctx.beginPath();
     ctx.moveTo(hmx+6, hmy+26); ctx.lineTo(hmx+6+ekg/2, hmy+26);
-    ctx.lineTo(hmx+6+ekg/2+5, hmy+12); ctx.lineTo(hmx+6+ekg/2+10, hmy+38);
-    ctx.lineTo(hmx+6+ekg/2+15, hmy+26); ctx.lineTo(hmx+89, hmy+26);
+    if (heartsRatio > 0.3) {
+        ctx.lineTo(hmx+6+ekg/2+5, hmy+26-ekgAmp); ctx.lineTo(hmx+6+ekg/2+10, hmy+26+ekgAmp);
+        ctx.lineTo(hmx+6+ekg/2+15, hmy+26);
+    }
+    if (heartsRatio > 0.6) {
+        ctx.lineTo(hmx+6+ekg/2+20, hmy+26); ctx.lineTo(hmx+6+ekg/2+23, hmy+26-ekgAmp*0.5);
+        ctx.lineTo(hmx+6+ekg/2+26, hmy+26+ekgAmp*0.5); ctx.lineTo(hmx+6+ekg/2+30, hmy+26);
+    }
+    ctx.lineTo(hmx+89, hmy+26);
     ctx.stroke();
     ctx.fillStyle = (Math.floor(performance.now()/300)%2===0) ? '#00E676' : '#1B5E20';
     ctx.beginPath(); ctx.arc(hmx+78, hmy+56, 5, 0, Math.PI*2); ctx.fill();
@@ -460,21 +471,23 @@ function drawORScene() {
 
     // HUD
     if (GAME.state === 'PLAYING' || GAME.state === 'RESOLUTION') {
-        drawRoundRect(M.sx+12, M.sy+6, M.sw-24, 44, 12, 'rgba(0,0,0,0.65)', null);
-
-        // LIVE HOSPITAL FEED indicator (left side of HUD bar)
+        // Left plate: LIVE HOSPITAL FEED indicator
         const liveX = M.sx + 24;
+        drawRoundRect(M.sx+12, M.sy+6, 200, 44, 12, 'rgba(0,0,0,0.65)', null);
         if (Math.floor(performance.now()/500)%2===0) {
             ctx.fillStyle = '#FF1744';
         } else {
             ctx.fillStyle = '#880000';
         }
         ctx.beginPath(); ctx.arc(liveX, M.sy+28, 5, 0, Math.PI*2); ctx.fill();
-        drawText('LIVE', liveX + 12, M.sy+28, 16, '#FF1744', 'left', null, 0, 'bold');
-        drawText('HOSPITAL FEED', liveX + 52, M.sy+28, 16, '#CC8888', 'left', null, 0, 'normal');
+        drawText('LIVE HOSPITAL FEED', liveX + 12, M.sy+28, 16, '#FF1744', 'left', null, 0, 'bold');
 
-        // Hearts shifted right after LIVE HOSPITAL FEED section (with pulse)
-        let hx = liveX + 170;
+        // Right plate: Hearts + Anesthesia bar
+        const rightPlateX = M.sx + 220;
+        drawRoundRect(rightPlateX, M.sy+6, M.sw-24-(rightPlateX-M.sx-12), 44, 12, 'rgba(0,0,0,0.65)', null);
+
+        // Hearts
+        let hx = rightPlateX + 12;
         for (let i = 0; i < GAME.maxHearts; i++) {
             const isLawyer = GAME.upgrades.lawyer && i === GAME.maxHearts - 1;
             const alive = i < GAME.hearts;

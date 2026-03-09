@@ -28,44 +28,49 @@ function drawScreenPlaying() {
     drawRect(M.sx, M.uiY, M.sw, M.uiH, 'rgba(8,18,35,0.95)');
 
     const pad = 12;
-    const topY = M.uiY + 6;
-    const contentY = topY + 22;
-    const contentH = M.uiH - 32;
+    const topY = M.uiY + 10;
+    const contentY = topY + 24;
+    const contentH = M.uiH - 38;
 
-    // === TOP LINE: Level (bold) + Phase dots ===
-    drawText(getRankName(GAME.rank), M.sx + pad + 4, topY + 8, 18, '#DDE4EE', 'left', null, 0, 'bold');
-    // Phase dots
-    const dotStartX = M.sx + pad + 320;
+    // === LEFT PANEL: Hospital Form (operation + patient) ===
+    const formX = M.sx + pad;
+    const formY = contentY + 2;
+    const formW = 260;
+    const formH = contentH - 8;
+    drawRoundRect(formX, formY, formW, formH, 10, '#111828', '#2A3A4E', 2);
+    // Level + Phase dots inside form top
+    drawText(getRankName(GAME.rank), formX + 14, formY + 14, 16, '#DDE4EE', 'left', null, 0, 'bold');
+    // Phase dots after rank text
+    const dotStartX = formX + 14;
+    const dotY = formY + 32;
     for (let i = 0; i < GAME.phasesNeeded; i++) {
         const filled = i < GAME.phasesCompleted;
         const current = i === GAME.phasesCompleted;
         ctx.fillStyle = filled ? COLORS.green : current ? COLORS.gold : '#334';
-        ctx.beginPath(); ctx.arc(dotStartX + i * 20, topY + 8, 6, 0, Math.PI*2); ctx.fill();
+        ctx.beginPath(); ctx.arc(dotStartX + i * 18, dotY, 5, 0, Math.PI*2); ctx.fill();
         if (current) {
             ctx.strokeStyle = COLORS.gold; ctx.lineWidth = 2;
-            ctx.beginPath(); ctx.arc(dotStartX + i * 20, topY + 8, 8, 0, Math.PI*2); ctx.stroke();
+            ctx.beginPath(); ctx.arc(dotStartX + i * 18, dotY, 7, 0, Math.PI*2); ctx.stroke();
         }
     }
-
-    // === LEFT PANEL: Hospital Form (operation + patient) ===
-    const formX = M.sx + pad;
-    const formY = contentY + 4;
-    const formW = 260;
-    const formH = contentH - 12;
-    drawRoundRect(formX, formY, formW, formH, 10, '#111828', '#2A3A4E', 2);
-    // Form labels and values
-    drawText('OPERATION', formX + 14, formY + 18, 16, '#5A6A80', 'left', null, 0, 'normal');
-    drawText(GAME.operationName, formX + 14, formY + 40, 20, '#FFF', 'left', null, 0, 'bold');
-    drawText('PATIENT', formX + 14, formY + 64, 16, '#5A6A80', 'left', null, 0, 'normal');
-    drawText(GAME.patientName, formX + 14, formY + 84, 18, '#DDE4EE', 'left', null, 0, 'normal');
-    // Combo counter
-    if (GAME.comboCount >= 2 && GAME.comboTimer > 0) {
-        const comboScale = 1 + Math.sin(now / 80) * 0.1;
-        const comboColor = GAME.comboCount >= 5 ? '#FF4081' : GAME.comboCount >= 3 ? '#FFD54F' : '#00E676';
-        ctx.save(); ctx.translate(formX + formW - 40, formY + formH - 20); ctx.scale(comboScale, comboScale);
-        drawText(`${GAME.comboCount}x`, 0, 0, 22, comboColor, 'center', '#000', 4);
-        ctx.restore();
+    // Form labels and values — with text wrapping for overflow
+    drawText('OPERATION', formX + 14, formY + 50, 16, '#5A6A80', 'left', null, 0, 'normal');
+    // Truncate operation name if too wide
+    ctx.font = "bold 18px 'Segoe UI', Tahoma, sans-serif";
+    let opName = GAME.operationName;
+    if (ctx.measureText(opName).width > formW - 28) {
+        while (ctx.measureText(opName + '...').width > formW - 28 && opName.length > 3) opName = opName.slice(0, -1);
+        opName += '...';
     }
+    drawText(opName, formX + 14, formY + 70, 18, '#FFF', 'left', null, 0, 'bold');
+    drawText('PATIENT', formX + 14, formY + 92, 16, '#5A6A80', 'left', null, 0, 'normal');
+    ctx.font = "normal 16px 'Segoe UI', Tahoma, sans-serif";
+    let patName = GAME.patientName;
+    if (ctx.measureText(patName).width > formW - 28) {
+        while (ctx.measureText(patName + '...').width > formW - 28 && patName.length > 3) patName = patName.slice(0, -1);
+        patName += '...';
+    }
+    drawText(patName, formX + 14, formY + 110, 16, '#DDE4EE', 'left', null, 0, 'normal');
 
     // === CENTER: Ring/Donut Timer ===
     const ringCX = formX + formW + 60;
@@ -105,7 +110,7 @@ function drawScreenPlaying() {
     const arrowContY = formY;
     const arrowContH = formH;
     drawRoundRect(arrowX, arrowContY, arrowContW, arrowContH, 10, '#111828', '#2A3A4E', 2);
-    drawText('ROBOT COMMAND SEQUENCE', arrowX + arrowContW/2, arrowContY + 14, 16, '#5A6A80', 'center', null, 0, 'normal');
+    drawText('ROBOT COMMAND SEQUENCE', arrowX + 14, arrowContY + 14, 16, '#5A6A80', 'left', null, 0, 'normal');
 
     // Arrow keys with horizontal scroll
     const sqW = 48;
@@ -167,7 +172,7 @@ function drawScreenStore() {
     // Header — clean shop branding
     drawRect(M.sx, M.sy, M.sw, 58, '#161B22');
     drawText('PURCHASE PLUGINS', M.sx+M.sw/2, M.sy+25, 30, '#FFF', 'center');
-    drawText('All plugins last ONE ROUND only!', M.sx+M.sw/2, M.sy+48, 16, '#FF9800', 'center', null, 0, 'normal');
+    drawText('All plugins last ONE OPERATION only!', M.sx+M.sw/2, M.sy+48, 16, '#FF9800', 'center', null, 0, 'normal');
 
     drawButton('\u2190 BACK', M.sx+20, M.sy+14, 110, 38, '#444', 16);
 
@@ -189,14 +194,21 @@ function drawScreenStore() {
         const iy = M.sy + 78 + row * 118;
         drawShadowRoundRect(ix, iy, cardW, cardH, 10, '#1A2332', '#2A3A4E', 2);
         drawText(item.icon, ix+28, iy+30, 28, '#FFF', 'center');
-        drawText(item.title, ix+50, iy+20, 16, '#FFF', 'left', null, 0, 'bold');
-        drawText(item.desc, ix+50, iy+40, 16, '#7889A0', 'left', null, 0, 'normal');
+        drawTextTruncated(item.title, ix+50, iy+20, 16, '#FFF', cardW-60, 'left', null, 0, 'bold');
+        drawTextTruncated(item.desc, ix+50, iy+40, 16, '#7889A0', cardW-60, 'left', null, 0, 'normal');
         const isMax = item.consumable && GAME.hearts >= GAME.maxHearts;
         const owned = !item.consumable && GAME.upgrades[item.id];
         const bc = (owned||isMax) ? '#555' : GAME.cash>=item.price ? COLORS.gold : '#555';
         const bt = owned ? 'OWNED' : isMax ? 'FULL' : `$${item.price}`;
         drawButton(bt, ix+cardW/2-50, iy+78, 100, 26, bc, 16);
     });
+
+    // Purchase flash overlay
+    if (GAME.shopFlashTimer > 0) {
+        const alpha = Math.min(0.2, GAME.shopFlashTimer / 300 * 0.2);
+        ctx.fillStyle = `rgba(0,230,118,${alpha})`;
+        ctx.fillRect(M.sx, M.sy, M.sw, M.sh);
+    }
 
     ctx.restore();
 }
@@ -218,24 +230,33 @@ function drawScreenResolution() {
         ctx.restore(); return;
     }
 
-    const titleIcon = isWin ? '\u2705' : '\u274C';
-    let title = isWin ? 'OPERATION SUCCESS' : GAME.lastResult==='AWAKE' ? 'PATIENT WOKE UP' : 'MALPRACTICE LAWSUIT';
-    drawText(titleIcon, M.sx+M.sw/2, M.sy+55, 56, '#FFF', 'center');
-    drawText(title, M.sx+M.sw/2, M.sy+105, 42, '#FFF', 'center', 'rgba(0,0,0,0.5)', 3);
-
     if (isWin) {
-        drawText(`BASE: +$${200+GAME.rank*100}   HEARTS: +$${GAME.hearts*(50+GAME.rank*10)}   SPEED: +$${Math.floor((GAME.anesthesia/1000)*10)}`, M.sx+M.sw/2, M.sy+155, 18, '#AAA', 'center', null, 0, 'normal');
-        drawText(`TOTAL PAYOUT: $${GAME.payout}`, M.sx+M.sw/2, M.sy+200, 44, COLORS.green, 'center', 'rgba(0,0,0,0.5)', 3);
-        drawText(`Rank: ${getRankName(GAME.rank)}`, M.sx+M.sw/2, M.sy+245, 22, '#6B7A8E', 'center', null, 0, 'normal');
-        drawText('Visit the shop or quit.', M.sx+M.sw/2, M.sy+275, 17, '#888', 'center', null, 0, 'normal');
+        // Beautified success screen
+        const pulse = 1 + Math.sin(performance.now()/300) * 0.04;
+        ctx.save(); ctx.translate(M.sx+M.sw/2, M.sy+55); ctx.scale(pulse, pulse);
+        drawText('🎉', 0, 0, 56, '#FFF', 'center');
+        ctx.restore();
+        drawText('OPERATION SUCCESS', M.sx+M.sw/2, M.sy+105, 42, COLORS.green, 'center', 'rgba(0,0,0,0.5)', 3);
+        // Promoted to rank
+        const rankNames = ['Intern','Cafeteria Medic','WebMD Graduate','Sleep-Deprived Resident','Malpractice Magnet',
+            'Chief of Vibes','Organ Freelancer','Insurance Nightmare','Dr. Google','Scalpel Influencer',
+            'Surgical Shitposter','Liability Speedrunner','God Complex','Board-Certified War Criminal','Literally God'];
+        drawText(`Promoted to ${rankNames[GAME.rank] || 'Literally God'}`, M.sx+M.sw/2, M.sy+155, 26, COLORS.gold, 'center', 'rgba(0,0,0,0.4)', 3);
+        // Payout breakdown
+        drawText(`+$${200+GAME.rank*100} base  +$${GAME.hearts*(50+GAME.rank*10)} hearts  +$${Math.floor((GAME.anesthesia/1000)*10)} speed`, M.sx+M.sw/2, M.sy+195, 16, '#6B7A8E', 'center', null, 0, 'normal');
+        drawText(`$${GAME.payout}`, M.sx+M.sw/2, M.sy+240, 56, COLORS.green, 'center', 'rgba(0,0,0,0.5)', 4);
     } else {
+        // Beautified failure screen
+        const failIcon = GAME.lastResult === 'AWAKE' ? '😱' : '⚖️';
+        let failTitle = GAME.lastResult === 'AWAKE' ? 'PATIENT WOKE UP' : 'MALPRACTICE LAWSUIT';
+        drawText(failIcon, M.sx+M.sw/2, M.sy+55, 56, '#FFF', 'center');
+        drawText(failTitle, M.sx+M.sw/2, M.sy+105, 42, COLORS.red, 'center', 'rgba(0,0,0,0.5)', 3);
+        drawText('YOU HAVE BEEN FIRED', M.sx+M.sw/2, M.sy+160, 24, '#888', 'center', null, 0, 'normal');
+        drawText('$0', M.sx+M.sw/2, M.sy+210, 48, '#555', 'center');
         const retryCost = (GAME.rank+1)*300;
         const canAfford = GAME.cash >= retryCost;
-        drawText('YOU HAVE BEEN FIRED.', M.sx+M.sw/2, M.sy+155, 28, '#AAA', 'center');
-        drawText('PAYOUT: $0', M.sx+M.sw/2, M.sy+195, 32, '#555', 'center');
         if (!canAfford) {
-            drawText('Not enough cash to retry!', M.sx+M.sw/2, M.sy+235, 18, COLORS.red, 'center', null, 0, 'normal');
-            drawText('Visit the shop or quit.', M.sx+M.sw/2, M.sy+255, 17, '#888', 'center', null, 0, 'normal');
+            drawText('Not enough cash to retry!', M.sx+M.sw/2, M.sy+255, 18, COLORS.red, 'center', null, 0, 'normal');
         }
     }
 
@@ -263,13 +284,22 @@ function drawHelpModal() {
     drawText('HOW TO PLAY', CW/2, my+42, 38, '#FFF', 'center');
     drawButton('\u2715', mx+mw-55, my+12, 42, 38, '#444', 22);
 
-    for (let i = 0; i < 4; i++) {
+    const totalPages = 5;
+    for (let i = 0; i < totalPages; i++) {
         ctx.fillStyle = i === GAME.helpPage ? COLORS.green : '#444';
-        ctx.beginPath(); ctx.arc(CW/2 - 30 + i*20, my+mh-100, 6, 0, Math.PI*2); ctx.fill();
+        ctx.beginPath(); ctx.arc(CW/2 - 40 + i*20, my+mh-100, 6, 0, Math.PI*2); ctx.fill();
     }
 
     const cx = CW/2, cy = my + 220;
     if (GAME.helpPage === 0) {
+        // Intro story page
+        drawText('🏥', cx, cy-90, 66, '#FFF', 'center');
+        drawText('WELCOME, SURGEON', cx, cy-30, 34, COLORS.green, 'center');
+        drawText('The hospital ran out of budget.', cx, cy+15, 22, '#CCC', 'center', null, 0, 'normal');
+        drawText('You now operate from home.', cx, cy+48, 22, '#CCC', 'center', null, 0, 'normal');
+        drawText('Control a robot arm remotely.', cx, cy+81, 22, '#FFF', 'center');
+        drawText('Try not to kill anyone.', cx, cy+120, 22, COLORS.gold, 'center');
+    } else if (GAME.helpPage === 1) {
         drawText('MATCH THE ARROWS', cx, cy-100, 34, COLORS.gold, 'center');
         const keys = ['\u21E7','\u21E9','\u21E6','\u21E8'], colors = [COLORS.green, COLORS.gold, '#2A3A4E', '#2A3A4E'];
         for (let i = 0; i < 4; i++) {
@@ -278,43 +308,43 @@ function drawHelpModal() {
         }
         drawText('Press arrow keys in order before', cx, cy+45, 22, '#CCC', 'center', null, 0, 'normal');
         drawText('the timer runs out.', cx, cy+78, 22, '#FFF', 'center');
-    } else if (GAME.helpPage === 1) {
+    } else if (GAME.helpPage === 2) {
         drawText('PROTECT YOUR HEARTS', cx, cy-100, 34, COLORS.red, 'center');
         for (let i = 0; i < 3; i++) drawText('\u2764', cx-70+i*70, cy-20, 56, i<2?COLORS.red:'#444', 'center');
         drawText('Wrong keys & timeouts cost hearts.', cx, cy+55, 22, '#CCC', 'center', null, 0, 'normal');
         drawText('Lose all hearts = game over!', cx, cy+88, 22, COLORS.red, 'center');
         drawText('3 perfect sequences in a row = bonus heart!', cx, cy+125, 18, COLORS.green, 'center', null, 0, 'normal');
-    } else if (GAME.helpPage === 2) {
+    } else if (GAME.helpPage === 3) {
         drawText('WFH HAZARDS', cx, cy-110, 34, '#FFA000', 'center');
         const hz1 = [{i:'\uD83D\uDC31',a:'Click 3x'},{i:'\u2615',a:'Click & wipe'},{i:'\uD83D\uDCF6',a:'Smash router'},{i:'\uD83D\uDD0C',a:'Drag plug'}];
-        const hzCardW = 82, hzCardH = 72, hzGap = 10;
+        const hzCardW = 90, hzCardH = 80, hzGap = 12;
         const hz1TotalW = 4*hzCardW + 3*hzGap;
         const hz1StartX = cx - hz1TotalW/2;
         for (let i = 0; i < 4; i++) {
             const hx = hz1StartX + i*(hzCardW+hzGap);
             drawRoundRect(hx, cy-75, hzCardW, hzCardH, 12, '#2A3A4E', null);
-            drawText(hz1[i].i, hx+hzCardW/2, cy-75+hzCardH/2-8, 28, '#FFF', 'center');
-            drawText(hz1[i].a, hx+hzCardW/2, cy-75+hzCardH+14, 16, '#AAA', 'center', null, 0, 'normal');
+            drawText(hz1[i].i, hx+hzCardW/2, cy-75+hzCardH/2-8, 36, '#FFF', 'center');
+            drawText(hz1[i].a, hx+hzCardW/2, cy-75+hzCardH+16, 16, '#AAA', 'center', null, 0, 'normal');
         }
         const hz2 = [{i:'\uD83D\uDCBC',a:'Close popup'},{i:'\uD83D\uDD27',a:'Fix screws'},{i:'\uD83E\uDDA0',a:'Zap viruses'}];
         const hz2TotalW = 3*hzCardW + 2*hzGap;
         const hz2StartX = cx - hz2TotalW/2;
         for (let i = 0; i < 3; i++) {
             const hx = hz2StartX + i*(hzCardW+hzGap);
-            drawRoundRect(hx, cy+25, hzCardW, hzCardH, 12, '#2A3A4E', null);
-            drawText(hz2[i].i, hx+hzCardW/2, cy+25+hzCardH/2-8, 28, '#FFF', 'center');
-            drawText(hz2[i].a, hx+hzCardW/2, cy+25+hzCardH+14, 16, '#AAA', 'center', null, 0, 'normal');
+            drawRoundRect(hx, cy+35, hzCardW, hzCardH, 12, '#2A3A4E', null);
+            drawText(hz2[i].i, hx+hzCardW/2, cy+35+hzCardH/2-8, 36, '#FFF', 'center');
+            drawText(hz2[i].a, hx+hzCardW/2, cy+35+hzCardH+16, 16, '#AAA', 'center', null, 0, 'normal');
         }
-        drawText('Deal with interruptions to get back to surgery!', cx, cy+140, 19, '#CCC', 'center', null, 0, 'normal');
+        drawText('Deal with interruptions to get back to surgery!', cx, cy+155, 19, '#CCC', 'center', null, 0, 'normal');
     } else {
         drawText('EARN & UPGRADE', cx, cy-100, 34, COLORS.gold, 'center');
         drawText('\uD83D\uDCB0', cx, cy-30, 66, '#FFF', 'center');
         drawText('Complete operations to earn cash.', cx, cy+45, 22, '#CCC', 'center', null, 0, 'normal');
         drawText('Spend it at the shop for plugins!', cx, cy+78, 22, COLORS.gold, 'center');
-        drawText('Upgrades reset each shift.', cx, cy+115, 17, '#777', 'center', null, 0, 'normal');
+        drawText('Upgrades reset each operation.', cx, cy+115, 17, '#777', 'center', null, 0, 'normal');
     }
 
     if (GAME.helpPage > 0) drawButton('\u2190 PREV', mx+25, my+mh-65, 110, 44, '#444', 18);
-    if (GAME.helpPage < 3) drawButton('NEXT \u2192', mx+mw-135, my+mh-65, 110, 44, '#444', 18);
+    if (GAME.helpPage < 4) drawButton('NEXT \u2192', mx+mw-135, my+mh-65, 110, 44, '#444', 18);
     drawButton(GAME.pendingStart ? 'START OPERATION' : 'CLOSE', CW/2-130, my+mh-70, 260, 50, GAME.pendingStart ? COLORS.green : '#555', 22, GAME.pendingStart);
 }

@@ -71,10 +71,9 @@ function generateSequence(len) {
 function chunkComplete() {
     GAME.phasesCompleted++; GAME.perfectStreak++; GAME.greenFlashTimer = 200;
     AudioEngine.playPhaseComplete();
-    addNotification(`Sequence ${GAME.phasesCompleted}/${GAME.phasesNeeded}`, '✅', 1500);
     if (GAME.perfectStreak >= 3 && GAME.hearts < GAME.maxHearts) {
         GAME.hearts++; GAME.perfectStreak = 0;
-        addNotification('+1 Heart! (3x Perfect)', '❤️', 2000);
+        GAME.yellowFlashTimer = 400;
     }
     if (GAME.phasesCompleted >= GAME.phasesNeeded) triggerResolution('WIN');
     else generateSequence(5 + Math.floor(GAME.rank*0.45));
@@ -112,7 +111,7 @@ function spawnHazard() {
     }
     if (GAME.hazard === 'battery') {
         GAME.dimLevel=0; GAME.batteryDrag=false;
-        GAME.plugPos = {x: -20, y: CH/2};
+        GAME.plugPos = {x: 80, y: CH/2};
         GAME.socketPos = {x: CW - 100, y: CH/2};
         AudioEngine.playBatteryWarning();
     }
@@ -164,8 +163,7 @@ function triggerResolution(result) {
         const tb = Math.floor((GAME.anesthesia/1000)*10);
         GAME.payout = base + hb + tb; GAME.cash += GAME.payout;
         AudioEngine.playLevelComplete();
-        addNotification('Operation Success!', '🎉', 2500);
-        if (GAME.rank > GAME.highestRank) { GAME.highestRank = GAME.rank; addNotification('Promoted to ' + getRankName(GAME.rank) + '!', '⭐', 3000); }
+        if (GAME.rank > GAME.highestRank) GAME.highestRank = GAME.rank;
     } else { GAME.payout = 0; AudioEngine.playLevelFail(); }
     GAME.upgrades = { ...DEFAULT_UPGRADES };
     AudioEngine.setBGMMode('gameover');

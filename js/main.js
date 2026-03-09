@@ -85,6 +85,8 @@ function loop(timestamp) {
 
     if (GAME.arrowPopTimer > 0) GAME.arrowPopTimer -= dt;
     if (GAME.greenFlashTimer > 0) GAME.greenFlashTimer -= dt;
+    if (GAME.yellowFlashTimer > 0) GAME.yellowFlashTimer -= dt;
+    if (GAME.shopFlashTimer > 0) GAME.shopFlashTimer -= dt;
 
     let shakeX=0, shakeY=0;
     if (GAME.shakeTimer > 0) {
@@ -123,7 +125,6 @@ function loop(timestamp) {
     drawCatTailBehind();
     drawDeskItems();
     drawHazards();
-    drawNotifications(dt);
     if (GAME.state === 'HELP') drawHelpModal();
 
     if (GAME.redFlashTimer > 0) {
@@ -132,7 +133,14 @@ function loop(timestamp) {
         ctx.fillRect(0, 0, CW, CH);
     }
 
-    // ADHD: Correct arrow green screen flash
+    // Yellow flash for perfect sequence bonus heart
+    if (GAME.yellowFlashTimer > 0) {
+        const alpha = Math.min(0.35, GAME.yellowFlashTimer / 400 * 0.35);
+        ctx.fillStyle = `rgba(255,213,79,${alpha})`;
+        ctx.fillRect(0, 0, CW, CH);
+    }
+
+    // Correct arrow green screen flash
     if (GAME.screenFlashTimer > 0) {
         const alpha = Math.min(0.15, GAME.screenFlashTimer / 100 * 0.15);
         ctx.strokeStyle = `rgba(0,230,118,${alpha})`;
@@ -140,7 +148,7 @@ function loop(timestamp) {
         ctx.strokeRect(3, 3, CW-6, CH-6);
     }
 
-    // ADHD: Hazard spawn orange border flash
+    // Hazard spawn orange border flash
     if (GAME.hazardSpawnFlash > 0) {
         const alpha = Math.min(0.3, GAME.hazardSpawnFlash / 300 * 0.3);
         ctx.strokeStyle = `rgba(255,152,0,${alpha})`;

@@ -60,7 +60,7 @@ function drawHazards() {
         // SCREAMING text
         let pulse = 1+Math.sin(now/120)*0.08;
         ctx.save(); ctx.translate(cx2, 55); ctx.scale(pulse, pulse);
-        drawText(`\uD83D\uDC31 SHOO THE CAT!! Click ${3-GAME.catClicks} more!! \uD83D\uDC31`, 0, 0, 42, '#FFA000', 'center', '#000', 6);
+        drawText(`\uD83D\uDC31 SHOO THE CAT!! Click ${3-GAME.catClicks} more!! \uD83D\uDC31`, 0, 0, 36, '#FFA000', 'center', '#000', 6);
         ctx.restore();
         ctx.save(); ctx.translate(cx2, CH - 80); ctx.scale(pulse, pulse);
         drawText('YOUR CAT IS ON THE DESK AGAIN!!!', 0, 0, 28, '#FF6F00', 'center', '#000', 4);
@@ -163,7 +163,7 @@ function drawHazards() {
         }
         let pulse2 = 1+Math.sin(now/120)*0.08;
         ctx.save(); ctx.translate(mcx, M.sy + 28); ctx.scale(pulse2, pulse2);
-        drawText('\u2615 COFFEE SPILL!! WIPE IT UP!! \u2615', 0, 0, 38, '#D7CCC8', 'center', '#000', 6);
+        drawText('\u2615 COFFEE SPILL!! WIPE IT UP!! \u2615', 0, 0, 36, '#D7CCC8', 'center', '#000', 6);
         ctx.restore();
         // Cloth/rag at cursor when wiping — 4x bigger (160x96)
         if (GAME.coffeeWiping) {
@@ -204,7 +204,7 @@ function drawHazards() {
         }
         let pulse4 = 1+Math.sin(now/120)*0.08;
         ctx.save(); ctx.translate(mcx, mcy-20); ctx.scale(pulse4, pulse4);
-        drawText(`\uD83D\uDCF6 WI-FI IS DOWN!!!`, 0, 0, 52, COLORS.red, 'center', '#000', 8);
+        drawText(`\uD83D\uDCF6 WI-FI IS DOWN!!!`, 0, 0, 36, COLORS.red, 'center', '#000', 6);
         ctx.restore();
         drawText(`SMASH THE ROUTER!! ${3-GAME.routerClicks} more clicks!`, mcx, mcy+35, 28, '#CCC', 'center', null, 0, 'normal');
     }
@@ -212,7 +212,7 @@ function drawHazards() {
         drawText('\u2328\uFE0F', mcx, mcy - 30, 80, '#FFF', 'center');
         let pulse5 = 1+Math.sin(now/120)*0.08;
         ctx.save(); ctx.translate(mcx, mcy+40); ctx.scale(pulse5, pulse5);
-        drawText('KEYBOARD DISCONNECTED!!', 0, 0, 40, COLORS.red, 'center', '#000', 6);
+        drawText('KEYBOARD DISCONNECTED!!', 0, 0, 36, COLORS.red, 'center', '#000', 6);
         ctx.restore();
         const fixedCount = GAME.kbScrews.filter(s => s).length;
         drawText(`Fix the screws! ${fixedCount}/4 done`, mcx, mcy+85, 24, '#CCC', 'center', null, 0, 'normal');
@@ -267,50 +267,41 @@ function drawHazards() {
 
     // === DESK-LEVEL hazard elements (outside monitor clip) ===
     if (GAME.hazard === 'battery') {
-        // Battery icon and warning — centered vertically at CH/2
+        // Battery icon and warning — centered on screen
         const batCY = CH/2;
         const bw = 270, bh = 135;
-        drawRoundRect(mcx-bw/2, batCY-bh/2-30, bw, bh, 20, '#333', '#FF4444', 5);
-        drawRect(mcx+bw/2, batCY-33-30, 20, 66, '#FF4444');
+        drawRoundRect(mcx-bw/2, batCY-bh/2, bw, bh, 20, '#333', '#FF4444', 5);
+        drawRect(mcx+bw/2, batCY-33, 20, 66, '#FF4444');
         const flashPct = (Math.sin(now/200)+1)/2 * 0.3;
-        drawRoundRect(mcx-bw/2+12, batCY-bh/2+12-30, (bw-24)*flashPct, bh-24, 14, COLORS.red, null);
+        drawRoundRect(mcx-bw/2+12, batCY-bh/2+12, (bw-24)*flashPct, bh-24, 14, COLORS.red, null);
         ctx.fillStyle = COLORS.red;
         ctx.beginPath();
-        ctx.moveTo(mcx-15, batCY-bh/2+20-30); ctx.lineTo(mcx+22, batCY-15-30);
-        ctx.lineTo(mcx+3, batCY-12-30); ctx.lineTo(mcx+30, batCY+bh/2-27-30);
-        ctx.lineTo(mcx-8, batCY+3-30); ctx.lineTo(mcx+12, batCY+6-30);
+        ctx.moveTo(mcx-15, batCY-bh/2+20); ctx.lineTo(mcx+22, batCY-15);
+        ctx.lineTo(mcx+3, batCY-12); ctx.lineTo(mcx+30, batCY+bh/2-27);
+        ctx.lineTo(mcx-8, batCY+3); ctx.lineTo(mcx+12, batCY+6);
         ctx.closePath(); ctx.fill();
         let pulse3 = 1+Math.sin(now/120)*0.08;
-        ctx.save(); ctx.translate(mcx, batCY+95); ctx.scale(pulse3, pulse3);
+        ctx.save(); ctx.translate(mcx, batCY-bh/2-30); ctx.scale(pulse3, pulse3);
         drawText('\uD83D\uDD0B BATTERY DYING!! PLUG IN NOW!! \u26A1', 0, 0, 36, COLORS.red, 'center', '#000', 6);
         ctx.restore();
-        drawText('Drag the charger to the outlet!', mcx, batCY+130, 22, '#CCC', 'center', null, 0, 'normal');
+        drawText('Drag the charger to the outlet!', mcx, batCY+bh/2+25, 22, '#CCC', 'center', null, 0, 'normal');
 
         // Plug and socket — 1.5x bigger, centered vertically
         const plugWig = Math.sin(now/150)*4;
         const sockWig = Math.sin(now/150 + 1)*4;
-        const plugX = GAME.batteryDrag ? GAME.mouseX : -20;
+        const plugX = GAME.batteryDrag ? GAME.mouseX : 80;
         const plugY = GAME.batteryDrag ? GAME.mouseY : CH/2 + plugWig;
         const sockX = CW - 100;
         const sockY = CH/2 + sockWig;
 
-        // Cord from outside left edge — thick bezier
+        // Cord from outside left edge to plug only
         ctx.lineWidth = 30; ctx.strokeStyle = '#1A1A1A';
         ctx.beginPath(); ctx.moveTo(-40, plugY);
-        ctx.bezierCurveTo(plugX - 20, plugY + 40, plugX + 40, plugY + 20, plugX, plugY);
+        ctx.bezierCurveTo(plugX - 60, plugY + 40, plugX - 20, plugY + 20, plugX, plugY);
         ctx.stroke();
         ctx.lineWidth = 24; ctx.strokeStyle = '#333';
         ctx.beginPath(); ctx.moveTo(-40, plugY);
-        ctx.bezierCurveTo(plugX - 20, plugY + 40, plugX + 40, plugY + 20, plugX, plugY);
-        ctx.stroke();
-        // Cord from plug to socket
-        ctx.lineWidth = 30; ctx.strokeStyle = '#1A1A1A';
-        ctx.beginPath(); ctx.moveTo(plugX, plugY);
-        ctx.bezierCurveTo(plugX + (sockX - plugX)*0.33, plugY + 100, plugX + (sockX - plugX)*0.66, sockY + 100, sockX, sockY);
-        ctx.stroke();
-        ctx.lineWidth = 24; ctx.strokeStyle = '#333';
-        ctx.beginPath(); ctx.moveTo(plugX, plugY);
-        ctx.bezierCurveTo(plugX + (sockX - plugX)*0.33, plugY + 100, plugX + (sockX - plugX)*0.66, sockY + 100, sockX, sockY);
+        ctx.bezierCurveTo(plugX - 60, plugY + 40, plugX - 20, plugY + 20, plugX, plugY);
         ctx.stroke();
 
         // Socket — 1.5x (180x180)
@@ -322,14 +313,18 @@ function drawHazards() {
         ctx.beginPath(); ctx.arc(sockX, sockY+42, 12, 0, Math.PI*2); ctx.fill();
         drawText('\u26A1', sockX, sockY+72, 28, '#888', 'center');
 
-        // Plug — 1.5x (120x90)
-        drawShadowRoundRect(plugX-60, plugY-45, 120, 90, 15, '#333', '#1A1A1A', 4);
+        // Plug — rotated 90deg (prongs face right toward socket)
+        ctx.save();
+        ctx.translate(plugX, plugY);
+        ctx.rotate(Math.PI / 2);
+        drawShadowRoundRect(-60, -45, 120, 90, 15, '#333', '#1A1A1A', 4);
         ctx.strokeStyle = '#555'; ctx.lineWidth = 3;
         for (let gr = 0; gr < 5; gr++) {
-            ctx.beginPath(); ctx.moveTo(plugX-42, plugY-27+gr*16); ctx.lineTo(plugX+42, plugY-27+gr*16); ctx.stroke();
+            ctx.beginPath(); ctx.moveTo(-42, -27+gr*16); ctx.lineTo(42, -27+gr*16); ctx.stroke();
         }
-        drawRoundRect(plugX-27, plugY-97, 18, 57, 4, '#CCC', '#AAA', 2);
-        drawRoundRect(plugX+9, plugY-97, 18, 57, 4, '#CCC', '#AAA', 2);
+        drawRoundRect(-27, -97, 18, 57, 4, '#CCC', '#AAA', 2);
+        drawRoundRect(9, -97, 18, 57, 4, '#CCC', '#AAA', 2);
+        ctx.restore();
     }
 
     // Wifi fist — 3x bigger, on router with smash effect
@@ -338,7 +333,7 @@ function drawHazards() {
         ctx.save();
         ctx.translate(110, DESK_Y + 37);
         ctx.scale(fistScale, fistScale);
-        drawText('\uD83D\uDC4A', 0, 0, 180, '#FFF', 'center');
+        drawText('\uD83D\uDC4A', 0, 0, 72, '#FFF', 'center');
         ctx.restore();
         // Impact lines around fist
         for (let il = 0; il < 8; il++) {
@@ -403,7 +398,11 @@ function drawHazards() {
         ctx.shadowColor = 'transparent'; ctx.shadowBlur = 0;
         ctx.restore();
         if (!GAME.hasScrewdriver) {
-            drawText('\uD83D\uDD27 GRAB ME!', GAME.screwdriverPos.x, GAME.screwdriverPos.y - 180, 28, COLORS.gold, 'center');
+            // Throbbing text above screwdriver
+            const throb = 1 + Math.sin(now / 200) * 0.12;
+            ctx.save(); ctx.translate(GAME.screwdriverPos.x, GAME.screwdriverPos.y - 400); ctx.scale(throb, throb);
+            drawText('GRAB THE SCREWDRIVER!', 0, 0, 28, COLORS.gold, 'center', '#000', 4);
+            ctx.restore();
         }
     }
 }

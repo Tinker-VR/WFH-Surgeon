@@ -50,9 +50,11 @@ window.addEventListener('mousedown', (e) => {
             if (isHover(cx-200, cy+25, 185, 52)) {
                 AudioEngine.playClick();
                 GAME.paused = false; GAME.pauseQuitConfirm = false;
+                clearHazard();
                 GAME.cash = STARTING_CASH; GAME.highestRank = STARTING_RANK; GAME.rank = STARTING_RANK;
                 GAME.hearts = 3; GAME.maxHearts = 3;
                 GAME.upgrades = { ...DEFAULT_UPGRADES };
+                GAME.dimLevel = 0; GAME.inputBuffer = [];
                 GAME.state = 'MENU'; resetHospitalAnimations(); AudioEngine.setBGMMode('menu');
                 return;
             }
@@ -93,14 +95,15 @@ window.addEventListener('mousedown', (e) => {
     const sx = M.sx, sy = M.sy, sw = M.sw, sh = M.sh;
 
     if (GAME.state === 'MENU') {
-        const btnW = 200, btnH = 44, btnGap = 25;
+        const btnW = 175, btnH = 40, btnGap = 15;
         const total = btnW * 3 + btnGap * 2;
         const bx0 = sx + (sw - total) / 2;
         const cy = M.uiY + M.uiH/2;
-        const by = cy + 10;
+        const by = cy - 5;
         if (isHover(bx0, by, btnW, btnH)) {
             AudioEngine.playClick(); GAME.rank = STARTING_RANK; GAME.hearts = 3;
-            GAME.pendingStart = true; GAME.state = 'HELP'; GAME.helpPage = 0;
+            if (DEBUG_GOD_MODE) { startOperation(); }
+            else { GAME.pendingStart = true; GAME.state = 'HELP'; GAME.helpPage = 0; }
         }
         if (isHover(bx0 + btnW + btnGap, by, btnW, btnH)) { AudioEngine.playClick(); GAME.storeReturnState = 'MENU'; GAME.state = 'STORE'; }
         if (isHover(bx0 + (btnW + btnGap)*2, by, btnW, btnH)) { AudioEngine.playClick(); GAME.state = 'HELP'; GAME.helpPage = 0; }
@@ -115,7 +118,7 @@ window.addEventListener('mousedown', (e) => {
             return;
         }
         if (GAME.helpPage > 0 && isHover(mx + 25, my + mh - 65, 110, 44)) { AudioEngine.playClick(); GAME.helpPage--; return; }
-        if (GAME.helpPage < 3 && isHover(mx + mw - 135, my + mh - 65, 110, 44)) { AudioEngine.playClick(); GAME.helpPage++; return; }
+        if (GAME.helpPage < 4 && isHover(mx + mw - 135, my + mh - 65, 110, 44)) { AudioEngine.playClick(); GAME.helpPage++; return; }
         if (isHover(CW/2 - 130, my + mh - 70, 260, 50)) {
             AudioEngine.playClick();
             if (GAME.pendingStart) { GAME.pendingStart = false; startOperation(); } else GAME.state = 'MENU';
@@ -152,13 +155,13 @@ window.addEventListener('mousedown', (e) => {
                 if (item.consumable) {
                     if (GAME.cash >= item.price && GAME.hearts < GAME.maxHearts) {
                         GAME.cash -= item.price; GAME.hearts++;
-                        AudioEngine.playBuy(); addNotification('Heart restored!', '❤️');
+                        AudioEngine.playBuy(); GAME.shopFlashTimer = 300;
                     }
                 } else {
                     if (GAME.upgrades[item.id]) return;
                     if (GAME.cash >= item.price) {
                         GAME.cash -= item.price; GAME.upgrades[item.id] = true;
-                        AudioEngine.playBuy(); addNotification(`${item.title} equipped!`, item.icon);
+                        AudioEngine.playBuy(); GAME.shopFlashTimer = 300;
                         if (item.id === 'lawyer') { GAME.maxHearts = 4; GAME.hearts++; }
                     }
                 }
@@ -172,9 +175,11 @@ window.addEventListener('mousedown', (e) => {
             const qx = sx + sw/2 - 210, qy = sy + sh/2 - 75;
             if (isHover(qx + 30, qy + 103, 170, 52)) {
                 AudioEngine.playClick();
+                clearHazard();
                 GAME.cash = STARTING_CASH; GAME.highestRank = STARTING_RANK; GAME.rank = STARTING_RANK;
                 GAME.hearts = 3; GAME.maxHearts = 3;
                 GAME.upgrades = { ...DEFAULT_UPGRADES };
+                GAME.dimLevel = 0; GAME.inputBuffer = [];
                 GAME.showQuitConfirm = false; GAME.state = 'MENU'; resetHospitalAnimations(); AudioEngine.setBGMMode('menu');
             }
             if (isHover(qx + 220, qy + 103, 170, 52)) { AudioEngine.playClick(); GAME.showQuitConfirm = false; }
@@ -253,7 +258,8 @@ window.addEventListener('mousedown', (e) => {
         else if (GAME.hazard === 'kbbreak') {
             if (!GAME.hasScrewdriver) {
                 // Pick up the screwdriver
-                if (Math.hypot(GAME.mouseX - GAME.screwdriverPos.x, GAME.mouseY - GAME.screwdriverPos.y) < 80) {
+                // Larger pickup area — covers handle and shaft (200px vertical range above tip)
+                if (Math.abs(GAME.mouseX - GAME.screwdriverPos.x) < 80 && GAME.mouseY > GAME.screwdriverPos.y - 380 && GAME.mouseY < GAME.screwdriverPos.y + 40) {
                     GAME.hasScrewdriver = true;
                     AudioEngine.playClick();
                 }
