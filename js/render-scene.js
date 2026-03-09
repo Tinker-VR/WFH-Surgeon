@@ -69,6 +69,10 @@ function drawORScene() {
     for (let j = M.sy; j < orBot-70; j += 40) { ctx.beginPath(); ctx.moveTo(M.sx, j); ctx.lineTo(M.sx+M.sw, j); ctx.stroke(); }
     // Baseboard
     drawRect(M.sx, orBot-73, M.sw, 6, '#8A9A96');
+    // Ambient occlusion at wall-floor junction
+    const aoGrad = ctx.createLinearGradient(M.sx, orBot-67, M.sx, orBot-52);
+    aoGrad.addColorStop(0, 'rgba(0,0,0,0.08)'); aoGrad.addColorStop(1, 'rgba(0,0,0,0)');
+    ctx.fillStyle = aoGrad; ctx.fillRect(M.sx, orBot-67, M.sw, 15);
     // Floor with tile pattern — muted
     const floorGrad = ctx.createLinearGradient(M.sx, orBot-67, M.sx, orBot);
     floorGrad.addColorStop(0, '#98B8B0'); floorGrad.addColorStop(1, '#8CABA4');
@@ -110,6 +114,13 @@ function drawORScene() {
     ctx.moveTo(cabX+cabW*0.2, cabY); ctx.lineTo(cabX+cabW*0.4, cabY);
     ctx.lineTo(cabX+cabW*0.05, cabY+cabH); ctx.lineTo(cabX-cabW*0.15, cabY+cabH);
     ctx.closePath(); ctx.fill();
+    // Inner edge shadows for glass depth
+    const cabInnerShadow = ctx.createLinearGradient(cabX+4, cabY+4, cabX+20, cabY+4);
+    cabInnerShadow.addColorStop(0, 'rgba(0,0,0,0.12)'); cabInnerShadow.addColorStop(1, 'rgba(0,0,0,0)');
+    ctx.fillStyle = cabInnerShadow; ctx.fillRect(cabX+4, cabY+4, cabW-8, cabH-8);
+    const cabInnerTop = ctx.createLinearGradient(cabX+4, cabY+4, cabX+4, cabY+20);
+    cabInnerTop.addColorStop(0, 'rgba(0,0,0,0.08)'); cabInnerTop.addColorStop(1, 'rgba(0,0,0,0)');
+    ctx.fillStyle = cabInnerTop; ctx.fillRect(cabX+4, cabY+4, cabW-8, cabH-8);
     ctx.restore();
 
     // === HAND SANITIZER DISPENSER (left wall) — muted ===
@@ -121,7 +132,7 @@ function drawORScene() {
     drawText('🧴', sanX + 13, sanY + 20, 14, '#FFF', 'center');
 
     // === WALL CLOCK (animated) — muted ===
-    const clockX = M.sx + M.sw/2 + 120, clockY = M.sy + 26;
+    const clockX = M.sx + M.sw/2 + 160, clockY = M.sy + 26;
     ctx.fillStyle = '#C8CCD0'; ctx.strokeStyle = '#808C92'; ctx.lineWidth = 2;
     ctx.beginPath(); ctx.arc(clockX, clockY, 26, 0, Math.PI*2); ctx.fill(); ctx.stroke();
     for (let h = 0; h < 12; h++) {
@@ -161,12 +172,22 @@ function drawORScene() {
     ctx.moveTo(cab2X+cabW*0.2, cabY); ctx.lineTo(cab2X+cabW*0.4, cabY);
     ctx.lineTo(cab2X+cabW*0.05, cabY+cabH); ctx.lineTo(cab2X-cabW*0.15, cabY+cabH);
     ctx.closePath(); ctx.fill();
+    // Inner edge shadows for glass depth
+    const cab2InnerShadow = ctx.createLinearGradient(cab2X+4, cabY+4, cab2X+20, cabY+4);
+    cab2InnerShadow.addColorStop(0, 'rgba(0,0,0,0.12)'); cab2InnerShadow.addColorStop(1, 'rgba(0,0,0,0)');
+    ctx.fillStyle = cab2InnerShadow; ctx.fillRect(cab2X+4, cabY+4, cabW-8, cabH-8);
+    const cab2InnerTop = ctx.createLinearGradient(cab2X+4, cabY+4, cab2X+4, cabY+20);
+    cab2InnerTop.addColorStop(0, 'rgba(0,0,0,0.08)'); cab2InnerTop.addColorStop(1, 'rgba(0,0,0,0)');
+    ctx.fillStyle = cab2InnerTop; ctx.fillRect(cab2X+4, cabY+4, cabW-8, cabH-8);
     ctx.restore();
 
     // === BLOOD BAG / IV POLE (right side) — muted ===
     const ivX = M.sx + M.sw - 125, ivBaseY = orBot - 55;
     ctx.strokeStyle = '#9AA4AA'; ctx.lineWidth = 4;
     ctx.beginPath(); ctx.moveTo(ivX, ivBaseY); ctx.lineTo(ivX, M.sy + 18); ctx.stroke();
+    // IV pole reflection highlight (thin white stripe)
+    ctx.strokeStyle = 'rgba(255,255,255,0.18)'; ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(ivX - 1, ivBaseY); ctx.lineTo(ivX - 1, M.sy + 18); ctx.stroke();
     // Cross bar
     ctx.lineWidth = 3;
     ctx.beginPath(); ctx.moveTo(ivX - 22, M.sy + 18); ctx.lineTo(ivX + 22, M.sy + 18); ctx.stroke();
@@ -178,7 +199,7 @@ function drawORScene() {
     // Shadow beneath blood bag
     ctx.fillStyle = 'rgba(0,0,0,0.15)';
     ctx.beginPath(); ctx.ellipse(ivX - 4, M.sy + 82, 14, 4, 0, 0, Math.PI*2); ctx.fill();
-    drawText('A+', ivX - 4, M.sy + 56, 16, '#C8A0A0', 'center', null, 0, 'normal');
+    //drawText('A+', ivX - 4, M.sy + 56, 16, '#C8A0A0', 'center', null, 0, 'normal');
     // Tube
     ctx.strokeStyle = '#B08888'; ctx.lineWidth = 2;
     ctx.beginPath(); ctx.moveTo(ivX - 4, M.sy + 80); ctx.quadraticCurveTo(ivX + 14, M.sy + 115, ivX - 35, orBot - 30); ctx.stroke();
@@ -281,8 +302,14 @@ function drawORScene() {
     const lampGrad = ctx.createLinearGradient(lampX-18, M.sy-5, lampX+18, M.sy+30);
     lampGrad.addColorStop(0, '#98A4AA'); lampGrad.addColorStop(0.4, '#808C92'); lampGrad.addColorStop(1, '#4A585E');
     drawRoundRect(lampX-18, M.sy-5, 36, 35, 10, lampGrad, '#4A585E', 2);
+    // Metallic sheen on housing
+    ctx.fillStyle = 'rgba(255,255,255,0.10)';
+    drawRoundRect(lampX-14, M.sy-2, 12, 28, 6, 'rgba(255,255,255,0.10)', null);
     ctx.fillStyle = '#C8CCD0'; ctx.strokeStyle = '#687078'; ctx.lineWidth = 2;
     ctx.beginPath(); ctx.arc(lampX, M.sy+22, 70, Math.PI, 0); ctx.fill(); ctx.stroke();
+    // Lamp reflector rim highlight
+    ctx.strokeStyle = 'rgba(255,255,255,0.15)'; ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.arc(lampX, M.sy+22, 69, Math.PI+0.1, -0.1); ctx.stroke();
     // Lamp bulbs — slightly muted
     for (let lb = -2; lb <= 2; lb++) {
         ctx.fillStyle = '#E8E4B0';
@@ -312,9 +339,9 @@ function drawORScene() {
     ctx.stroke();
     ctx.fillStyle = (Math.floor(performance.now()/300)%2===0) ? '#00E676' : '#1B5E20';
     ctx.beginPath(); ctx.arc(hmx+78, hmy+56, 5, 0, Math.PI*2); ctx.fill();
-    drawText('HR', hmx+12, hmy+56, 16, '#4CAF50', 'left', null, 0, 'normal');
-    drawText('SpO2', hmx+12, hmy+66, 16, '#42A5F5', 'left', null, 0, 'normal');
-    drawText('98', hmx+70, hmy+66, 16, '#42A5F5', 'right', null, 0, 'normal');
+    //drawText('HR', hmx+12, hmy+56, 16, '#4CAF50', 'left', null, 0, 'normal');
+    //drawText('SpO2', hmx+12, hmy+66, 16, '#42A5F5', 'left', null, 0, 'normal');
+    //drawText('98', hmx+70, hmy+66, 16, '#42A5F5', 'right', null, 0, 'normal');
 
     // === EKG WIRE from patient to monitor ===
     ctx.strokeStyle = '#66BB6A'; ctx.lineWidth = 1.5;
@@ -367,7 +394,7 @@ function drawORScene() {
     const o2X = ivX + 28, o2Y = orBot - 65;
     drawRoundRect(o2X, o2Y, 16, 58, 8, '#6888A0', '#507088', 2);
     drawRoundRect(o2X+3, o2Y-7, 10, 10, 3, '#607078', '#4A585E', 1);
-    drawText('O2', o2X+8, o2Y+30, 16, '#CCC', 'center', null, 0, 'normal');
+    //drawText('O2', o2X+8, o2Y+30, 16, '#CCC', 'center', null, 0, 'normal');
 
     // === SUPPLY SHELF (right wall, higher up) — muted ===
     const shelfX = M.sx + M.sw - 95, shelfY = orBot - 80;
@@ -386,7 +413,7 @@ function drawORScene() {
     const gloveX = M.sx + M.sw/2 + 50, gloveY = M.sy + 10;
     drawRoundRect(gloveX, gloveY, 50, 30, 4, '#C0C8C0', '#90A090', 1);
     drawRoundRect(gloveX+15, gloveY+22, 20, 12, 3, '#A8B8A8', null);
-    drawText('GLOVES', gloveX+25, gloveY+14, 16, '#7A9A7A', 'center', null, 0, 'normal');
+    //drawText('GLOVES', gloveX+25, gloveY+14, 16, '#7A9A7A', 'center', null, 0, 'normal');
 
     // === FIRE EXTINGUISHER (wall-mounted, left side) — drawn version ===
     const feX = M.sx + 105, feY = M.sy + 65;
@@ -477,7 +504,7 @@ function drawORScene() {
     if (GAME.state === 'PLAYING' || GAME.state === 'RESOLUTION') {
         drawRoundRect(M.sx+12, M.sy+6, M.sw-24, 44, 12, 'rgba(0,0,0,0.65)', null);
 
-        // LIVE indicator (left side of HUD bar)
+        // LIVE HOSPITAL FEED indicator (left side of HUD bar)
         const liveX = M.sx + 24;
         if (Math.floor(performance.now()/500)%2===0) {
             ctx.fillStyle = '#FF1744';
@@ -486,13 +513,21 @@ function drawORScene() {
         }
         ctx.beginPath(); ctx.arc(liveX, M.sy+28, 5, 0, Math.PI*2); ctx.fill();
         drawText('LIVE', liveX + 12, M.sy+28, 16, '#FF1744', 'left', null, 0, 'bold');
+        drawText('HOSPITAL FEED', liveX + 52, M.sy+28, 16, '#CC8888', 'left', null, 0, 'normal');
 
-        // Hearts shifted right after LIVE section
-        let hx = liveX + 60;
+        // Hearts shifted right after LIVE HOSPITAL FEED section (with pulse)
+        let hx = liveX + 170;
         for (let i = 0; i < GAME.maxHearts; i++) {
             const isLawyer = GAME.upgrades.lawyer && i === GAME.maxHearts - 1;
-            const hColor = i < GAME.hearts ? (isLawyer ? COLORS.gold : COLORS.red) : '#444';
-            drawText('\u2764', hx, M.sy+28, 32, hColor, 'left'); hx += 42;
+            const alive = i < GAME.hearts;
+            const hColor = alive ? (isLawyer ? COLORS.gold : COLORS.red) : '#444';
+            const pulse = alive ? 1 + Math.sin(performance.now()/300 + i*0.8) * 0.06 : 1;
+            ctx.save();
+            ctx.translate(hx + 16, M.sy + 28);
+            ctx.scale(pulse, pulse);
+            drawText('\u2764', 0, 0, 32, hColor, 'center');
+            ctx.restore();
+            hx += 42;
         }
         // Anesthesia bar fills remaining width
         const barX = hx + 15, barW = M.sx+M.sw-40 - barX;
@@ -501,7 +536,21 @@ function drawORScene() {
         drawRoundRect(barX, M.sy+14, barW, 28, 14, '#1A1A1A', null);
         if (barW*pct > 5) {
             if (pct <= 0.2) { ctx.shadowColor = COLORS.red; ctx.shadowBlur = 8 + Math.sin(performance.now()/150)*4; }
-            drawRoundRect(barX+3, M.sy+17, (barW-6)*pct, 22, 11, barC, null);
+            const fillW = (barW-6)*pct;
+            drawRoundRect(barX+3, M.sy+17, fillW, 22, 11, barC, null);
+            // Shimmer highlight sweep
+            ctx.save();
+            ctx.beginPath();
+            ctx.roundRectPolyfill(barX+3, M.sy+17, fillW, 22, 11);
+            ctx.clip();
+            const shimX = ((performance.now()/1200) % 1) * (fillW + 60) - 30 + barX+3;
+            const shimGrad = ctx.createLinearGradient(shimX-30, 0, shimX+30, 0);
+            shimGrad.addColorStop(0, 'rgba(255,255,255,0)');
+            shimGrad.addColorStop(0.5, 'rgba(255,255,255,0.12)');
+            shimGrad.addColorStop(1, 'rgba(255,255,255,0)');
+            ctx.fillStyle = shimGrad;
+            ctx.fillRect(barX+3, M.sy+17, fillW, 22);
+            ctx.restore();
             ctx.shadowColor = 'transparent'; ctx.shadowBlur = 0;
         }
         drawText('ANESTHESIA', barX+14, M.sy+28, 16, '#DDD', 'left', '#000', 3, 'bold');
@@ -525,39 +574,20 @@ function drawPatient(cx, y) {
     // Bed legs
     drawRect(cx-205, y+44, 18, 30, '#787C80');
     drawRect(cx+187, y+44, 18, 30, '#787C80');
-    // Bed rail hints
+    // Bed rail hints with reflections
     ctx.strokeStyle = '#909498'; ctx.lineWidth = 2;
     ctx.beginPath(); ctx.moveTo(cx-230, y+4); ctx.lineTo(cx-230, y-10); ctx.stroke();
     ctx.beginPath(); ctx.moveTo(cx+230, y+4); ctx.lineTo(cx+230, y-10); ctx.stroke();
+    // Rail reflection highlights
+    ctx.strokeStyle = 'rgba(255,255,255,0.2)'; ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(cx-229, y+4); ctx.lineTo(cx-229, y-10); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(cx+231, y+4); ctx.lineTo(cx+231, y-10); ctx.stroke();
     // Pillow — raised and plumper
     ctx.fillStyle = '#E3F2FD';
     ctx.beginPath(); ctx.ellipse(cx-185, y+0, 48, 22, 0, 0, Math.PI*2); ctx.fill();
     ctx.strokeStyle = '#BBDEFB'; ctx.lineWidth = 1;
     ctx.beginPath(); ctx.ellipse(cx-185, y+0, 48, 22, 0, 0, Math.PI*2); ctx.stroke();
 
-    // Neck trapezoid — connects head to blanket (drawn AFTER pillow, BEFORE head)
-    ctx.fillStyle = '#EAC086';
-    ctx.beginPath();
-    ctx.moveTo(cx-205, y-8+10);   // left side of head area (head center - offset)
-    ctx.lineTo(cx-165, y-8+10);   // right side of head area
-    ctx.lineTo(cx-155, y+12);     // blanket left edge right side
-    ctx.lineTo(cx-215, y+12);     // blanket left edge left side
-    ctx.closePath();
-    ctx.fill();
-    // Neck shadow
-    ctx.fillStyle = 'rgba(180,140,80,0.3)';
-    ctx.beginPath();
-    ctx.moveTo(cx-205, y+2);
-    ctx.lineTo(cx-165, y+2);
-    ctx.lineTo(cx-155, y+12);
-    ctx.lineTo(cx-215, y+12);
-    ctx.closePath();
-    ctx.fill();
-
-    // Head — 32 radius, raised onto pillow
-    ctx.fillStyle = '#EAC086'; ctx.beginPath(); ctx.arc(cx-185, y-8, 32, 0, Math.PI*2); ctx.fill();
-    // Surgical cap
-    ctx.fillStyle = '#00ACC1'; ctx.beginPath(); ctx.arc(cx-185, y-15, 33, Math.PI, 0); ctx.fill();
     // Body/gown — bigger blanket with more volume
     let breath = Math.sin(performance.now()/500)*5;
     // Blanket shadow (depth) — taller
@@ -583,6 +613,31 @@ function drawPatient(cx, y) {
     ctx.beginPath(); ctx.moveTo(cx-100, y+6); ctx.lineTo(cx+140, y+6); ctx.stroke();
     ctx.beginPath(); ctx.moveTo(cx-80, y-4); ctx.lineTo(cx+120, y-6); ctx.stroke();
     ctx.beginPath(); ctx.moveTo(cx-50, y-16); ctx.lineTo(cx+80, y-18); ctx.stroke();
+
+    // Neck trapezoid — drawn AFTER blanket so it's visible between head and blanket
+    ctx.fillStyle = '#EAC086';
+    ctx.beginPath();
+    ctx.moveTo(cx-210, y+2);    // left side wider
+    ctx.lineTo(cx-160, y+2);    // right side wider
+    ctx.lineTo(cx-150, y+14);   // blanket edge right
+    ctx.lineTo(cx-220, y+14);   // blanket edge left
+    ctx.closePath();
+    ctx.fill();
+    // Neck shadow
+    ctx.fillStyle = 'rgba(180,140,80,0.3)';
+    ctx.beginPath();
+    ctx.moveTo(cx-205, y+6);
+    ctx.lineTo(cx-165, y+6);
+    ctx.lineTo(cx-155, y+14);
+    ctx.lineTo(cx-215, y+14);
+    ctx.closePath();
+    ctx.fill();
+
+    // Head — 32 radius, raised onto pillow (drawn AFTER blanket+neck so head is on top)
+    ctx.fillStyle = '#EAC086'; ctx.beginPath(); ctx.arc(cx-185, y-8, 32, 0, Math.PI*2); ctx.fill();
+    // Surgical cap
+    ctx.fillStyle = '#00ACC1'; ctx.beginPath(); ctx.arc(cx-185, y-15, 33, Math.PI, 0); ctx.fill();
+
     // Surgical drape edges hanging over bed sides — longer
     ctx.fillStyle = 'rgba(129,212,250,0.5)';
     ctx.beginPath(); ctx.moveTo(cx-155, y+12); ctx.lineTo(cx-155, y+36); ctx.lineTo(cx-130, y+36); ctx.lineTo(cx-130, y+12); ctx.fill();

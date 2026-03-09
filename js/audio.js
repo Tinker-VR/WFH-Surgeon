@@ -113,6 +113,11 @@ const AudioEngine = {
     playTimerWarning() { this._osc(1000, 'square', 0.06, 0.18); this._osc(1200, 'square', 0.06, 0.15, 0.08); },
     playAnesthesiaWarning() { this._osc(400, 'square', 0.08, 0.15); this._osc(350, 'square', 0.08, 0.12, 0.1); },
 
+    playHazardClear()   { this._osc(523, 'sine', 0.08, 0.20); this._osc(659, 'sine', 0.08, 0.18, 0.06); this._osc(784, 'sine', 0.1, 0.15, 0.12); },
+    playHazardSpawn()   { this._osc(220, 'square', 0.1, 0.20); this._osc(180, 'square', 0.15, 0.18, 0.08); this._noise(0.2, 0.10, 1200); },
+    playScreenTransition() { this._noise(0.15, 0.08, 3000); this._osc(400, 'sine', 0.06, 0.10); },
+    playHeartbeat()     { this._osc(60, 'sine', 0.15, 0.25); this._osc(55, 'sine', 0.1, 0.18, 0.18); },
+
     playCatMeow() {
         if (!this.ctx || !this.enabled) return;
         const o = this.ctx.createOscillator(), g = this.ctx.createGain();

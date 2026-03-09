@@ -8,12 +8,16 @@ function processArrow(code) {
         GAME.currentIndex++;
         GAME.arrowPopTimer = 100;
         GAME.armReach = Math.min(300, GAME.armReach + 80);
+        GAME.comboCount++;
+        GAME.comboTimer = 800;
+        GAME.screenFlashTimer = 100;
+        GAME.screenFlashColor = '#00E676';
         AudioEngine.playCorrectKey();
         // energy_anes healing removed — drain reduction handled in main loop
         if (GAME.currentIndex >= GAME.sequence.length) { GAME.armReach = 300; chunkComplete(); }
     } else {
         if (!DEBUG_GOD_MODE) GAME.hearts--;
-        GAME.redFlashTimer = 150; GAME.shakeTimer = 300; GAME.perfectStreak = 0;
+        GAME.redFlashTimer = 150; GAME.shakeTimer = 300; GAME.perfectStreak = 0; GAME.comboCount = 0;
         AudioEngine.playWrongKey(); GAME.armGlitchTimer = 800;
         for (let b = 0; b < 20; b++) GAME.bloodSpills.push({ x: (Math.random()*300)-150, y: (Math.random()*60)-30, r: Math.random()*18+6 });
         if (!DEBUG_GOD_MODE && GAME.hearts <= 0) triggerResolution('MALPRACTICE');
@@ -55,10 +59,13 @@ function startOperation() {
     AudioEngine.setBGMMode('gameplay');
 }
 
+const MEDICAL_EMOJIS = ['💉','🩺','🏥','💊','🩹','🫀','🧬','🔬','🩻','🫁','🧪','🩸','🦷','👁️','🧠'];
+
 function generateSequence(len) {
     GAME.sequence = [];
     for (let i = 0; i < len; i++) GAME.sequence.push(ARROWS[Math.floor(Math.random()*4)]);
     GAME.currentIndex = 0; GAME.phaseTimer = GAME.phaseTimerMax;
+    GAME.sequenceEmoji = MEDICAL_EMOJIS[Math.floor(Math.random()*MEDICAL_EMOJIS.length)];
 }
 
 function chunkComplete() {
@@ -74,6 +81,7 @@ function chunkComplete() {
 }
 
 function spawnHazard() {
+    if (DEBUG_FORCE_HAZARD === 'none') return;
     if (DEBUG_FORCE_HAZARD) {
         GAME.hazard = DEBUG_FORCE_HAZARD;
     } else {
@@ -88,6 +96,9 @@ function spawnHazard() {
         if (!pool.length) return;
         GAME.hazard = pool[Math.floor(Math.random()*pool.length)];
     }
+    GAME.hazardSpawnFlash = 300;
+    GAME.shakeTimer = Math.max(GAME.shakeTimer, 150);
+    AudioEngine.playHazardSpawn();
     GAME.coffeeWipe = 0; GAME.routerClicks = 0;
     if (GAME.hazard === 'cat') { GAME.catClicks = 0; GAME.catFlashTimer = 0; GAME.catStars = []; AudioEngine.playCatMeow(); }
     if (GAME.hazard === 'ad') {
@@ -101,8 +112,8 @@ function spawnHazard() {
     }
     if (GAME.hazard === 'battery') {
         GAME.dimLevel=0; GAME.batteryDrag=false;
-        GAME.plugPos = {x: 80, y: DESK_Y + 80};
-        GAME.socketPos = {x: CW - 130, y: DESK_Y + 80};
+        GAME.plugPos = {x: -20, y: CH/2};
+        GAME.socketPos = {x: CW - 100, y: CH/2};
         AudioEngine.playBatteryWarning();
     }
     if (GAME.hazard === 'lag') { AudioEngine.playWifiStatic(); GAME.routerShakeTimer = 999999; }
@@ -131,6 +142,7 @@ function spawnHazard() {
 }
 
 function clearHazard() {
+    AudioEngine.playHazardClear();
     GAME.hazard = null; GAME.coffeeWipe = 0; GAME.coffeeWiping = false; GAME.dimLevel = 0;
     GAME.routerShakeTimer = 0;
     GAME.kbScrews = [false,false,false,false]; GAME.hasScrewdriver = false;

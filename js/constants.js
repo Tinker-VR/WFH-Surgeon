@@ -48,17 +48,17 @@ const CHEEKY_ADS = [
 ];
 
 const STORE_ITEMS = [
-    {id: 'heart_restore', icon: '❤️', title: 'Black Market Organ', desc: 'Restores 1 lost heart.', price: 2000, consumable: true},
-    {id: 'lawyer', icon: '💼', title: 'Ambulance Chaser', desc: '+1 extra heart capacity.', price: 1500},
-    {id: 'energy_anes', icon: '💉', title: 'Liquid Courage IV', desc: '40% slower anesthesia drain.', price: 1200},
-    {id: 'energy_time', icon: '⚡', title: 'Monster Energy Drip', desc: '+40% sequence time.', price: 1000},
-    {id: 'ethernet', icon: '🔌', title: 'Ethernet Cable', desc: 'No Wi-Fi disconnects.', price: 800},
-    {id: 'treats', icon: '🐟', title: 'Cat Treats', desc: 'Distracts the cat.', price: 600},
-    {id: 'mugLid', icon: '☕', title: 'Mug Lid', desc: 'No coffee spills.', price: 500},
-    {id: 'adBlock', icon: '🛑', title: 'AdBlocker Pro', desc: 'Blocks popup ads.', price: 900},
-    {id: 'powerBank', icon: '🔋', title: 'Power Bank', desc: 'Blocks low battery.', price: 850},
-    {id: 'gamerKB', icon: '⌨️', title: 'Razer DeathBoard 9000', desc: 'No keyboard jams.', price: 750},
-    {id: 'antivirus', icon: '🛡️', title: 'ICE Agent', desc: 'Deports viruses.', price: 950}
+    {id: 'heart_restore', icon: '❤️', title: 'Black Market Organ', desc: 'Restores 1 lost heart', price: 2000, consumable: true},
+    {id: 'lawyer', icon: '💼', title: 'Fraudulent Insurance', desc: '+1 extra heart', price: 1500},
+    {id: 'energy_anes', icon: '💉', title: 'Ketamine Cocktail', desc: 'Slower anesthesia drain', price: 1200},
+    {id: 'energy_time', icon: '⚡', title: 'Adderall Prescription', desc: 'Longer sequence timer', price: 1000},
+    {id: 'ethernet', icon: '🔌', title: 'Stolen Ethernet', desc: 'No Wi-Fi disconnects', price: 800},
+    {id: 'treats', icon: '🐟', title: 'Catnip Bribe', desc: 'Distracts the cat', price: 600},
+    {id: 'mugLid', icon: '☕', title: 'Sippy Cup Lid', desc: 'No coffee spills', price: 500},
+    {id: 'adBlock', icon: '🛑', title: 'uBlock Pirated', desc: 'Blocks popup ads', price: 900},
+    {id: 'powerBank', icon: '🔋', title: 'Stolen Tesla Battery', desc: 'Blocks low battery', price: 850},
+    {id: 'gamerKB', icon: '⌨️', title: 'Razer DeathBoard 9000', desc: 'No keyboard jams', price: 750},
+    {id: 'antivirus', icon: '🛡️', title: "McAfee's Ghost", desc: 'Deports viruses', price: 950}
 ];
 
 const DEFAULT_UPGRADES = { energy_anes:false, energy_time:false, ethernet:false, treats:false, lawyer:false, mugLid:false, adBlock:false, powerBank:false, gamerKB:false, antivirus:false };

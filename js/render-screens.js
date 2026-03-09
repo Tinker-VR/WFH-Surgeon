@@ -22,52 +22,135 @@ function drawScreenMenu() {
 
 function drawScreenPlaying() {
     const M = MONITOR;
+    const now = performance.now();
     ctx.save();
     ctx.beginPath(); ctx.roundRectPolyfill(M.sx, M.uiY, M.sw, M.uiH, 4); ctx.clip();
     drawRect(M.sx, M.uiY, M.sw, M.uiH, 'rgba(8,18,35,0.95)');
 
-    // Info text — rank/phase, operation, patient on 3 lines
-    drawText(getRankName(GAME.rank) + ' | Phase ' + (GAME.phasesCompleted+1) + '/' + GAME.phasesNeeded, M.sx+M.sw/2, M.uiY+18, 18, '#AAB8CC', 'center', null, 0, 'bold');
-    drawText(GAME.operationName, M.sx+M.sw/2, M.uiY+38, 16, '#AAB8CC', 'center', null, 0, 'normal');
-    drawText('Patient: ' + GAME.patientName, M.sx+M.sw/2, M.uiY+54, 16, '#AAB8CC', 'center', null, 0, 'normal');
+    const pad = 12;
+    const topY = M.uiY + 6;
+    const contentY = topY + 22;
+    const contentH = M.uiH - 32;
 
-    // Arrow keys
-    const arrowY = M.uiY + 68;
-    const maxSqH = M.uiH - 68 - 24;
-    const sqW = Math.min(65, maxSqH);
-    const sqGap = 8;
-    const availW = M.sw - 50;
-    const neededW = GAME.sequence.length * (sqW + sqGap) - sqGap;
-    const finalSqW = neededW > availW ? Math.floor((availW - (GAME.sequence.length-1)*sqGap) / GAME.sequence.length) : sqW;
-    const totalW = GAME.sequence.length * finalSqW + (GAME.sequence.length-1)*sqGap;
-    let kx2 = M.sx + (M.sw - totalW)/2;
-    const arrowCenterY = arrowY + (maxSqH - finalSqW)/2;
-
-    for (let i = 0; i < GAME.sequence.length; i++) {
-        let bg = '#2A3A4E', txt = '#AAA', sc = 1;
-        if (i < GAME.currentIndex) { bg = COLORS.green; txt = '#000'; }
-        else if (i === GAME.currentIndex) { bg = COLORS.gold; txt = '#000'; sc = 1+Math.sin(performance.now()/100)*0.08; }
-        if (i === GAME.currentIndex-1 && GAME.arrowPopTimer > 0) sc = 1+(GAME.arrowPopTimer/100)*0.2;
-        if (GAME.hazard === 'lag') { bg = '#333'; txt = '#555'; }
-        let aw = finalSqW*sc, ax = kx2+(finalSqW-aw)/2, ay = arrowCenterY+(finalSqW-aw)/2;
-        drawRoundRect(ax, ay, aw, aw, 12, bg, null);
-        drawText(ARROW_SYM[GAME.sequence[i]], kx2+finalSqW/2, arrowCenterY+finalSqW/2, 34*sc, txt, 'center');
-        kx2 += finalSqW + sqGap;
+    // === TOP LINE: Level (bold) + Phase dots ===
+    drawText(getRankName(GAME.rank), M.sx + pad + 4, topY + 8, 18, '#DDE4EE', 'left', null, 0, 'bold');
+    // Phase dots
+    const dotStartX = M.sx + pad + 320;
+    for (let i = 0; i < GAME.phasesNeeded; i++) {
+        const filled = i < GAME.phasesCompleted;
+        const current = i === GAME.phasesCompleted;
+        ctx.fillStyle = filled ? COLORS.green : current ? COLORS.gold : '#334';
+        ctx.beginPath(); ctx.arc(dotStartX + i * 20, topY + 8, 6, 0, Math.PI*2); ctx.fill();
+        if (current) {
+            ctx.strokeStyle = COLORS.gold; ctx.lineWidth = 2;
+            ctx.beginPath(); ctx.arc(dotStartX + i * 20, topY + 8, 8, 0, Math.PI*2); ctx.stroke();
+        }
     }
 
-    // Timer bar — color changes green -> gold -> red
-    const barY = M.uiY + M.uiH - 20;
-    const pPct = Math.max(0, GAME.phaseTimer/GAME.phaseTimerMax);
-    let barColor = pPct > 0.5 ? COLORS.green : pPct > 0.2 ? COLORS.gold : COLORS.red;
-    drawRoundRect(M.sx+40, barY, M.sw-80, 16, 8, '#1A1A1A', '#333', 2);
-    if ((M.sw-88)*pPct > 4) {
-        if (pPct <= 0.2) {
-            ctx.shadowColor = COLORS.red; ctx.shadowBlur = 8 + Math.sin(performance.now()/150)*4;
+    // === LEFT PANEL: Hospital Form (operation + patient) ===
+    const formX = M.sx + pad;
+    const formY = contentY + 4;
+    const formW = 260;
+    const formH = contentH - 12;
+    drawRoundRect(formX, formY, formW, formH, 10, '#111828', '#2A3A4E', 2);
+    // Form labels and values
+    drawText('OPERATION', formX + 14, formY + 18, 16, '#5A6A80', 'left', null, 0, 'normal');
+    drawText(GAME.operationName, formX + 14, formY + 40, 20, '#FFF', 'left', null, 0, 'bold');
+    drawText('PATIENT', formX + 14, formY + 64, 16, '#5A6A80', 'left', null, 0, 'normal');
+    drawText(GAME.patientName, formX + 14, formY + 84, 18, '#DDE4EE', 'left', null, 0, 'normal');
+    // Combo counter
+    if (GAME.comboCount >= 2 && GAME.comboTimer > 0) {
+        const comboScale = 1 + Math.sin(now / 80) * 0.1;
+        const comboColor = GAME.comboCount >= 5 ? '#FF4081' : GAME.comboCount >= 3 ? '#FFD54F' : '#00E676';
+        ctx.save(); ctx.translate(formX + formW - 40, formY + formH - 20); ctx.scale(comboScale, comboScale);
+        drawText(`${GAME.comboCount}x`, 0, 0, 22, comboColor, 'center', '#000', 4);
+        ctx.restore();
+    }
+
+    // === CENTER: Ring/Donut Timer ===
+    const ringCX = formX + formW + 60;
+    const ringCY = formY + formH / 2 + 2;
+    const ringR = 42;
+    const ringInner = 28;
+    const pPct = Math.max(0, GAME.phaseTimer / GAME.phaseTimerMax);
+    const ringColor = pPct > 0.5 ? COLORS.green : pPct > 0.2 ? COLORS.gold : COLORS.red;
+
+    // Ring glow
+    if (pPct <= 0.2) {
+        ctx.shadowColor = COLORS.red; ctx.shadowBlur = 12 + Math.sin(now/150)*6;
+    } else {
+        ctx.shadowColor = ringColor; ctx.shadowBlur = 6;
+    }
+    // Background ring
+    ctx.beginPath(); ctx.arc(ringCX, ringCY, ringR, 0, Math.PI*2);
+    ctx.arc(ringCX, ringCY, ringInner, 0, Math.PI*2, true);
+    ctx.fillStyle = '#1A1A2E'; ctx.fill();
+    // Filled arc (depletes clockwise from top)
+    const startAngle = -Math.PI / 2;
+    const endAngle = startAngle + Math.PI * 2 * pPct;
+    ctx.beginPath(); ctx.arc(ringCX, ringCY, ringR, startAngle, endAngle);
+    ctx.arc(ringCX, ringCY, ringInner, endAngle, startAngle, true);
+    ctx.closePath();
+    ctx.fillStyle = ringColor; ctx.fill();
+    ctx.shadowColor = 'transparent'; ctx.shadowBlur = 0;
+    // Medical emoji inside
+    const emojiPulse = 1 + Math.sin(now / 400) * 0.06;
+    ctx.save(); ctx.translate(ringCX, ringCY); ctx.scale(emojiPulse, emojiPulse);
+    drawText(GAME.sequenceEmoji || '💉', 0, 0, 28, '#FFF', 'center');
+    ctx.restore();
+
+    // === RIGHT PANEL: Robot Command Sequence ===
+    const arrowX = ringCX + ringR + 26;
+    const arrowContW = M.sx + M.sw - pad - arrowX;
+    const arrowContY = formY;
+    const arrowContH = formH;
+    drawRoundRect(arrowX, arrowContY, arrowContW, arrowContH, 10, '#111828', '#2A3A4E', 2);
+    drawText('ROBOT COMMAND SEQUENCE', arrowX + arrowContW/2, arrowContY + 14, 16, '#5A6A80', 'center', null, 0, 'normal');
+
+    // Arrow keys with horizontal scroll
+    const sqW = 48;
+    const sqGap = 6;
+    const arrowAreaY = arrowContY + 26;
+    const arrowAreaH = arrowContH - 32;
+    const arrowCenterY2 = arrowAreaY + arrowAreaH / 2;
+    const visibleW = arrowContW - 16;
+    const totalArrowW = GAME.sequence.length * (sqW + sqGap) - sqGap;
+
+    // Calculate scroll offset to keep current arrow visible
+    let scrollOff = 0;
+    if (totalArrowW > visibleW) {
+        const targetOff = (GAME.currentIndex - 2) * (sqW + sqGap);
+        scrollOff = Math.max(0, Math.min(targetOff, totalArrowW - visibleW));
+    }
+
+    ctx.save();
+    ctx.beginPath();
+    ctx.rect(arrowX + 6, arrowContY + 22, visibleW + 4, arrowContH - 26);
+    ctx.clip();
+
+    const arrowStartX = arrowX + 8 - scrollOff + (totalArrowW < visibleW ? (visibleW - totalArrowW)/2 : 0);
+    for (let i = 0; i < GAME.sequence.length; i++) {
+        let bg = '#2A3A4E', txt = '#555', sc = 1;
+        if (i < GAME.currentIndex) { bg = COLORS.green; txt = '#000'; }
+        else if (i === GAME.currentIndex) {
+            bg = COLORS.gold; txt = '#000';
+            sc = 1 + Math.sin(now / 100) * 0.08;
+            // Glow on current
+            ctx.shadowColor = COLORS.gold; ctx.shadowBlur = 10;
         }
-        drawRoundRect(M.sx+44, barY+2, (M.sw-88)*pPct, 12, 6, barColor, null);
+        if (i === GAME.currentIndex - 1 && GAME.arrowPopTimer > 0) sc = 1 + (GAME.arrowPopTimer / 100) * 0.2;
+        if (GAME.hazard === 'lag') { bg = '#333'; txt = '#444'; }
+        const kx = arrowStartX + i * (sqW + sqGap);
+        const aw = sqW * sc;
+        const ax = kx + (sqW - aw) / 2;
+        const ay = arrowCenterY2 - aw / 2;
+        drawRoundRect(ax, ay, aw, aw, 10, bg, null);
+        drawText(ARROW_SYM[GAME.sequence[i]], kx + sqW / 2, arrowCenterY2, 28 * sc, txt, 'center');
         ctx.shadowColor = 'transparent'; ctx.shadowBlur = 0;
     }
+    ctx.restore();
 
+    // Green flash on phase complete
     if (GAME.greenFlashTimer > 0) {
         ctx.fillStyle = `rgba(0,230,118,${Math.min(0.35, GAME.greenFlashTimer/150)})`;
         ctx.fillRect(M.sx, M.uiY, M.sw, M.uiH);
@@ -106,8 +189,8 @@ function drawScreenStore() {
         const iy = M.sy + 78 + row * 118;
         drawShadowRoundRect(ix, iy, cardW, cardH, 10, '#1A2332', '#2A3A4E', 2);
         drawText(item.icon, ix+28, iy+30, 28, '#FFF', 'center');
-        drawTextTruncated(item.title, ix+50, iy+20, 18, '#FFF', cardW-58, 'left');
-        drawTextTruncated(item.desc, ix+50, iy+42, 16, '#7889A0', cardW-58, 'left', null, 0, 'normal');
+        drawText(item.title, ix+50, iy+20, 16, '#FFF', 'left', null, 0, 'bold');
+        drawText(item.desc, ix+50, iy+40, 16, '#7889A0', 'left', null, 0, 'normal');
         const isMax = item.consumable && GAME.hearts >= GAME.maxHearts;
         const owned = !item.consumable && GAME.upgrades[item.id];
         const bc = (owned||isMax) ? '#555' : GAME.cash>=item.price ? COLORS.gold : '#555';
@@ -202,27 +285,27 @@ function drawHelpModal() {
         drawText('Lose all hearts = game over!', cx, cy+88, 22, COLORS.red, 'center');
         drawText('3 perfect sequences in a row = bonus heart!', cx, cy+125, 18, COLORS.green, 'center', null, 0, 'normal');
     } else if (GAME.helpPage === 2) {
-        drawText('WFH HAZARDS', cx, cy-100, 34, '#FFA000', 'center');
+        drawText('WFH HAZARDS', cx, cy-110, 34, '#FFA000', 'center');
         const hz1 = [{i:'\uD83D\uDC31',a:'Click 3x'},{i:'\u2615',a:'Click & wipe'},{i:'\uD83D\uDCF6',a:'Smash router'},{i:'\uD83D\uDD0C',a:'Drag plug'}];
-        const hzCardW = 88, hzGap = 10;
+        const hzCardW = 82, hzCardH = 72, hzGap = 10;
         const hz1TotalW = 4*hzCardW + 3*hzGap;
         const hz1StartX = cx - hz1TotalW/2;
         for (let i = 0; i < 4; i++) {
             const hx = hz1StartX + i*(hzCardW+hzGap);
-            drawRoundRect(hx, cy-55, hzCardW, hzCardW, 12, '#2A3A4E', null);
-            drawText(hz1[i].i, hx+hzCardW/2, cy-55+hzCardW/2-10, 28, '#FFF', 'center');
-            drawText(hz1[i].a, hx+hzCardW/2, cy-55+hzCardW+16, 16, '#AAA', 'center', null, 0, 'normal');
+            drawRoundRect(hx, cy-75, hzCardW, hzCardH, 12, '#2A3A4E', null);
+            drawText(hz1[i].i, hx+hzCardW/2, cy-75+hzCardH/2-8, 28, '#FFF', 'center');
+            drawText(hz1[i].a, hx+hzCardW/2, cy-75+hzCardH+14, 16, '#AAA', 'center', null, 0, 'normal');
         }
         const hz2 = [{i:'\uD83D\uDCBC',a:'Close popup'},{i:'\uD83D\uDD27',a:'Fix screws'},{i:'\uD83E\uDDA0',a:'Zap viruses'}];
         const hz2TotalW = 3*hzCardW + 2*hzGap;
         const hz2StartX = cx - hz2TotalW/2;
         for (let i = 0; i < 3; i++) {
             const hx = hz2StartX + i*(hzCardW+hzGap);
-            drawRoundRect(hx, cy+50, hzCardW, hzCardW, 12, '#2A3A4E', null);
-            drawText(hz2[i].i, hx+hzCardW/2, cy+50+hzCardW/2-10, 28, '#FFF', 'center');
-            drawText(hz2[i].a, hx+hzCardW/2, cy+50+hzCardW+16, 16, '#AAA', 'center', null, 0, 'normal');
+            drawRoundRect(hx, cy+25, hzCardW, hzCardH, 12, '#2A3A4E', null);
+            drawText(hz2[i].i, hx+hzCardW/2, cy+25+hzCardH/2-8, 28, '#FFF', 'center');
+            drawText(hz2[i].a, hx+hzCardW/2, cy+25+hzCardH+14, 16, '#AAA', 'center', null, 0, 'normal');
         }
-        drawText('Deal with interruptions to get back to surgery!', cx, cy+160, 19, '#CCC', 'center', null, 0, 'normal');
+        drawText('Deal with interruptions to get back to surgery!', cx, cy+140, 19, '#CCC', 'center', null, 0, 'normal');
     } else {
         drawText('EARN & UPGRADE', cx, cy-100, 34, COLORS.gold, 'center');
         drawText('\uD83D\uDCB0', cx, cy-30, 66, '#FFF', 'center');

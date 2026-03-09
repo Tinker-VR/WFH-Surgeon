@@ -189,6 +189,9 @@ function drawDeskItems() {
     // === MUG (moved right to clear router, with rotation) ===
     const mx2 = 220, my2 = dy + 80;
     const mugW = 75, mugH = 90;
+    // Ground shadow directly under mug
+    ctx.fillStyle = 'rgba(0,0,0,0.12)';
+    ctx.beginPath(); ctx.ellipse(mx2 + mugW/2, my2 + mugH + 4, mugW*0.45, 8, 0, 0, Math.PI*2); ctx.fill();
     ctx.save();
     ctx.translate(mx2 + mugW/2, my2 + mugH/2);
     const mugTilt = GAME.hazard === 'coffee' ? -0.4 : 0;
@@ -438,30 +441,31 @@ function drawDeskItems() {
 // Cat peeking from behind the DESK on the right side — drawn separately from main.js
 function drawCatTailBehind() {
     if (GAME.upgrades.treats) return;
+    if (GAME.hazard === 'cat') return;
     const t = performance.now() / 1000;
     const peekX = CW - 80;
     const peekY = DESK_Y;
-    const headR = 30;
-    const earBob = Math.sin(t * 1.5) * 2;
+    const headR = 60;
+    const earBob = Math.sin(t * 1.5) * 4;
 
     // === TAIL — starts behind/above the cat's head, curves upward with sway ===
-    const tailBaseX = peekX + 18;
-    const tailBaseY = peekY - headR - 5;
+    const tailBaseX = peekX + 36;
+    const tailBaseY = peekY - headR - 10;
     const segments = 10;
-    const segLen = 10;
-    const sway = Math.sin(t * 2.0) * 12;
+    const segLen = 18;
+    const sway = Math.sin(t * 2.0) * 20;
 
     // Build tail points curving upward and to the right
     const tailPts = [];
     for (let i = 0; i <= segments; i++) {
         const frac = i / segments;
-        const tx = tailBaseX + frac * 40 + Math.sin(t * 2.2 + i * 0.6) * (4 + frac * sway);
-        const ty = tailBaseY - i * segLen + Math.cos(t * 1.8 + i * 0.5) * (3 + frac * 5);
+        const tx = tailBaseX + frac * 70 + Math.sin(t * 2.2 + i * 0.6) * (8 + frac * sway);
+        const ty = tailBaseY - i * segLen + Math.cos(t * 1.8 + i * 0.5) * (6 + frac * 10);
         tailPts.push({ x: tx, y: ty });
     }
 
     // Draw main tail (orange)
-    ctx.strokeStyle = '#FFA000'; ctx.lineWidth = 10; ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+    ctx.strokeStyle = '#FFA000'; ctx.lineWidth = 20; ctx.lineCap = 'round'; ctx.lineJoin = 'round';
     ctx.beginPath();
     ctx.moveTo(tailPts[0].x, tailPts[0].y);
     for (let i = 1; i < tailPts.length; i++) {
@@ -470,7 +474,7 @@ function drawCatTailBehind() {
     ctx.stroke();
 
     // Tabby stripes on tail (darker orange on alternating segments)
-    ctx.strokeStyle = '#E65100'; ctx.lineWidth = 6; ctx.lineCap = 'round';
+    ctx.strokeStyle = '#E65100'; ctx.lineWidth = 12; ctx.lineCap = 'round';
     for (let i = 0; i < tailPts.length - 1; i++) {
         if (i % 2 === 0) {
             ctx.beginPath();
@@ -483,20 +487,19 @@ function drawCatTailBehind() {
     // Tail tip — slightly thinner, lighter
     const tip = tailPts[tailPts.length - 1];
     const tipPrev = tailPts[tailPts.length - 2];
-    ctx.strokeStyle = '#FF8F00'; ctx.lineWidth = 7; ctx.lineCap = 'round';
+    ctx.strokeStyle = '#FF8F00'; ctx.lineWidth = 14; ctx.lineCap = 'round';
     ctx.beginPath();
     ctx.moveTo(tipPrev.x, tipPrev.y);
-    ctx.lineTo(tip.x + Math.sin(t * 3) * 5, tip.y - 6);
+    ctx.lineTo(tip.x + Math.sin(t * 3) * 10, tip.y - 12);
     ctx.stroke();
 
     // === CAT FACE — top half semicircle above desk line (forehead, ears, eyes) ===
-    // Clip to only show above the desk line
     ctx.save();
     ctx.beginPath();
     ctx.rect(0, 0, CW, peekY);
     ctx.clip();
 
-    // Head — semicircle (top half)
+    // Head — semicircle (top half) — 2x
     ctx.fillStyle = '#FFA000';
     ctx.beginPath();
     ctx.arc(peekX, peekY, headR, 0, Math.PI * 2);
@@ -505,85 +508,74 @@ function drawCatTailBehind() {
     // Forehead tabby stripe
     ctx.fillStyle = '#E65100';
     ctx.beginPath();
-    ctx.moveTo(peekX - 4, peekY - headR + 5);
-    ctx.lineTo(peekX, peekY - headR + 14);
-    ctx.lineTo(peekX + 4, peekY - headR + 5);
+    ctx.moveTo(peekX - 8, peekY - headR + 10);
+    ctx.lineTo(peekX, peekY - headR + 28);
+    ctx.lineTo(peekX + 8, peekY - headR + 10);
     ctx.closePath();
     ctx.fill();
 
-    // Left ear
+    // Left ear — 2x
     ctx.fillStyle = '#FFA000';
     ctx.beginPath();
-    ctx.moveTo(peekX - 20, peekY - 22 + earBob);
-    ctx.lineTo(peekX - 28, peekY - 50 + earBob);
-    ctx.lineTo(peekX - 8, peekY - 28 + earBob);
+    ctx.moveTo(peekX - 40, peekY - 44 + earBob);
+    ctx.lineTo(peekX - 56, peekY - 100 + earBob);
+    ctx.lineTo(peekX - 16, peekY - 56 + earBob);
     ctx.closePath(); ctx.fill();
-    // Left inner ear
     ctx.fillStyle = '#FFAB91';
     ctx.beginPath();
-    ctx.moveTo(peekX - 19, peekY - 26 + earBob);
-    ctx.lineTo(peekX - 25, peekY - 44 + earBob);
-    ctx.lineTo(peekX - 11, peekY - 30 + earBob);
+    ctx.moveTo(peekX - 38, peekY - 52 + earBob);
+    ctx.lineTo(peekX - 50, peekY - 88 + earBob);
+    ctx.lineTo(peekX - 22, peekY - 60 + earBob);
     ctx.closePath(); ctx.fill();
 
-    // Right ear
+    // Right ear — 2x
     ctx.fillStyle = '#FFA000';
     ctx.beginPath();
-    ctx.moveTo(peekX + 20, peekY - 22 + earBob);
-    ctx.lineTo(peekX + 28, peekY - 50 + earBob);
-    ctx.lineTo(peekX + 8, peekY - 28 + earBob);
+    ctx.moveTo(peekX + 40, peekY - 44 + earBob);
+    ctx.lineTo(peekX + 56, peekY - 100 + earBob);
+    ctx.lineTo(peekX + 16, peekY - 56 + earBob);
     ctx.closePath(); ctx.fill();
-    // Right inner ear
     ctx.fillStyle = '#FFAB91';
     ctx.beginPath();
-    ctx.moveTo(peekX + 19, peekY - 26 + earBob);
-    ctx.lineTo(peekX + 25, peekY - 44 + earBob);
-    ctx.lineTo(peekX + 11, peekY - 30 + earBob);
+    ctx.moveTo(peekX + 38, peekY - 52 + earBob);
+    ctx.lineTo(peekX + 50, peekY - 88 + earBob);
+    ctx.lineTo(peekX + 22, peekY - 60 + earBob);
     ctx.closePath(); ctx.fill();
 
-    // === EYES — both visible, pupils track mouse ===
+    // === EYES — both visible, pupils track mouse — 2x ===
     const blinkCycle = Math.floor(t * 0.4) % 6;
     const eyeOpen = blinkCycle !== 0;
-    const eyeY = peekY - 10;
-    const leftEyeX = peekX - 12;
-    const rightEyeX = peekX + 12;
+    const eyeY = peekY - 20;
+    const leftEyeX = peekX - 24;
+    const rightEyeX = peekX + 24;
 
     if (eyeOpen) {
-        // Left eye white
         ctx.fillStyle = '#FFF';
-        ctx.beginPath(); ctx.ellipse(leftEyeX, eyeY, 8, 9, 0, 0, Math.PI * 2); ctx.fill();
-        // Left iris
+        ctx.beginPath(); ctx.ellipse(leftEyeX, eyeY, 16, 18, 0, 0, Math.PI * 2); ctx.fill();
         const angL = Math.atan2((GAME.mouseY || 0) - eyeY, (GAME.mouseX || 0) - leftEyeX);
-        const pupOffL = 3;
+        const pupOffL = 6;
         ctx.fillStyle = '#1B5E20';
-        ctx.beginPath(); ctx.ellipse(leftEyeX + Math.cos(angL) * pupOffL, eyeY + Math.sin(angL) * pupOffL, 5, 7, 0, 0, Math.PI * 2); ctx.fill();
-        // Left pupil
+        ctx.beginPath(); ctx.ellipse(leftEyeX + Math.cos(angL) * pupOffL, eyeY + Math.sin(angL) * pupOffL, 10, 14, 0, 0, Math.PI * 2); ctx.fill();
         ctx.fillStyle = '#000';
-        ctx.beginPath(); ctx.ellipse(leftEyeX + Math.cos(angL) * pupOffL, eyeY + Math.sin(angL) * pupOffL, 2, 5, 0, 0, Math.PI * 2); ctx.fill();
-        // Left shine
+        ctx.beginPath(); ctx.ellipse(leftEyeX + Math.cos(angL) * pupOffL, eyeY + Math.sin(angL) * pupOffL, 4, 10, 0, 0, Math.PI * 2); ctx.fill();
         ctx.fillStyle = '#FFF';
-        ctx.beginPath(); ctx.arc(leftEyeX + Math.cos(angL) * pupOffL + 2, eyeY + Math.sin(angL) * pupOffL - 2, 2, 0, Math.PI * 2); ctx.fill();
+        ctx.beginPath(); ctx.arc(leftEyeX + Math.cos(angL) * pupOffL + 4, eyeY + Math.sin(angL) * pupOffL - 4, 4, 0, Math.PI * 2); ctx.fill();
 
-        // Right eye white
         ctx.fillStyle = '#FFF';
-        ctx.beginPath(); ctx.ellipse(rightEyeX, eyeY, 8, 9, 0, 0, Math.PI * 2); ctx.fill();
-        // Right iris
+        ctx.beginPath(); ctx.ellipse(rightEyeX, eyeY, 16, 18, 0, 0, Math.PI * 2); ctx.fill();
         const angR = Math.atan2((GAME.mouseY || 0) - eyeY, (GAME.mouseX || 0) - rightEyeX);
-        const pupOffR = 3;
+        const pupOffR = 6;
         ctx.fillStyle = '#1B5E20';
-        ctx.beginPath(); ctx.ellipse(rightEyeX + Math.cos(angR) * pupOffR, eyeY + Math.sin(angR) * pupOffR, 5, 7, 0, 0, Math.PI * 2); ctx.fill();
-        // Right pupil
+        ctx.beginPath(); ctx.ellipse(rightEyeX + Math.cos(angR) * pupOffR, eyeY + Math.sin(angR) * pupOffR, 10, 14, 0, 0, Math.PI * 2); ctx.fill();
         ctx.fillStyle = '#000';
-        ctx.beginPath(); ctx.ellipse(rightEyeX + Math.cos(angR) * pupOffR, eyeY + Math.sin(angR) * pupOffR, 2, 5, 0, 0, Math.PI * 2); ctx.fill();
-        // Right shine
+        ctx.beginPath(); ctx.ellipse(rightEyeX + Math.cos(angR) * pupOffR, eyeY + Math.sin(angR) * pupOffR, 4, 10, 0, 0, Math.PI * 2); ctx.fill();
         ctx.fillStyle = '#FFF';
-        ctx.beginPath(); ctx.arc(rightEyeX + Math.cos(angR) * pupOffR + 2, eyeY + Math.sin(angR) * pupOffR - 2, 2, 0, Math.PI * 2); ctx.fill();
+        ctx.beginPath(); ctx.arc(rightEyeX + Math.cos(angR) * pupOffR + 4, eyeY + Math.sin(angR) * pupOffR - 4, 4, 0, Math.PI * 2); ctx.fill();
     } else {
-        // Blink — horizontal lines for closed eyes
-        ctx.strokeStyle = '#1B5E20'; ctx.lineWidth = 2;
-        ctx.beginPath(); ctx.moveTo(leftEyeX - 6, eyeY); ctx.lineTo(leftEyeX + 6, eyeY); ctx.stroke();
-        ctx.beginPath(); ctx.moveTo(rightEyeX - 6, eyeY); ctx.lineTo(rightEyeX + 6, eyeY); ctx.stroke();
+        ctx.strokeStyle = '#1B5E20'; ctx.lineWidth = 4;
+        ctx.beginPath(); ctx.moveTo(leftEyeX - 12, eyeY); ctx.lineTo(leftEyeX + 12, eyeY); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(rightEyeX - 12, eyeY); ctx.lineTo(rightEyeX + 12, eyeY); ctx.stroke();
     }
 
-    ctx.restore(); // end clip
+    ctx.restore();
 }

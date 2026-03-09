@@ -28,12 +28,6 @@ function drawMuteButton() {
     drawText(AudioEngine.enabled ? '🔊' : '🔇', mb.x+mb.w/2, mb.y+mb.h/2, 18, AudioEngine.enabled ? '#FFF' : '#888', 'center');
 }
 
-function drawQuitButton() {
-    const qb = GAME.quitBtn, hover = isHover(qb.x, qb.y, qb.w, qb.h);
-    drawRoundRect(qb.x, qb.y, qb.w, qb.h, 8, hover ? '#633' : 'rgba(40,0,0,0.5)', null);
-    drawText('✕', qb.x+qb.w/2, qb.y+qb.h/2, 18, hover ? '#F88' : '#A66', 'center');
-}
-
 function drawPauseButton() {
     if (GAME.state !== 'PLAYING') return;
     const pb = GAME.pauseBtn, hover = isHover(pb.x, pb.y, pb.w, pb.h);
@@ -46,8 +40,20 @@ function drawPauseOverlay() {
     ctx.fillStyle = 'rgba(0,0,0,0.75)';
     ctx.fillRect(0, 0, CW, CH);
     const cx = CW/2, cy = CH/2;
+
+    if (GAME.pauseQuitConfirm) {
+        // "Are you sure?" confirmation
+        drawShadowRoundRect(cx-210, cy-100, 420, 200, 16, '#1A1A2E', '#555', 2);
+        drawText('ARE YOU SURE?', cx, cy-55, 34, COLORS.red, 'center');
+        drawText('Quitting resets all progress.', cx, cy-15, 18, '#AAA', 'center', null, 0, 'normal');
+        drawButton('YES, QUIT', cx-200, cy+25, 185, 52, COLORS.red, 20);
+        drawButton('NO, STAY', cx+15, cy+25, 185, 52, '#555', 20);
+        return;
+    }
+
     drawRoundRect(cx-55, cy-65, 40, 100, 8, '#FFF', null);
     drawRoundRect(cx+15, cy-65, 40, 100, 8, '#FFF', null);
     drawText('PAUSED', cx, cy+75, 42, '#FFF', 'center', 'rgba(0,0,0,0.5)', 4);
     drawButton('RESUME', cx - 110, cy + 100, 220, 55, COLORS.green, 26, true);
+    drawButton('QUIT', cx - 110, cy + 170, 220, 55, COLORS.red, 26);
 }

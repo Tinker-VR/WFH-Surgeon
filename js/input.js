@@ -26,7 +26,7 @@ window.addEventListener('mouseup', (e) => {
     updateMousePos(e);
     if (GAME.hazard === 'battery' && GAME.batteryDrag) {
         GAME.batteryDrag = false;
-        if (Math.hypot(GAME.plugPos.x - GAME.socketPos.x, GAME.plugPos.y - GAME.socketPos.y) < 100) clearHazard();
+        if (Math.hypot(GAME.plugPos.x - GAME.socketPos.x, GAME.plugPos.y - GAME.socketPos.y) < 150) clearHazard();
     }
     if (GAME.hazard === 'coffee') GAME.coffeeWiping = false;
 });
@@ -42,10 +42,40 @@ window.addEventListener('mousedown', (e) => {
         GAME.paused = !GAME.paused;
         return;
     }
-    // Resume button on pause overlay (big center button)
-    if (GAME.state === 'PLAYING' && GAME.paused && isHover(CW/2 - 110, CH/2 + 100, 220, 55)) {
-        AudioEngine.playClick();
-        GAME.paused = false;
+    // Pause overlay buttons
+    if (GAME.state === 'PLAYING' && GAME.paused) {
+        const cx = CW/2, cy = CH/2;
+        if (GAME.pauseQuitConfirm) {
+            // YES, QUIT
+            if (isHover(cx-200, cy+25, 185, 52)) {
+                AudioEngine.playClick();
+                GAME.paused = false; GAME.pauseQuitConfirm = false;
+                GAME.cash = STARTING_CASH; GAME.highestRank = STARTING_RANK; GAME.rank = STARTING_RANK;
+                GAME.hearts = 3; GAME.maxHearts = 3;
+                GAME.upgrades = { ...DEFAULT_UPGRADES };
+                GAME.state = 'MENU'; resetHospitalAnimations(); AudioEngine.setBGMMode('menu');
+                return;
+            }
+            // NO, STAY
+            if (isHover(cx+15, cy+25, 185, 52)) {
+                AudioEngine.playClick();
+                GAME.pauseQuitConfirm = false;
+                return;
+            }
+            return;
+        }
+        // RESUME button
+        if (isHover(cx - 110, cy + 100, 220, 55)) {
+            AudioEngine.playClick();
+            GAME.paused = false;
+            return;
+        }
+        // QUIT button
+        if (isHover(cx - 110, cy + 170, 220, 55)) {
+            AudioEngine.playClick();
+            GAME.pauseQuitConfirm = true;
+            return;
+        }
         return;
     }
     // Block ALL other clicks while paused
@@ -56,12 +86,6 @@ window.addEventListener('mousedown', (e) => {
         AudioEngine.enabled = !AudioEngine.enabled;
         if (!AudioEngine.enabled) AudioEngine.stopBGM();
         else AudioEngine.startBGM();
-        return;
-    }
-
-    const qb = GAME.quitBtn;
-    if (isHover(qb.x, qb.y, qb.w, qb.h)) {
-        location.reload();
         return;
     }
 
@@ -215,7 +239,7 @@ window.addEventListener('mousedown', (e) => {
             if (isHover(closeX, closeY, 50, 50)) clearHazard();
         }
         else if (GAME.hazard === 'battery') {
-            if (Math.hypot(GAME.mouseX - GAME.plugPos.x, GAME.mouseY - GAME.plugPos.y) < 90) GAME.batteryDrag = true;
+            if (Math.hypot(GAME.mouseX - GAME.plugPos.x, GAME.mouseY - GAME.plugPos.y) < 135) GAME.batteryDrag = true;
         }
         else if (GAME.hazard === 'lag') {
             if (isHover(10, DESK_Y + 5, 200, 65)) {
@@ -247,7 +271,7 @@ window.addEventListener('mousedown', (e) => {
         }
         else if (GAME.hazard === 'malware') {
             GAME.virusIcons.forEach(v => {
-                if (v.alive && Math.hypot(GAME.mouseX - v.x, GAME.mouseY - v.y) < 135) {
+                if (v.alive && Math.hypot(GAME.mouseX - v.x, GAME.mouseY - v.y) < 68) {
                     v.alive = false;
                     GAME.virusesClicked++;
                     AudioEngine.playVirusZap();

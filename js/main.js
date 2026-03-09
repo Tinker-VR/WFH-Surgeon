@@ -25,6 +25,16 @@ function loop(timestamp) {
         if (GAME.armGlitchTimer > 0) GAME.armGlitchTimer -= dt;
         if (GAME.catFlashTimer > 0) GAME.catFlashTimer -= dt;
         if (GAME.routerSmashAnim > 0) GAME.routerSmashAnim -= dt;
+        if (GAME.comboTimer > 0) GAME.comboTimer -= dt;
+        if (GAME.screenFlashTimer > 0) GAME.screenFlashTimer -= dt;
+        if (GAME.hazardSpawnFlash > 0) GAME.hazardSpawnFlash -= dt;
+        // Heartbeat at low anesthesia
+        if (GAME.anesthesia / GAME.anesthesiaMax < 0.3 && GAME.anesthesia > 0) {
+            if (!GAME._lastHeartbeat || timestamp - GAME._lastHeartbeat > 600) {
+                GAME._lastHeartbeat = timestamp;
+                AudioEngine.playHeartbeat();
+            }
+        }
         // Update cat star particles
         GAME.catStars = GAME.catStars.filter(s => {
             s.x += s.vx * dt / 1000;
@@ -122,9 +132,24 @@ function loop(timestamp) {
         ctx.fillRect(0, 0, CW, CH);
     }
 
+    // ADHD: Correct arrow green screen flash
+    if (GAME.screenFlashTimer > 0) {
+        const alpha = Math.min(0.15, GAME.screenFlashTimer / 100 * 0.15);
+        ctx.strokeStyle = `rgba(0,230,118,${alpha})`;
+        ctx.lineWidth = 6;
+        ctx.strokeRect(3, 3, CW-6, CH-6);
+    }
+
+    // ADHD: Hazard spawn orange border flash
+    if (GAME.hazardSpawnFlash > 0) {
+        const alpha = Math.min(0.3, GAME.hazardSpawnFlash / 300 * 0.3);
+        ctx.strokeStyle = `rgba(255,152,0,${alpha})`;
+        ctx.lineWidth = 8;
+        ctx.strokeRect(2, 2, CW-4, CH-4);
+    }
+
     ctx.restore();
     drawMuteButton();
-    drawQuitButton();
     drawPauseOverlay();
     drawPauseButton();
 
